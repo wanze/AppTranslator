@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script extracts APK files from a folder with the apktool.jar library. 
 # Other folders/files than the translations are deleted in order to save disk space ;) 
@@ -6,7 +6,7 @@
 # 1st parameter: Absolute path to the folder containing the APK files
 # 2nd parameter: Absolute path to a folder where the extracted files are written, one folder per APK is generated
 # 
-# Note: The apktool.jar file must be in the same folder as this script
+# Note: The apktool.jar file must be within the same folder as this script
 # 
 # Example:
 # ./extract_apk_translations /var/apks/ /var/apks_extracted/
