@@ -1,0 +1,5 @@
+# Contains extracted translations and preprocessed solr xml files
+import/translations2solr
+
+# Exclude index
+solr/data
