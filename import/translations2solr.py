@@ -15,10 +15,10 @@ Usage:
 $ python translations2solr.py --input=/path/to/APKs.zip --solr_dir=/path/to/solr
 
 Arguments:
-- input			Path to a zip file or folder containing APK files
-- mode			(EI|E|I) where 'E' does extract/preprocess translations and store them temporary; 'I' does index them into Solr (default='EI')
-- solr_dir		Path to Solr directory. Note: Mandatory for mode 'I'
-- solr_url		URL to access Solr (default='http://localhost:8983') Note: Mandatory for mode 'I'
+--input			Path to a zip file or folder containing APK files
+--mode			(EI|E|I) where 'E' does extract/preprocess translations and store them temporary; 'I' does index them into Solr (default='EI', meaning extract AND index)
+--solr_dir		Path to Solr directory. Note: Mandatory for mode 'I'
+--solr_url		URL to access Solr (default='http://localhost:8983') Note: Mandatory for mode 'I'
 
 @author Stefan Wanzenried <stefan.wanzenried@gmail.com>
 """
@@ -34,10 +34,7 @@ class Solr:
 		solr_url -- URL to Solr
 		"""
 		self.dir_solr = dir_solr.rstrip(os.sep) + os.sep
-		if solr_url:
-			self.solr_url = solr_url.rstrip('/')
-		else:
-			self.solr_url = 'http://localhost:8983'
+		self.solr_url = solr_url.rstrip('/') if solr_url else 'http://localhost:8983'
 		# The instance directory storing the index for the different cores
 		self.dir_data = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), self.SOLR_DATA_DIR) + os.sep
 		self.cache_cores = self.getCores()
@@ -49,10 +46,7 @@ class Solr:
 		"""
 		xml_response = self._callSolrAPI({'action' : 'STATUS'})
 		xml = ElementTree.parse(xml_response)
-		cores = []
-		for core in xml.getroot()[2]:
-			cores.append(core.attrib['name'])
-		return cores
+		return [core.attrib['name'] for core in xml.getroot()[2]]
 
 
 	def createCore(self, name):
@@ -84,8 +78,7 @@ class Solr:
 		Index a Solr xml document (or path containing xml documents) into the given core
 		"""
 		print "Start indexing '" + document + "' into core " + core + "\n"
-		if not self.existsCore(core):
-			self.createCore(core)
+		if not self.existsCore(core): self.createCore(core)
 		cmd = self.dir_solr + os.path.join('bin', 'post')
 		print subprocess.call([cmd, '-c', core, document])
 
@@ -135,8 +128,7 @@ class Translations2Solr:
 		Index solr xml files into Solr
 		"""
 		for language in os.listdir(self.dir_temp_solr_xml):
-			if language == '.':
-				continue
+			if language == '.': continue
 			dir_xml_docs = os.path.join(self.dir_temp_solr_xml, language)			
 			self.solr.index(dir_xml_docs, language)
 
@@ -146,25 +138,19 @@ class Translations2Solr:
 		Create solr xml files of extracted translations
 		"""
 		for f in os.listdir(self.dir_temp_extracted):
-			if f[0] == '.':
-				continue
+			if f[0] == '.': continue
 			apk_folder = os.path.realpath(os.path.join(self.dir_temp_extracted, f))
 			file_manifest = os.path.join(apk_folder, 'AndroidManifest.xml')
-			if not os.path.isfile(file_manifest):
-				continue
+			if not os.path.isfile(file_manifest): continue
 			app_id = self._extractAppId(file_manifest)
 			print "\nPrepare solr xml for app: " + app_id + "\n"
 			# Loop folders inside 'res' folder, they contain the translations in different languages
 			dir_values = os.path.join(apk_folder, 'res')
 			for dir_value in os.listdir(dir_values):
-				if dir_value[0] == '.':
-					continue
+				if dir_value[0] == '.': continue
 				# Extract the language
 				match = re.search('^values-(\w{2})$', dir_value)
-				if match:
-					language = match.group(1)
-				else:
-					language = 'en' # TODO: This is an assumption currently, we need to check if the content is english!	
+				language = match.group(1) if match else 'en' # TODO: This is an assumption currently, we need to check if the content is english!	
 				dir_trans = os.path.realpath(os.path.join(dir_values, dir_value))
 				self._createSolrXMLFile(app_id, language, os.path.join(dir_trans, 'strings.xml'))
 
@@ -173,12 +159,9 @@ class Translations2Solr:
 		"""
 		Convert a android translations xml file to a solr xml file 
 		"""
-		if not os.path.isfile(file_translations):
-			return
-
+		if not os.path.isfile(file_translations): return
 		dir_xml = os.path.join(self.dir_temp_solr_xml, language)
-		if not os.path.isdir(dir_xml):
-			os.makedirs(dir_xml)
+		if not os.path.isdir(dir_xml): os.makedirs(dir_xml)
 		temp_filename = os.path.join(dir_xml, app_id + '.xml.tmp')
 		file_temp = open(temp_filename, 'w+')
 		file_temp.write('<add>\n');
@@ -186,14 +169,15 @@ class Translations2Solr:
 		for trans in xml.getroot():
 			key = trans.attrib['name']
 			# Do not index empty translations...
-			if not trans.text:
-				continue
+			if not trans.text: continue
 			value = trans.text.encode('utf-8')
+			# Clean/remove unwanted strings
+			value = self._sanitizeTranslationString(value) 
+			if not value: continue
 			file_temp.write('<doc>\n')
 			file_temp.write('<field name="id">' + '_'.join([app_id, key]) + '</field>\n')
 			file_temp.write('<field name="app_id">' + app_id + '</field>\n')
 			file_temp.write('<field name="key">' + key + '</field>\n')
-			# TODO Filter out URLS, HTML etc.
 			file_temp.write('<field name="value">' + value + '</field>\n')
 			file_temp.write('</doc>\n')
 		file_temp.write('</add>\n')
@@ -202,6 +186,14 @@ class Translations2Solr:
 		os.rename(temp_filename, file_xml)
 		return file_xml
 
+
+	def _sanitizeTranslationString(self, value):
+		"""
+		Remove uninteresting translations (e.g. links, HTML)
+		"""
+		for str in ['http', 'www']:
+			if value.startswith(str): return ''
+		return value
 
 	def _extractAppId(self, file_manifest):
 		"""
@@ -233,9 +225,9 @@ def main():
 		if opt in ('-u', '--solr_url'):
 			solr_url = arg
 
-	# Should we extract translations?
+	# mode = extract
 	if 'e' in mode.lower():
-		if not os.path.isfile(_input):
+		if not os.path.isfile(_input) and not os.path.isdir(_input):
 			print _input + " must be a folder or .zip file containing APK files"
 			sys.exit(2)
 
@@ -247,7 +239,7 @@ def main():
 				z.extractall(dir_extract)
 			_input = dir_extract
 
-	# If indexing should be performed (mode=I), check if path to solr is given and valid
+	# mode = index
 	solr = None
 	if 'i' in mode.lower():
 		if not os.path.isdir(solr_path):
