@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="appTranslator">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>AppTranslator</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Open+Sans:300italic,400,300,700'
+          rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="bower_components/semantic/dist/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/app.css">
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="assets/js/controllers.js"></script>
+</head>
+<body ng-controller="TranslationController">
+
+<div class="ui page grid">
+    <div class="sixteen wide column">
+        <h1>AppTranslator</h1>
+    </div>
+    <div class="sixteen wide column">
+        <form class="ui form segment">
+            <h3>Search</h3>
+
+            <div class="field">
+                <label>Translation String</label>
+
+                <div class="ui left icon input">
+                    <input name="string" placeholder="" type="text" ng-model="data.string">
+                    <i class="search icon"></i>
+                </div>
+            </div>
+            <div class="two fields">
+                <div class="field">
+                    <label>Source Language</label>
+                    <select name="source_lang" class="ui dropdown" ng-model="data.source_lang">
+                        <option value="">--Select--</option>
+                        <option ng-repeat="language in data.languages" value="{{language.code}}">{{language.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Target Language</label>
+                    <select name="target_lang" class="ui dropdown" ng-model="data.target_lang">
+                        <option value="">--Select--</option>
+                        <option ng-repeat="language in data.languages" value="{{language.code}}">{{language.name}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <button class="ui primary button" type="submit" ng-click="getTranslations()">Translate</button>
+            </div>
+            <div class="ui divider"></div>
+            <div class="field">
+                <h3>Results</h3>
+                <p ng-show="!state.loaded">No search performed yet</p>
+                <div ng-show="state.loaded">
+                    <div class="ui top attached tabular menu">
+                        <a class="item active" data-tab="translations">Translations</a>
+                        <a class="item" data-tab="debug">Debug</a>
+                    </div>
+                    <div class="ui bottom attached tab segment active" data-tab="translations">
+                        <ul>
+                            <li ng-repeat="translation in data.translations">{{translation}}</li>
+                        </ul>
+                    </div>
+                    <div class="ui bottom attached tab segment" data-tab="debug">
+                        <textarea name="response" ng-model="data.debug"></textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/semantic/dist/semantic.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
