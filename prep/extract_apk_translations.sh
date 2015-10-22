@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
-# This script extracts APK files from a folder with the apktool.jar library. 
-# Other folders/files than the translations are deleted in order to save disk space ;) 
-# 
-# 1st parameter: Absolute path to the folder containing the APK files
-# 2nd parameter: Absolute path to a folder where the extracted files are written, one folder per APK is generated
-# 
+# This script extracts APK files from a folder with the apktool.jar library.
+# Other folders/files than the translations are deleted in order to save disk space ;)
+#
+# 1st parameter:
+# Absolute path to the folder containing the APK files
+#
+# 2nd parameter (optional):
+# Absolute path to a folder where the extracted files are written, one folder per APK is generated
+# If no path is given, defaults to "../data/translations_extracted"
+#
 # Note: The apktool.jar file must be within the same folder as this script
-# 
+#
 # Example:
 # ./extract_apk_translations /var/apks/ /var/apks_extracted/
-# 
+#
 
 dir_in=$1
 dir_out=$2
@@ -23,6 +27,11 @@ else
 	dir_in="${dir_in}/*"
 fi
 
+# If no output directory is given, defaults to ../data/translations_extracted
+if [ -z $dir_out ]; then
+	dir_out="${dir_current}/../data/translations_extracted"
+fi
+
 # Loop APK files
 for file in $dir_in; do
 	name=$(basename "$file")
@@ -31,7 +40,7 @@ for file in $dir_in; do
 
 	# Run APK Tool for the current APK file
 	java -jar apktool.jar d "$file" -o "$dir_target" -s
-	
+
 	# Remove assets and other folders/files not interested in
 	cd "$dir_target"
 	rm -R assets
@@ -50,5 +59,3 @@ for file in $dir_in; do
 	done
 	cd "$dir_current"
 done
-
-

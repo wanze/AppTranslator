@@ -7,6 +7,7 @@ import urllib2
 import urllib
 import subprocess
 import zipfile
+import extractor
 
 """
 Preprocess extracted translations and index them into Solr
@@ -38,23 +39,23 @@ class Solr:
         self.solr_url = solr_url.rstrip('/') if solr_url else 'http://localhost:8983'
         # The instance directory storing the index for the different cores
         self.dir_data = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), self.SOLR_DATA_DIR) + os.sep
-        self.cache_cores = self.getCores()
+        self.cache_cores = self.get_cores()
 
 
-    def getCores(self):
+    def get_cores(self):
         """
         Return a list of active cores, e.g. ['en', 'de', 'fr']
         """
-        xml_response = self._callSolrAPI({'action': 'STATUS'})
+        xml_response = self._call_solr_api({'action': 'STATUS'})
         xml = ElementTree.parse(xml_response)
         return [core.attrib['name'] for core in xml.getroot()[2]]
 
 
-    def createCore(self, name):
+    def create_core(self, name):
         """
         Create a new core in Solr with the given name, based on a configSet providing the solrconfig.xml and schema.xml files
         """
-        if self.existsCore(name):
+        if self.exists_core(name):
             return
 
         params = {
@@ -64,7 +65,7 @@ class Solr:
             'configSet': self.SOLR_CONFIGSET,
         }
 
-        xml_response = self._callSolrAPI(params)
+        xml_response = self._call_solr_api(params)
         # Check XML response for errors, a status=0 indicates that the core was created successfully
         xml = ElementTree.parse(xml_response)
         status = int(xml.getroot()[0][0].text)
@@ -79,17 +80,17 @@ class Solr:
         Index a Solr xml document (or path containing xml documents) into the given core
         """
         print "Start indexing '" + document + "' into core " + core + "\n"
-        if not self.existsCore(core):
-            self.createCore(core)
+        if not self.exists_core(core):
+            self.create_core(core)
         cmd = self.dir_solr + os.path.join('bin', 'post')
         print subprocess.call([cmd, '-c', core, document])
 
 
-    def existsCore(self, name):
+    def exists_core(self, name):
         return name in self.cache_cores
 
 
-    def _callSolrAPI(self, params):
+    def _call_solr_api(self, params):
         # print self.solr_url + '/solr/admin/cores?' + urllib.urlencode(params)
         return urllib2.urlopen(self.solr_url + '/solr/admin/cores?' + urllib.urlencode(params))
 
@@ -145,7 +146,7 @@ class Translations2Solr:
             file_manifest = os.path.join(apk_folder, 'AndroidManifest.xml')
             if not os.path.isfile(file_manifest):
                 continue
-            app_id = self._extractAppId(file_manifest)
+            app_id = self._extract_app_id(file_manifest)
             print "\nPrepare solr xml for app: " + app_id + "\n"
             # Loop folders inside 'res' folder, they contain the translations in different languages
             dir_values = os.path.join(apk_folder, 'res')
@@ -156,10 +157,10 @@ class Translations2Solr:
                 match = re.search('^values-(\w{2})$', dir_value)
                 language = match.group(1) if match else 'en'  # TODO: This is an assumption currently, we need to check if the content is english!
                 dir_trans = os.path.realpath(os.path.join(dir_values, dir_value))
-                self._createSolrXMLFile(app_id, language, os.path.join(dir_trans, 'strings.xml'))
+                self._create_solr_xml_file(app_id, language, os.path.join(dir_trans, 'strings.xml'))
 
 
-    def _createSolrXMLFile(self, app_id, language, file_translations):
+    def _create_solr_xml_file(self, app_id, language, file_translations):
         """
         Convert a android translations xml file to a solr xml file
         """
@@ -177,7 +178,7 @@ class Translations2Solr:
                 continue
             value = trans.text.encode('utf-8')
             # Clean/remove unwanted strings
-            value = self._sanitizeTranslationString(value)
+            value = self._sanitize_translation_string(value)
             if not value:
                 continue
             file_temp.write('<doc>\n')
@@ -194,7 +195,7 @@ class Translations2Solr:
 
 
     @staticmethod
-    def _sanitizeTranslationString(value):
+    def _sanitize_translation_string(value):
         """
         Remove uninteresting translations (e.g. links, HTML)
         """
@@ -203,8 +204,8 @@ class Translations2Solr:
                 return ''
         return value
 
-
-    def _extractAppId(self, file_manifest):
+    @staticmethod
+    def _extract_app_id(file_manifest):
         """
         Return the unique app ID from a given android manifest xml file
         """
