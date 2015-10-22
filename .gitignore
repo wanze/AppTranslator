@@ -1,8 +1,11 @@
 # Contains extracted translations and preprocessed solr xml files
 import/translations2solr
 
-# Exclude index
+# Exclude data
+data
 solr/data
+
+.vagrant
 
 # Python
 *.pyc
@@ -54,4 +57,3 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
-
