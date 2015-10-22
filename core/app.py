@@ -1,14 +1,16 @@
 import sys
 import json
 import urllib
+import os
 from flask import Flask
 from flask import request
 from flask import Response
-from database import SolrDatabase
-from translator import Translator
+from werkzeug import secure_filename
+import translator
 
 app = Flask(__name__)
-translator = Translator(SolrDatabase())
+trans = translator.TranslatorMoses('/home/vagrant/mosesdecoder')
+app.config['UPLOAD_FOLDER'] = os.path.dirname(os.path.realpath(__file__)) + '/../data/temp/upload/'
 
 @app.after_request
 def add_header(response):
@@ -19,16 +21,37 @@ def add_header(response):
 def hello_world():
     return 'Hello World!'
 
-@app.route('/translate')
-def get_translations():
-    string = request.args.get('string')
-    print string
+@app.route('/upload', methods=['POST'])
+def upload():
+    # TODO Move to class
+    f = request.files['file']
+    if f and f.filename.rsplit('.', 1)[1] == 'xml':
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        out = json.dumps({'success': True, 'filename': filename})
+    else:
+        out = json.dumps({'success': False})
+    return Response(out, mimetype='application/json')
+
+@app.route('/translateXML')
+def translate_xml():
     lang_from = request.args.get('from')
     lang_to = request.args.get('to')
-    out = json.dumps(translator.get_all(string, lang_from, lang_to))
+    xml_filename = request.args.get('xml_filename')
+    xml_file = os.path.join(app.config['UPLOAD_FOLDER'], xml_filename)
+    out = json.dumps(trans.translate_xml(xml_file, lang_from, lang_to))
+    return Response(out, mimetype='application/json')
+
+
+@app.route('/get')
+def get_translations():
+    string = request.args.get('string')
+    lang_from = request.args.get('from')
+    lang_to = request.args.get('to')
+    out = json.dumps(trans.get(string, lang_from, lang_to))
     return Response(out, mimetype='application/json')
 
 if __name__ == '__main__':
     debug = '--debug' in sys.argv
     app.debug = debug
-    app.run()
+    app.run(host='0.0.0.0')
