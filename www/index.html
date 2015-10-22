@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="bower_components/semantic/dist/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/app.css">
     <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/ng-file-upload/ng-file-upload.min.js"></script>
     <script src="assets/js/controllers.js"></script>
 </head>
 <body ng-controller="TranslationController">
@@ -22,53 +23,121 @@
     </div>
     <div class="sixteen wide column">
         <form class="ui form segment">
-            <h3>Search</h3>
+            <h3>Configuration</h3>
 
-            <div class="field">
-                <label>Translation String</label>
-
-                <div class="ui left icon input">
-                    <input name="string" placeholder="" type="text" ng-model="data.string">
-                    <i class="search icon"></i>
-                </div>
-            </div>
             <div class="two fields">
                 <div class="field">
                     <label>Source Language</label>
-                    <select name="source_lang" class="ui dropdown" ng-model="data.source_lang">
-                        <option value="">--Select--</option>
+                    <select name="source_lang" class="ui dropdown" ng-model="data.config.source_lang">
                         <option ng-repeat="language in data.languages" value="{{language.code}}">{{language.name}}
                         </option>
                     </select>
                 </div>
                 <div class="field">
                     <label>Target Language</label>
-                    <select name="target_lang" class="ui dropdown" ng-model="data.target_lang">
-                        <option value="">--Select--</option>
+                    <select name="target_lang" class="ui dropdown" ng-model="data.config.target_lang">
                         <option ng-repeat="language in data.languages" value="{{language.code}}">{{language.name}}
                         </option>
                     </select>
                 </div>
             </div>
+            <!--<div class="grouped fields">-->
+            <!--<label for="decoder">Decoder</label>-->
+
+            <!--<div class="field">-->
+
+            <!--<div class="ui radio checkbox">-->
+            <!--<input type="radio" name="decoder" checked="checked" class="hidden" value="moses"-->
+            <!--ng-model="decoder.decoder">-->
+            <!--<label>Moses</label>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="field">-->
+            <!--<div class="ui radio checkbox">-->
+            <!--<input type="radio" name="decoder" class="hidden" value="moses" ng-model="decoder.decoder">-->
+            <!--<label>Solr</label>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+
+            <div class="ui divider"></div>
             <div class="field">
-                <button class="ui primary button" type="submit" ng-click="getTranslations()">Translate</button>
+                <h3>Input</h3>
+            </div>
+            <div class="field" style="position: relative;">
+                <div class="ui two column middle aligned very relaxed stackable grid">
+                    <div class="column">
+                        <div class="ui form">
+                            <div class="field">
+                                <div class="ui left icon input">
+                                    <i class="search icon"></i>
+                                    <input type="text" placeholder="Enter a string..." ng-model="data.input.string">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui vertical divider">
+                        Or
+                    </div>
+                    <div class="center aligned column">
+                        <div class="ui form">
+                            <div class="field">
+                                <button type="file" class="ui teal labeled icon button"
+                                        ngf-select="uploadFile($file)"
+                                        ng-model="data.input.file" name="file">
+                                    Upload XML translation file
+                                    <i class="upload icon"></i>
+                                </button>
+                            </div>
+                            <div class="field" ng-show="state.progress > 0">
+                                <div id="progress" class="ui progress" data-percent="{{state.progress}}">
+                                    <div class="bar" style="transition-duration: 300ms">
+                                        <div class="progress">{{state.progress}} %</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <button class="ui primary button" ng-click="getTranslations()">Translate</button>
             </div>
             <div class="ui divider"></div>
             <div class="field">
                 <h3>Results</h3>
+
                 <p ng-show="!state.loaded">No search performed yet</p>
+
                 <div ng-show="state.loaded">
                     <div class="ui top attached tabular menu">
-                        <a class="item active" data-tab="translations">Translations</a>
+                        <a class="item active" data-tab="translations">Translation(s)</a>
                         <a class="item" data-tab="debug">Debug</a>
                     </div>
                     <div class="ui bottom attached tab segment active" data-tab="translations">
-                        <ul>
-                            <li ng-repeat="translation in data.translations">{{translation}}</li>
+                        <ul ng-if="data.config.mode == 'string'">
+                            <li ng-repeat="translation in data.result.translations">{{translation}}</li>
                         </ul>
+                        <table ng-if="data.config.mode == 'xml'" class="ui celled striped table">
+                            <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Source</th>
+                                <th>Translation</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="row in data.result.translations">
+                                <td>{{row.key}}</td>
+                                <td>{{row.source}}</td>
+                                <td>{{row.target}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="ui bottom attached tab segment" data-tab="debug">
-                        <textarea name="response" ng-model="data.debug"></textarea>
+                        <textarea ng-model="data.result.debug"></textarea>
                     </div>
                 </div>
             </div>
