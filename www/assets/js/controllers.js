@@ -60,7 +60,7 @@ app.controller('TranslationController', function ($scope, $http, Upload, $timeou
     };
 
     $scope.getTranslations = function () {
-        $scope.isLoading = true;
+        $scope.state.isLoading = true;
         var params = {
             'from': $scope.data.config.source_lang,
             'to': $scope.data.config.target_lang

@@ -5,7 +5,7 @@ import subprocess
 import hashlib
 import os
 import sys
-from extractor import Extractor
+from prep.extractor import Extractor
 
 class Translator(object):
     def get(self, string, lang_from, lang_to):
@@ -100,7 +100,7 @@ class TranslatorMoses(Translator):
         }
 
     def get_command(self, lang_from, lang_to, file_input='', file_output='', file_debug=''):
-        cmd = self.dir_moses + 'bin/moses -f ' + self.dir_models + lang_from + '-' + lang_to + '/train/model/moses.ini -verbose 2'
+        cmd = self.dir_moses + 'bin/moses -f ' + self.dir_models + lang_from + '-' + lang_to + '/mert-work/moses.ini -verbose 2'
         cmd = cmd + ' < ' + file_input if file_input else cmd
         cmd = cmd + ' > ' + file_output if file_output else cmd
         cmd = cmd + ' 2> ' + file_debug if file_debug else cmd

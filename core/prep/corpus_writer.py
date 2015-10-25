@@ -4,6 +4,14 @@ from extractor import Extractor
 
 class CorpusWriter(object):
 
+    # Percentage of parallel data used for training, rest for tuning/testing
+    PERCENT_TRAIN = 0.8
+    OUT_FILENAME = 'strings'
+    OUT_FILENAME_TRAIN = 'strings-train'
+    OUT_FILENAME_TEST = 'strings-test'
+    FOLDER_PARALLEL = 'parallel'
+    FOLDER_MONOLINGUAL = 'mono'
+
     def __init__(self, folder_apks, folder_target, languages):
         """
         folder_apks -- Absolute path to a folder containing the extracted APKs files, one folder per APK
@@ -22,23 +30,25 @@ class CorpusWriter(object):
             translations = extractor.extract_translations()
             print 'Write monolingual data for app ' + folder_apk
             self._write_monolingual(translations)
-            print 'Write billingual data for app ' + folder_apk
+            print 'Write parallel data for app ' + folder_apk
             self._write_parallel(translations)
 
     def _write_monolingual(self, translations):
-        folder = os.path.realpath(os.path.join(self.folder_target, 'mono'))
+        folder = os.path.realpath(os.path.join(self.folder_target, self.FOLDER_MONOLINGUAL))
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
         for language in translations:
-            file_mono = os.path.realpath(os.path.join(folder, 'strings.' + language))
+            file_mono = os.path.realpath(os.path.join(folder, self.OUT_FILENAME + '.' + language))
             f = open(file_mono, 'a+')
-            for key in translations[language]:
-                value = translations[language][key]
-                if not value:
-                    continue
-                f.write(value + '\n')
+            if translations[language]:
+                for key in translations[language]:
+                    value = translations[language][key]
+                    if value:
+                        f.write(value + '\n')
             f.close()
 
     def _write_parallel(self, translations):
-        folder_parallel = os.path.realpath(os.path.join(self.folder_target, 'parallel'))
+        folder_parallel = os.path.realpath(os.path.join(self.folder_target, self.FOLDER_PARALLEL))
         langs_available = translations.keys()
         langs = sorted([lang for lang in langs_available if lang in self.languages])
         # We need at least 2 supported languages to create parallel data
@@ -51,11 +61,15 @@ class CorpusWriter(object):
             folder = os.path.realpath(os.path.join(folder_parallel, first_lang + '-' + second_lang))
             if not os.path.isdir(folder):
                 os.makedirs(folder)
-            file1 = os.path.realpath(os.path.join(folder, 'strings.' + first_lang))
-            file2 = os.path.realpath(os.path.join(folder, 'strings.' + second_lang))
-            f1 = open(file1, 'a+')
-            f2 = open(file2, 'a+')
+            f1, f2 = self._get_files(first_lang, second_lang, folder, self.OUT_FILENAME_TRAIN)
+            lines_train = len(translations[first_lang]) * self.PERCENT_TRAIN
+            i = 0
             for key in translations[first_lang]:
+                if i == lines_train:
+                    # Finished writing training, file. Rest of sentences go into test files
+                    f1.close()
+                    f2.close()
+                    f1, f2 = self._get_files(first_lang, second_lang, folder, self.OUT_FILENAME_TEST)
                 if key in translations[second_lang]:
                     # Both key exists, we can write the parallel data
                     value1 = translations[first_lang][key]
@@ -63,8 +77,17 @@ class CorpusWriter(object):
                     if value1 and value2:
                         f1.write(value1 + '\n')
                         f2.write(value2 + '\n')
+                i += 1
             f1.close()
             f2.close()
+
+    @staticmethod
+    def _get_files(first_lang, second_lang, folder, filename):
+        file1 = os.path.realpath(os.path.join(folder, filename + '.' + first_lang))
+        file2 = os.path.realpath(os.path.join(folder, filename + '.' + second_lang))
+        f1 = open(file1, 'a+')
+        f2 = open(file2, 'a+')
+        return f1, f2
 
 
 if __name__ == '__main__':

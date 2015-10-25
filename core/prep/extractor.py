@@ -49,7 +49,7 @@ class Extractor(object):
         Sanitize translation string
         """
         value = value.strip()
-        for replacement in ['\n', '\r', '\t']:
+        for replacement in ['\n', '\r', '\t', '"']:
             value = value.replace(replacement, '')
         for string in ['http', 'www']:
             if value.startswith(string):

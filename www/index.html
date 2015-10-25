@@ -60,57 +60,58 @@
             <!--</div>-->
             <!--</div>-->
 
-            <div class="ui divider"></div>
-            <div class="field">
+            <!--<div class="ui divider"></div>-->
+            <div class="field form-section">
                 <h3>Input</h3>
             </div>
-            <div class="field" style="position: relative;">
-                <div class="ui two column middle aligned very relaxed stackable grid">
-                    <div class="column">
-                        <div class="ui form">
-                            <div class="field">
-                                <div class="ui left icon input">
-                                    <i class="search icon"></i>
-                                    <input type="text" placeholder="Enter a string..." ng-model="data.input.string">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui vertical divider">
-                        Or
-                    </div>
-                    <div class="center aligned column">
-                        <div class="ui form">
-                            <div class="field">
-                                <button type="file" class="ui teal labeled icon button"
-                                        ngf-select="uploadFile($file)"
-                                        ng-model="data.input.file" name="file">
-                                    Upload XML translation file
-                                    <i class="upload icon"></i>
-                                </button>
-                            </div>
-                            <div class="field" ng-show="state.progress > 0">
-                                <div id="progress" class="ui progress" data-percent="{{state.progress}}">
-                                    <div class="bar" style="transition-duration: 300ms">
-                                        <div class="progress">{{state.progress}} %</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+            <div class="field">
+                <div class="ui left icon input">
+                    <i class="search icon"></i>
+                    <input type="text" placeholder="Enter a string..." ng-model="data.input.string">
                 </div>
             </div>
             <div class="field">
-                <button class="ui primary button" ng-click="getTranslations()">Translate</button>
+                <div class="ui horizontal divider">
+                    Or
+                </div>
+            </div>
+            <div class="field" style="text-align: center;">
+                <button type="file" class="ui teal labeled icon button" ngf-select="uploadFile($file)" ng-model="data.input.file" name="file" ng-class="{'loading' : state.progress > 0 && state.progress < 100}">
+                    Upload XML translation file
+                    <i class="upload icon"></i>
+                </button>
+            </div>
+            <div class="field" ng-show="state.progress > 0">
+                <div id="progress" class="ui progress" data-percent="{{state.progress}}">
+                    <div class="bar" style="transition-duration: 300ms">
+                        <div class="progress">{{state.progress}} %</div>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="ui divider"></div>-->
+            <div class="field form-section">
+                <button class="ui primary left icon large button" ng-click="getTranslations()" ng-class="{'loading' : state.isLoading }" ng-disabled="!data.input.string && data.config.mode !== 'xml'">
+                    <i class="translate icon"></i> Start Translation
+                </button>
             </div>
             <div class="ui divider"></div>
             <div class="field">
                 <h3>Results</h3>
 
-                <p ng-show="!state.loaded">No search performed yet</p>
+                <p ng-show="!state.loaded && !state.isLoading">No translation started yet</p>
 
-                <div ng-show="state.loaded">
+                <div class="ui segment" ng-show="state.isLoading">
+                    <div class="ui active inverted dimmer">
+                        <div class="ui text loader">Loading</div>
+                    </div>
+                    <p>&nbsp;</p>
+
+                    <p>&nbsp;</p>
+
+                    <p>&nbsp;</p>
+                </div>
+
+                <div ng-show="state.loaded && !state.isLoading">
                     <div class="ui top attached tabular menu">
                         <a class="item active" data-tab="translations">Translation(s)</a>
                         <a class="item" data-tab="debug">Debug</a>
@@ -137,7 +138,7 @@
                         </table>
                     </div>
                     <div class="ui bottom attached tab segment" data-tab="debug">
-                        <textarea ng-model="data.result.debug"></textarea>
+                        <textarea ng-model="data.result.debug" rows="50"></textarea>
                     </div>
                 </div>
             </div>

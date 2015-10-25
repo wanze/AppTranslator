@@ -8,7 +8,9 @@
 # --corpus_dir Absolute path to directory containing the monolingual and parallel data of the languages
 # --language_models_dir Absolute path to a directory containing the language models
 # --languages Language codes of source and target languages to train, separated by a comma, e.g. "fr-en,en-fr,en-de,de-en"
-#
+# --mode train|tune Start first with mode train, afterwards with tune
+
+MODE="train"
 
 while [[ $# > 1 ]]
 do
@@ -28,6 +30,10 @@ case $key in
     ;;
     -l|--languages)
     IFS=',' read -a LANGUAGES <<< "$2"
+    shift # past argument
+    ;;
+    -l|--mode)
+    MODE="$2"
     shift # past argument
     ;;
     -c|--corpus_dir)
@@ -65,7 +71,14 @@ train(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice $MOSES_DIR/scripts/training/train-model.perl -root-dir train -corpus "/$corpus_parallel_dir/strings.clean" -f "$lang_from" -e "$lang_to" -alignment grow-diag-final-and -reordering msd-bidirectional-fe -lm "0:3:$LANGUAGE_MODELS_DIR/$lang_to.arpa.bin:8" -external-bin-dir "$MOSES_DIR/word_align_tools" -mgiza >& training.out &
+    nohup nice $MOSES_DIR/scripts/training/train-model.perl -root-dir train -corpus "$corpus_parallel_dir/strings-train.clean" -f "$lang_from" -e "$lang_to" -alignment grow-diag-final-and -reordering msd-bidirectional-fe -lm "0:3:$LANGUAGE_MODELS_DIR/$lang_to.arpa.bin:8" -external-bin-dir "$MOSES_DIR/word_align_tools" -mgiza >& training.out &
+}
+
+tune(){
+    local lang_from=$1
+    local lang_to=$2
+    local corpus_parallel_dir=$3
+    nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-test.clean.$lang_from" "$corpus_parallel_dir/strings-test.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" &> mert.out &
 }
 
 cd $OUTPUT_DIR
@@ -80,7 +93,11 @@ for language in "${LANGUAGES[@]}"; do
         if [ ! -d "$corpus_parallel_dir" ]; then
             corpus_parallel_dir="$CORPUS_DIR/parallel/$lang2-$lang1"
         fi
-        train "$lang1" "$lang2" "$corpus_parallel_dir"
+        if [[ $MODE == "train" ]]; then
+            train "$lang1" "$lang2" "$corpus_parallel_dir"
+        elif [[ $MODE == "tune" ]]; then
+            tune "$lang1" "$lang2" "$corpus_parallel_dir"
+        fi
     fi
     cd $OUTPUT_DIR
 done
