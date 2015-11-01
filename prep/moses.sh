@@ -8,7 +8,7 @@
 # --corpus_dir Absolute path to directory containing the monolingual and parallel data of the languages
 # --language_models_dir Absolute path to a directory containing the language models
 # --languages Language codes of source and target languages to train, separated by a comma, e.g. "fr-en,en-fr,en-de,de-en"
-# --mode train|tune Start first with mode train, afterwards with tune
+# --mode train|tune (default='train') Start first with mode 'train', afterwards with mode 'tune'
 
 MODE="train"
 

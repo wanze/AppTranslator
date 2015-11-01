@@ -1,6 +1,6 @@
 var app = angular.module('appTranslator', ['ngFileUpload']);
 
-app.controller('TranslationController', function ($scope, $http, Upload, $timeout) {
+app.controller('TranslationController', function ($scope, $http, Upload, $timeout, $sce) {
 
     $scope.url = 'http://127.0.0.1:5050/';
 
@@ -61,6 +61,7 @@ app.controller('TranslationController', function ($scope, $http, Upload, $timeou
 
     $scope.getTranslations = function () {
         $scope.state.isLoading = true;
+        $scope.loaded = false;
         var params = {
             'from': $scope.data.config.source_lang,
             'to': $scope.data.config.target_lang
@@ -76,7 +77,10 @@ app.controller('TranslationController', function ($scope, $http, Upload, $timeou
         $http.get(endpoint, {'params': params}).then(function (response) {
             console.log(response);
             $scope.data.result.translations = response.data.translations;
-            $scope.data.result.debug = JSON.stringify(response.data.debug);
+            debug = JSON.stringify(response.data.debug);
+            debug = debug.replace(/\\n/g, '&#13;&#10;');
+            debug = debug.replace(/\\t/g, '    ');
+            $scope.data.result.debug = $sce.trustAsHtml(debug);
             $scope.state.isLoading = false;
             $scope.state.loaded = true;
         }, function (response) {
