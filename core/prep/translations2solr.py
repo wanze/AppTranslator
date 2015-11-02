@@ -13,13 +13,14 @@ import extractor
 Preprocess extracted translations and index them into Solr
 
 Usage: 
-$ python translations2solr.py --input=/path/to/APKs.zip --solr_dir=/path/to/solr
+$ python translations2solr.py --input_dir=/path/to/extracted/APKs --solr_dir=/path/to/solr --output_dir=/path/to/output_dir
 
 Arguments:
---input			Path to a zip file or folder containing APK files
---mode			(EI|E|I) where 'E' does extract/preprocess translations and store them temporary; 'I' does index them into Solr (default='EI', meaning extract AND index)
---solr_dir		Path to Solr directory. Note: Mandatory for mode 'I'
---solr_url		URL to access Solr (default='http://localhost:8983') Note: Mandatory for mode 'I'
+--input_dir			Path to a zip file or folder containing APK files
+--output_dir        Path to a directory where the Solr XML files are written
+--mode              (EI|E|I) where 'E' does extract/preprocess translations as Solr XML; 'I' does index them into Solr (default='EI', meaning extract AND index)
+--solr_dir  		Path to Solr directory. Note: Mandatory for mode 'I'
+--solr_url  		URL to access Solr (default='http://localhost:8983') Note: Mandatory for mode 'I'
 
 @author Stefan Wanzenried <stefan.wanzenried@gmail.com>
 """
@@ -38,7 +39,9 @@ class Solr:
         self.dir_solr = dir_solr.rstrip(os.sep) + os.sep
         self.solr_url = solr_url.rstrip('/') if solr_url else 'http://localhost:8983'
         # The instance directory storing the index for the different cores
-        self.dir_data = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), self.SOLR_DATA_DIR) + os.sep
+        self.dir_data = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../config')), self.SOLR_DATA_DIR) + os.sep
+        if not os.path.isdir(self.dir_data):
+            os.makedirs(self.dir_data)
         self.cache_cores = self.get_cores()
 
 
@@ -98,87 +101,62 @@ class Solr:
 class Translations2Solr:
 
     # Contains extracted translations and preprocessed solr xml files
-    TMP_DIR = 'translations2solr'
-    TMP_DIR_EXTRACTED = 'extracted_languages'
     TMP_DIR_SOLR_XML = 'solr_xml'
 
-    def __init__(self, dir_apks_in, solr):
+    def __init__(self, dir_apks_in, dir_xml_out, solr):
         """
         dir_apks_in -- Absolute path of directory containing extracted APK files, one folder per app
+        dir_xml_out -- Absolute path to directory where the Solr XML files are written
         solr        -- Instance of class Solr
         """
-        self.dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.dir_apks_in = dir_apks_in
-        self.dir_temp = os.path.join(self.dir_current, self.TMP_DIR)
-        self.dir_temp_extracted = os.path.join(self.dir_temp, self.TMP_DIR_EXTRACTED)
-        self.dir_temp_solr_xml = os.path.join(self.dir_temp, self.TMP_DIR_SOLR_XML)
+        self.dir_apks_in = dir_apks_in.rstrip('/') + '/'
+        self.dir_xml_out = dir_xml_out.rstrip('/') + '/'
+        if not os.path.isdir(self.dir_xml_out):
+            os.makedirs(self.dir_xml_out)
         self.solr = solr
 
 
-    def extract_translations(self):
+    def write_xml(self):
         """
-        Extract all translations from the APK files and convert them to a solr xml file
+        Create solr xml files of extracted translations
         """
-        cmd = './extract_apk_translations.sh'
-        print subprocess.call([cmd, self.dir_apks_in, self.dir_temp_extracted])
-        self._prepare_solr_xml()
+        print self.dir_apks_in
+        for f in os.listdir(self.dir_apks_in):
+            if f[0] == '.':
+                continue
+            apk_folder = os.path.realpath(os.path.join(self.dir_apks_in, f))
+            ext = extractor.Extractor(apk_folder)
+            app_id = ext.extract_app_id()
+            print "\nPrepare solr xml for app: " + app_id + "\n"
+            translations = ext.extract_translations()
+            for language in translations:
+                self._create_solr_xml_file(app_id, language, translations[language])
 
 
     def index(self):
         """
         Index solr xml files into Solr
         """
-        for language in os.listdir(self.dir_temp_solr_xml):
+        for language in os.listdir(self.dir_xml_out):
             if language == '.':
                 continue
-            dir_xml_docs = os.path.join(self.dir_temp_solr_xml, language)
+            dir_xml_docs = os.path.join(self.dir_xml_out, language)
             self.solr.index(dir_xml_docs, language)
 
 
-    def _prepare_solr_xml(self):
+    def _create_solr_xml_file(self, app_id, language, translations):
         """
-        Create solr xml files of extracted translations
+        Write an xml file
         """
-        for f in os.listdir(self.dir_temp_extracted):
-            if f[0] == '.':
-                continue
-            apk_folder = os.path.realpath(os.path.join(self.dir_temp_extracted, f))
-            file_manifest = os.path.join(apk_folder, 'AndroidManifest.xml')
-            if not os.path.isfile(file_manifest):
-                continue
-            app_id = self._extract_app_id(file_manifest)
-            print "\nPrepare solr xml for app: " + app_id + "\n"
-            # Loop folders inside 'res' folder, they contain the translations in different languages
-            dir_values = os.path.join(apk_folder, 'res')
-            for dir_value in os.listdir(dir_values):
-                if dir_value[0] == '.':
-                    continue
-                # Extract the language
-                match = re.search('^values-(\w{2})$', dir_value)
-                language = match.group(1) if match else 'en'  # TODO: This is an assumption currently, we need to check if the content is english!
-                dir_trans = os.path.realpath(os.path.join(dir_values, dir_value))
-                self._create_solr_xml_file(app_id, language, os.path.join(dir_trans, 'strings.xml'))
-
-
-    def _create_solr_xml_file(self, app_id, language, file_translations):
-        """
-        Convert a android translations xml file to a solr xml file
-        """
-        if not os.path.isfile(file_translations): return
-        dir_xml = os.path.join(self.dir_temp_solr_xml, language)
-        if not os.path.isdir(dir_xml): os.makedirs(dir_xml)
+        if not translations:
+            return
+        dir_xml = os.path.join(self.dir_xml_out, language)
+        if not os.path.isdir(dir_xml):
+            os.makedirs(dir_xml)
         temp_filename = os.path.join(dir_xml, app_id + '.xml.tmp')
         file_temp = open(temp_filename, 'w+')
         file_temp.write('<add>\n')
-        xml = ElementTree.parse(file_translations)
-        for trans in xml.getroot():
-            key = trans.attrib['name']
-            # Do not index empty translations...
-            if not trans.text:
-                continue
-            value = trans.text.encode('utf-8')
-            # Clean/remove unwanted strings
-            value = self._sanitize_translation_string(value)
+        for key, value in translations.iteritems():
             if not value:
                 continue
             file_temp.write('<doc>\n')
@@ -194,78 +172,50 @@ class Translations2Solr:
         return file_xml
 
 
-    @staticmethod
-    def _sanitize_translation_string(value):
-        """
-        Remove uninteresting translations (e.g. links, HTML)
-        """
-        for str in ['http', 'www']:
-            if value.startswith(str):
-                return ''
-        return value
-
-    @staticmethod
-    def _extract_app_id(file_manifest):
-        """
-        Return the unique app ID from a given android manifest xml file
-        """
-        xml = ElementTree.parse(file_manifest)
-        app_id = xml.getroot().attrib['package']
-        return app_id
-
-
-def main():
+if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'i:m:d:u:', ['input=', 'mode=', 'solr_dir=', 'solr_url='])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:m:d:u:o:', ['input_dir=', 'mode=', 'solr_dir=', 'solr_url=', 'output_dir='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
 
-    _input = ''
+    input_dir = ''
     mode = 'EI'  # EXTRACT && INDEX
-    solr_path = ''
+    solr_dir = ''
     solr_url = ''
+    output_dir = ''
     for opt, arg in opts:
-        if opt in ('-i', '--input'):
-            _input = arg
+        if opt in ('-i', '--input_dir'):
+            input_dir = arg
         if opt in ('-m', '--mode'):
             mode = arg
         if opt in ('-d', '--solr_dir'):
-            solr_path = arg
+            solr_dir = arg
         if opt in ('-u', '--solr_url'):
             solr_url = arg
+        if opt in ('-o', '--output_dir'):
+            output_dir = arg
 
+    print output_dir
+    print mode
     # mode = extract
     if 'e' in mode.lower():
-        if not os.path.isfile(_input) and not os.path.isdir(_input):
-            print _input + " must be a folder or .zip file containing APK files"
+        if not os.path.isdir(input_dir):
+            print input_dir + " must be a folder containing extracted APK files"
             sys.exit(2)
-
-        # _input supports ZIP file or directory containing APKs. In case of a zip, extract it first
-        if _input.endswith('.zip'):
-            dir_extract = os.path.join(os.path.dirname(os.path.abspath(_input)),
-                                       os.path.basename(_input).rstrip('.zip'))
-            print "Extracting content of '" + _input + "' to '" + dir_extract + "'..."
-            with zipfile.ZipFile(_input, 'r') as z:
-                z.extractall(dir_extract)
-            _input = dir_extract
 
     # mode = index
     solr = None
     if 'i' in mode.lower():
-        if not os.path.isdir(solr_path):
-            print "The path to Solr '" + solr_path + "' is not valid"
+        if not os.path.isdir(solr_dir):
+            print "The path to Solr '" + solr_dir + "' is not valid"
             sys.exit(2)
         else:
-            solr = Solr(solr_path, solr_url)
+            solr = Solr(solr_dir, solr_url)
 
     # Run it!
-    app = Translations2Solr(_input, solr)
+    app = Translations2Solr(input_dir, output_dir, solr)
     if 'e' in mode.lower():
-        app.extract_translations()
+        app.write_xml()
     if 'i' in mode.lower():
         app.index()
-
-
-main()
-
