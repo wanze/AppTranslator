@@ -88,7 +88,7 @@ class Solr:
             self.create_core(core)
         cmd = self.dir_solr + os.path.join('bin', 'post')
         print subprocess.call([cmd, '-c', core, document])
-	time.sleep(10)
+        time.sleep(10)
 
     def exists_core(self, name):
         return name in self.cache_cores

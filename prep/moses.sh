@@ -58,8 +58,7 @@ if [ ! -d "$CORPUS_DIR" ]; then
 fi
 
 if [ ! -d "$OUTPUT_DIR" ]; then
-    echo "ERROR: Output directory does not exist"
-    exit 1
+    mkdir "$OUTPUT_DIR"
 fi
 
 if [ ! -d "$LANGUAGE_MODELS_DIR" ]; then
