@@ -42,7 +42,7 @@ class AppTranslator:
             f = request.files['file']
             if f and f.filename.rsplit('.', 1)[1] == 'xml':
                 filename = secure_filename(f.filename)
-                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                f.save(os.path.join(self.app.config['UPLOAD_FOLDER'], filename))
                 out = json.dumps({'success': True, 'filename': filename})
             else:
                 out = json.dumps({'success': False})

@@ -20,7 +20,9 @@ class Extractor(object):
 
     def extract_translations(self):
         folder_res = os.path.realpath(os.path.join(self.folder_apk, 'res'))  # Build absolute path
-        for folder_value in os.listdir(folder_res):
+        if not os.path.isdir(folder_res):
+	    return self.translations
+	for folder_value in os.listdir(folder_res):
             if folder_value[0] == '.':
                 continue
             match = re.search('^values-(\w{2})$', folder_value)  # Extract the language
