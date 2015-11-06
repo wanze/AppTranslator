@@ -14,7 +14,8 @@ class AppTranslator:
     DEFAULT_CONFIG = {
         'debug': False,
         'port': 5000,
-        'moses': '/home/vagrant/mosesdecoder'
+        'moses': '/home/vagrant/mosesdecoder',
+        'lamtram': '/home/vagrant/lamtram'
     }
 
     def __init__(self, config):
@@ -50,7 +51,7 @@ class AppTranslator:
 
         @self.app.route('/translateXML')
         def translate_xml():
-            trans = translator.TranslatorMoses(self.config['moses'])
+            trans = self._get_decoder(request.args.get('decoder'))
             lang_from = request.args.get('from')
             lang_to = request.args.get('to')
             xml_filename = request.args.get('xml_filename')
@@ -61,12 +62,18 @@ class AppTranslator:
 
         @self.app.route('/get')
         def get_translation():
-            trans = translator.TranslatorMoses(self.config['moses'])
+            trans = self._get_decoder(request.args.get('decoder'))
             string = request.args.get('string')
             lang_from = request.args.get('from')
             lang_to = request.args.get('to')
             out = json.dumps(trans.get(string, lang_from, lang_to))
             return Response(out, mimetype='application/json')
+
+    def _get_decoder(self, type):
+        if type == 'moses':
+            return translator.TranslatorMoses(self.config['moses'])
+        elif type == 'lamtram':
+            return translator.TranslatorLamtram(self.config['lamtram'])
 
     def run(self):
         self.app.run(host='0.0.0.0', port=self.config['port'], debug=self.config['debug'])

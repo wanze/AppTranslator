@@ -3,6 +3,7 @@ var app = angular.module('appTranslator', ['ngFileUpload']);
 app.controller('TranslationController', function ($scope, $http, Upload, $timeout, $sce) {
 
     $scope.url = 'http://127.0.0.1:5050/';
+    //$scope.url = 'http://diufpc114.unifr.ch:5000/'
 
     $scope.state = {
         isLoading: false,
@@ -14,7 +15,8 @@ app.controller('TranslationController', function ($scope, $http, Upload, $timeou
         decoder: {
             decoder: 'moses',
             moses: {},
-            solr: {}
+            solr: {},
+            lamtram: {}
         },
         config: {
             source_lang: 'en',
@@ -64,7 +66,8 @@ app.controller('TranslationController', function ($scope, $http, Upload, $timeou
         $scope.loaded = false;
         var params = {
             'from': $scope.data.config.source_lang,
-            'to': $scope.data.config.target_lang
+            'to': $scope.data.config.target_lang,
+            'decoder': $scope.data.decoder.decoder
         };
         var endpoint = '';
         if ($scope.data.config.mode == 'xml') {

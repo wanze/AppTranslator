@@ -41,26 +41,27 @@
                     </select>
                 </div>
             </div>
-            <!--<div class="grouped fields">-->
-            <!--<label for="decoder">Decoder</label>-->
+            <div class="grouped fields">
+                <label for="decoder">Decoder</label>
 
-            <!--<div class="field">-->
+                <div class="field">
+                    <div class="ui radio checkbox">
+                        <input id="moses" type="radio" name="decoder" checked="checked" class="hidden" value="moses"
+                               ng-model="data.decoder.decoder">
+                        <label for="moses">Moses</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui radio checkbox">
 
-            <!--<div class="ui radio checkbox">-->
-            <!--<input type="radio" name="decoder" checked="checked" class="hidden" value="moses"-->
-            <!--ng-model="decoder.decoder">-->
-            <!--<label>Moses</label>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--<div class="field">-->
-            <!--<div class="ui radio checkbox">-->
-            <!--<input type="radio" name="decoder" class="hidden" value="moses" ng-model="decoder.decoder">-->
-            <!--<label>Solr</label>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</div>-->
+                        <input id="lamtram" type="radio" name="decoder" class="hidden" value="lamtram"
+                               ng-model="data.decoder.decoder">
+                        <label for="lamtram">Lamtram</label>
+                    </div>
+                </div>
+            </div>
 
-            <!--<div class="ui divider"></div>-->
+            <div class="ui divider"></div>
             <div class="field form-section">
                 <h3>Input</h3>
             </div>
@@ -76,7 +77,9 @@
                 </div>
             </div>
             <div class="field" style="text-align: center;">
-                <button type="file" class="ui teal labeled icon button" ngf-select="uploadFile($file)" ng-model="data.input.file" name="file" ng-class="{'loading' : state.progress > 0 && state.progress < 100}">
+                <button type="file" class="ui teal labeled icon button" ngf-select="uploadFile($file)"
+                        ng-model="data.input.file" name="file"
+                        ng-class="{'loading' : state.progress > 0 && state.progress < 100}">
                     Upload XML translation file
                     <i class="upload icon"></i>
                 </button>
@@ -90,7 +93,9 @@
             </div>
             <!--<div class="ui divider"></div>-->
             <div class="field form-section">
-                <button class="ui primary left icon large button" ng-click="getTranslations()" ng-class="{'loading' : state.isLoading }" ng-disabled="!data.input.string && data.config.mode !== 'xml'">
+                <button class="ui primary left icon large button" ng-click="getTranslations()"
+                        ng-class="{'loading' : state.isLoading }"
+                        ng-disabled="!data.input.string && data.config.mode !== 'xml'">
                     <i class="translate icon"></i> Start Translation
                 </button>
             </div>

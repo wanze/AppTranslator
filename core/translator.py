@@ -7,6 +7,7 @@ import os
 import sys
 from prep.extractor import Extractor
 
+
 class Translator(object):
     def get(self, string, lang_from, lang_to):
         """
@@ -49,6 +50,8 @@ class TranslatorMoses(Translator):
         dir_data = os.path.dirname(os.path.realpath(__file__)) + '/../data/'
         self.dir_models = dir_data + 'moses/'
         self.dir_temp = dir_data + 'temp/moses/'
+        if not os.path.isdir(self.dir_temp):
+            os.makedirs(self.dir_temp)
         self.config = config
 
     def translate_xml(self, xml, lang_from, lang_to):
@@ -102,6 +105,69 @@ class TranslatorMoses(Translator):
     def get_command(self, lang_from, lang_to, file_input='', file_output='', file_debug=''):
         cmd = self.dir_moses + 'bin/moses -f ' + self.dir_models + lang_from + '-' + lang_to + '/mert-work/moses.ini -verbose 2'
         cmd = cmd + ' < ' + file_input if file_input else cmd
+        cmd = cmd + ' > ' + file_output if file_output else cmd
+        cmd = cmd + ' 2> ' + file_debug if file_debug else cmd
+        return cmd
+
+    def get_temp_filename(self, string, lang_from, lang_to):
+        return self.dir_temp + hashlib.md5(''.join([string, lang_from, lang_to])).hexdigest()
+
+
+class TranslatorLamtram(Translator):
+    def __init__(self, dir_lamtram, config={}):
+        self.dir_lamtram = dir_lamtram.rstrip('/') + '/'
+        dir_data = os.path.dirname(os.path.realpath(__file__)) + '/../data/'
+        self.dir_models = dir_data + 'lamtram/'
+        self.dir_temp = dir_data + 'temp/lamtram/'
+        if not os.path.isdir(self.dir_temp):
+            os.makedirs(self.dir_temp)
+        self.config = config
+
+    def translate_xml(self, xml, lang_from, lang_to):
+        translations = Extractor.get_translations(xml)
+        # Write a file with one translation per line that can be processed by Lamtram
+        filename_input = self.get_temp_filename(xml + 'in', lang_from, lang_to)
+        file_input = open(filename_input, 'w')
+        for key, value in translations.iteritems():
+            file_input.write(value + '\n')
+        file_input.close()
+        cmd = self.get_command(lang_from, lang_to, filename_input)
+        result = subprocess.check_output(cmd, shell=True)
+        os.remove(filename_input)
+        out = []
+        i = 0
+        trans = result.split('\n')
+        for key, value in translations.iteritems():
+            row = {
+                'key': key,
+                'source': value,
+                'target': trans[i].strip()
+            }
+            out.append(row)
+            i += 1
+        return {
+            'translations': out,
+            'debug': ''
+        }
+
+    def get_all(self, string, lang_from, lang_to):
+        pass
+
+    def get(self, string, lang_from, lang_to):
+        filename = self.get_temp_filename(string, lang_from, lang_to)
+        f = open(filename, 'w')
+        f.write(string)
+        f.close()
+        cmd = "echo '" + string + "' | " + self.get_command(lang_from, lang_to, filename)
+        result = subprocess.check_output(cmd, shell=True)
+        os.remove(filename)
+        return {
+            'translations': [result.rstrip()],
+            'debug': ''
+        }
+
+    def get_command(self, lang_from, lang_to, file_input, file_output='', file_debug=''):
+        cmd = self.dir_lamtram + 'src/lamtram/lamtram --operation gen --models_in encdec=' + self.dir_models + lang_from + '-' + lang_to + '/transmodel.out --beam 5 --word_pen 0.0 --src_in ' + file_input
         cmd = cmd + ' > ' + file_output if file_output else cmd
         cmd = cmd + ' 2> ' + file_debug if file_debug else cmd
         return cmd

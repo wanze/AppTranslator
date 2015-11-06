@@ -1,5 +1,6 @@
 {
   "port": 5000,
   "debug": true,
-  "moses": "/home/vagrant/mosesdecoder"
+  "moses": "/home/vagrant/mosesdecoder",
+  "lamtram": "/home/vagrant/lamtram"
 }
