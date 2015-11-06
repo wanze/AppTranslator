@@ -2,6 +2,7 @@ import os
 import itertools
 from extractor import Extractor
 
+
 class CorpusWriter(object):
 
     # Percentage of parallel data used for training, rest for tuning/testing
