@@ -9,7 +9,10 @@
 # --language_models_dir Absolute path to a directory containing the language models
 # --languages Language codes of source and target languages to train, separated by a comma, e.g. "fr-en,en-fr,en-de,de-en"
 # --mode train|tune (default='train') Start first with mode 'train', afterwards with mode 'tune'
-
+#
+# For testing, parallel data must be in files "strings-train.clean.<lang_source>" and "strings-train.clean.<lang_target>"
+# For tuning, parallel data must be in files "strings-tune.clean.<lang_source>" and "strings-tune.clean.<lang_target>"
+#
 MODE="train"
 
 while [[ $# > 1 ]]
@@ -77,7 +80,7 @@ tune(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-test.clean.$lang_from" "$corpus_parallel_dir/strings-test.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" &> mert.out &
+    nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-tune.clean.$lang_from" "$corpus_parallel_dir/strings-tune.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" &> mert.out &
 }
 
 cd $OUTPUT_DIR

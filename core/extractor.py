@@ -6,7 +6,6 @@ import sys
 
 
 class Extractor(object):
-
     def __init__(self, folder_apk):
         self.folder_apk = folder_apk
         self.translations = {}
@@ -33,6 +32,14 @@ class Extractor(object):
         return self.translations
 
     @staticmethod
+    def is_number(string):
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
     def get_translations(xml_file):
         if not os.path.isfile(xml_file):
             return
@@ -43,6 +50,8 @@ class Extractor(object):
             if not trans.text:
                 continue
             value = Extractor.sanitize_translation_string(trans.text.encode('utf-8'))  # Clean/remove unwanted strings
+            if not value:
+                continue
             translations[key] = value
         return translations
 
@@ -52,8 +61,13 @@ class Extractor(object):
         Sanitize translation string
         """
         value = value.strip()
+        # Ignore numbers and floats
+        if Extractor.is_number(value):
+            return ''
+        # Replace special chars
         for replacement in ['\n', '\r', '\t', '"']:
             value = value.replace(replacement, '')
+        # Ignore URLs
         for string in ['http', 'www']:
             if value.startswith(string):
                 return ''
