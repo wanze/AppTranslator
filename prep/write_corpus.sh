@@ -43,6 +43,10 @@ fi
 
 CURRENT_DIR=$PWD
 
+# Remove old data
+rm -R "$OUTPUT_DIR/parallel"
+rm -R "$OUTPUT_DIR/mono"
+
 # Create parallel and mono data from extracted APK translations
 echo "Executing corpous_writer.py"
 python ../core/corpus_writer.py --in "$INPUT_DIR" --out "$OUTPUT_DIR"

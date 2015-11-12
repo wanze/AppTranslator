@@ -38,7 +38,7 @@ class CorpusWriter(object):
             if language not in self.languages:
                 continue
             file_mono = os.path.realpath(os.path.join(folder, self.OUT_FILENAME + '.' + language))
-            f = open(file_mono, 'w')
+            f = open(file_mono, 'a')
             if translations[language]:
                 for key in translations[language]:
                     value = translations[language][key]
@@ -62,8 +62,8 @@ class CorpusWriter(object):
                 os.makedirs(folder)
             file1 = os.path.realpath(os.path.join(folder, self.OUT_FILENAME + '.' + first_lang))
             file2 = os.path.realpath(os.path.join(folder, self.OUT_FILENAME + '.' + second_lang))
-            f1 = open(file1, 'w')
-            f2 = open(file2, 'w')
+            f1 = open(file1, 'a')
+            f2 = open(file2, 'a')
             for key in translations[first_lang]:
                 if key in translations[second_lang]:
                     # Both key exists, we can write the parallel data

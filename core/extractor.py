@@ -14,7 +14,10 @@ class Extractor(object):
         file_manifest = os.path.join(self.folder_apk, 'AndroidManifest.xml')
         if not os.path.isfile(file_manifest):
             return ''
-        xml = ElementTree.parse(file_manifest)
+        try:
+            xml = ElementTree.parse(file_manifest)
+        except ElementTree.ParseError:
+            return ''
         app_id = xml.getroot().attrib['package']
         return app_id
 
@@ -42,11 +45,15 @@ class ExtractTranslationsFromXML(object):
     def __init__(self, xml_file):
         self.xml_file = xml_file
         self.sanitizer = TranslationStringSanitizer()
+        self.parser = ElementTree.XMLParser(encoding='utf-8')
 
     def extract(self):
         if not os.path.isfile(self.xml_file):
             return {}
-        xml = ElementTree.parse(self.xml_file)
+        try:
+            xml = ElementTree.parse(self.xml_file, parser=self.parser)
+        except ElementTree.ParseError:
+            return {}
         translations = {}
         for trans in xml.getroot():
             key = trans.attrib['name']
@@ -61,7 +68,7 @@ class ExtractTranslationsFromXML(object):
 
 class TranslationStringSanitizer(object):
 
-    PLACEHOLDER_TOKEN = 'STRING_PLACEHOLDER_TOKEN'
+    PLACEHOLDER_TOKEN = 'STRING-PLACEHOLDER-TOKEN'
 
     def __init__(self):
         self.html_stripper = HTMLTagsStripper()
