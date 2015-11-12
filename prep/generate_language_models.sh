@@ -55,8 +55,8 @@ for file in $INPUT_DIR/*; do
     name=$(basename "$file")
     if [[ $name =~ true ]]; then
         lang="${name##*.}"
-        model=$OUTPUT_DIR/$lang.arpa
-        model_bin=$OUTPUT_DIR/$lang.arpa.bin
+        model="$OUTPUT_DIR/$lang.arpa"
+        model_bin="$OUTPUT_DIR/$lang.arpa.bin"
         $MOSES_DIR/bin/lmplz -o 3 < "$name" > "$model"
         # Build binary file
         $MOSES_DIR/bin/build_binary "$model" "$model_bin"
