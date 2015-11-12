@@ -1,11 +1,11 @@
 import os
 import re
 import xml.etree.ElementTree as ElementTree
-import getopt
-import sys
+from HTMLParser import HTMLParser
 
 
 class Extractor(object):
+
     def __init__(self, folder_apk):
         self.folder_apk = folder_apk
         self.translations = {}
@@ -19,17 +19,75 @@ class Extractor(object):
         return app_id
 
     def extract_translations(self):
-        folder_res = os.path.realpath(os.path.join(self.folder_apk, 'res'))  # Build absolute path
+        folder_res = os.path.realpath(os.path.join(self.folder_apk, 'res'))
         if not os.path.isdir(folder_res):
             return self.translations
         for folder_value in os.listdir(folder_res):
             if folder_value[0] == '.':
                 continue
-            match = re.search('^values-(\w{2})$', folder_value)  # Extract the language
-            language = match.group(1) if match else 'en'  # TODO: This is an assumption currently, we need to check if the content is english!
+            match = re.search('^values-(\w{2})$', folder_value)
+            language = match.group(1) if match else 'en'  # TODO: This is an assumption currently, we need to check if the default language is english!
             folder_trans = os.path.realpath(os.path.join(folder_res, folder_value))
             self.translations[language] = self.get_translations(os.path.join(folder_trans, 'strings.xml'))
         return self.translations
+
+    @staticmethod
+    def get_translations(xml_file):
+        e = ExtractTranslationsFromXML(xml_file)
+        return e.extract()
+
+
+class ExtractTranslationsFromXML(object):
+
+    def __init__(self, xml_file):
+        self.xml_file = xml_file
+        self.sanitizer = TranslationStringSanitizer()
+
+    def extract(self):
+        if not os.path.isfile(self.xml_file):
+            return {}
+        xml = ElementTree.parse(self.xml_file)
+        translations = {}
+        for trans in xml.getroot():
+            key = trans.attrib['name']
+            if not trans.text:
+                continue
+            value = self.sanitizer.sanitize(trans.text.encode('utf-8'))  # Clean/remove unwanted strings
+            if not value:
+                continue
+            translations[key] = value
+        return translations
+
+
+class TranslationStringSanitizer(object):
+
+    PLACEHOLDER_TOKEN = 'STRING_PLACEHOLDER_TOKEN'
+
+    def __init__(self):
+        self.html_stripper = HTMLTagsStripper()
+
+    def sanitize(self, value):
+        value = value.strip()
+        if len(value) <= 1:
+            return ''
+        # Ignore numbers and floats
+        if self.is_number(value):
+            return ''
+        # Replace special chars
+        for replacement in ['\n', '\r', '\t', '"']:
+            value = value.replace(replacement, '')
+        # Ignore URLs
+        for string in ['http', 'www']:
+            if value.startswith(string):
+                return ''
+        # Strip any HTML tags
+        s = HTMLTagsStripper()
+        s.feed(value)
+        value = s.get_data()
+        # Replace %s and %1$s with a placeholder token
+        value = re.sub(r"%(s|[0-9]+\$s)", self.PLACEHOLDER_TOKEN, value)
+
+        return value
 
     @staticmethod
     def is_number(string):
@@ -39,36 +97,19 @@ class Extractor(object):
         except ValueError:
             return False
 
-    @staticmethod
-    def get_translations(xml_file):
-        if not os.path.isfile(xml_file):
-            return
-        xml = ElementTree.parse(xml_file)
-        translations = {}
-        for trans in xml.getroot():
-            key = trans.attrib['name']
-            if not trans.text:
-                continue
-            value = Extractor.sanitize_translation_string(trans.text.encode('utf-8'))  # Clean/remove unwanted strings
-            if not value:
-                continue
-            translations[key] = value
-        return translations
 
-    @staticmethod
-    def sanitize_translation_string(value):
-        """
-        Sanitize translation string
-        """
-        value = value.strip()
-        # Ignore numbers and floats
-        if Extractor.is_number(value):
-            return ''
-        # Replace special chars
-        for replacement in ['\n', '\r', '\t', '"']:
-            value = value.replace(replacement, '')
-        # Ignore URLs
-        for string in ['http', 'www']:
-            if value.startswith(string):
-                return ''
-        return value
+class HTMLTagsStripper(HTMLParser):
+
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.reset()
+        self.fed = []
+
+    def error(self, message):
+        pass
+
+    def handle_data(self, d):
+        self.fed.append(d)
+
+    def get_data(self):
+        return ''.join(self.fed)

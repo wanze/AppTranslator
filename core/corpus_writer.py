@@ -35,8 +35,10 @@ class CorpusWriter(object):
         if not os.path.isdir(folder):
             os.makedirs(folder)
         for language in translations:
+            if language not in self.languages:
+                continue
             file_mono = os.path.realpath(os.path.join(folder, self.OUT_FILENAME + '.' + language))
-            f = open(file_mono, 'a+')
+            f = open(file_mono, 'w')
             if translations[language]:
                 for key in translations[language]:
                     value = translations[language][key]
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     # Defaults if the script is run without any parameters
     folder_in = os.path.dirname(os.path.realpath(__file__)) + '/../data/translations_extracted'
     folder_out = os.path.dirname(os.path.realpath(__file__)) + '/../data/corpus'
-    languages = ['en', 'fr', 'de', 'ru']
+    languages = ['en', 'fr', 'de']
 
     for opt, arg in opts:
         if opt in ('-i', '--in'):
