@@ -1,7 +1,31 @@
-body {
-    margin-top: 2em;
-}
+h2.ui.header {
+  padding-top: 1em; }
 
-.form-section {
-    padding-top: 2em;
-}
+.ui.steps {
+  margin-bottom: 3em; }
+  .ui.steps .step {
+    cursor: pointer; }
+
+.ui.form .field h3 {
+  border-bottom: 2px solid #cccccc;
+  padding-bottom: 0.5em;
+  margin-top: 1em;
+  margin-bottom: 1em; }
+.ui.form .field:first-child h3 {
+  margin-top: 0; }
+.ui.form .field.last {
+  padding-top: 1em;
+  text-align: right; }
+.ui.form .field.centered {
+  text-align: center; }
+.ui.form .field .desc {
+  color: #898989; }
+
+.drop-box {
+  background: #F8F8F8;
+  border: 3px dashed #008080;
+  display: inline-block;
+  padding: 3em 5em;
+  border-radius: 5px; }
+
+/*# sourceMappingURL=app.css.map */

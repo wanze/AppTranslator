@@ -1,0 +1,63 @@
+<form ng-show="decoder.decoder == 'moses'" class="ui form">
+    <div class="field">
+        <h3>Moses Settings</h3>
+    </div>
+    <div class="two fields">
+        <div class="field">
+            <label>Drop unknown</label>
+            <select class="ui dropdown" ng-model="decoder.moses.drop_unknown">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+            <div class="desc">drop unknown words instead of copying them</div>
+        </div>
+        <div class="field">
+            <label>Maximum phrase length</label>
+            <input ng-model="decoder.moses.max_phrase_length" type="text">
+        </div>
+    </div>
+    <div class="two fields">
+        <div class="field">
+            <label>Search algorithm</label>
+            <input ng-model="decoder.moses.search_algorithm" type="text">
+
+            <div class="desc">0 = normal stack, 1 = cube pruning</div>
+        </div>
+        <div class="field">
+            <label>Verbose</label>
+            <input ng-model="decoder.moses.verbose" type="text">
+
+            <div class="desc">verbosity level of the debugging, 1-3</div>
+        </div>
+    </div>
+    <div class="two fields">
+        <div class="field">
+            <label>Weights distortion</label>
+            <input ng-model="decoder.moses.weight_d" type="text">
+            <div class="desc">Weight(s) for distortion (reordering components) Use [0.1-1]</div>
+        </div>
+        <div class="field">
+            <label>Weight(s) for language models</label>
+            <input ng-model="decoder.moses.weight_l" type="text">
+            <div class="desc">Use [0.1;1]</div>
+        </div>
+    </div>
+
+    <div class="two fields">
+        <div class="field">
+            <label>Weight(s) for translation model components</label>
+            <input ng-model="decoder.moses.weight_t" type="text">
+            <div class="desc">Use [0.1;1]</div>
+        </div>
+        <div class="field">
+            <label>Weight for word penalty</label>
+            <input ng-model="decoder.moses.weight_w" type="text">
+            <div class="desc">Negative values for the word penalty favor longer output, positive values favor shorter output. Use [-3;3]</div>
+        </div>
+    </div>
+
+    <div class="field last">
+        <button ng-click="getTranslations()" class="ui big labeled icon primary button">Start Translation <i class="angle right icon"></i></button>
+    </div>
+
+</form>

@@ -1,0 +1,38 @@
+<div class="ui grid container" ng-show="app.state == 'decode'">
+    <div class="sixteen wide column">
+
+        <h2 class="ui header">
+            <i class="translate icon"></i>
+
+            <div class="content">
+                Decode
+                <div class="sub header">Translate strings or XML translation files</div>
+            </div>
+        </h2>
+
+        <div class="ui three steps">
+            <div ng-class="{active : steps.active == 1}" ng-click="changeStep(1)" class="step">
+                <div class="content">
+                    <div class="title">Configure</div>
+                    <div class="description">Choose languages and translation input</div>
+                </div>
+            </div>
+            <div ng-class="{disabled: steps.progress < 2, active : steps.active == 2}" ng-click="changeStep(2)" class="step">
+                <div class="content">
+                    <div class="title">Decoder Options</div>
+                    <div class="description">Settings for the decoder</div>
+                </div>
+            </div>
+            <div ng-class="{disabled: steps.progress < 3, active : steps.active == 3}" ng-click="changeStep(3)" class="step">
+                <div class="content">
+                    <div class="title">Results</div>
+                    <div class="description">Check the results</div>
+                </div>
+            </div>
+        </div>
+
+        <!--<div ng-include="steps.template[steps.active]"></div>-->
+        <ng-include src="stepsTemplate"></ng-include>
+
+    </div>
+</div>
