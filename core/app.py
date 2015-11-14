@@ -1,11 +1,10 @@
 import sys
-import json
-import urllib
 import os
+import hashlib
+import json
 from flask import Flask
 from flask import request
 from flask import Response
-from werkzeug import secure_filename
 import translator
 
 
@@ -15,7 +14,8 @@ class AppTranslator:
         'debug': False,
         'port': 5000,
         'moses': '/home/vagrant/mosesdecoder',
-        'lamtram': '/home/vagrant/lamtram'
+        'lamtram': '/home/vagrant/lamtram',
+        'solr': '/home/vagrant/solr'
     }
 
     def __init__(self, config):
@@ -35,6 +35,7 @@ class AppTranslator:
         @self.app.after_request
         def add_header(response):
             response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
             return response
 
         @self.app.route('/upload', methods=['POST'])
@@ -42,36 +43,32 @@ class AppTranslator:
             # TODO Move to class
             f = request.files['file']
             if f and f.filename.rsplit('.', 1)[1] == 'xml':
-                filename = secure_filename(f.filename)
+                filename = hashlib.md5(f.filename)
                 f.save(os.path.join(self.app.config['UPLOAD_FOLDER'], filename))
                 out = json.dumps({'success': True, 'filename': filename})
             else:
                 out = json.dumps({'success': False})
             return Response(out, mimetype='application/json')
 
-        @self.app.route('/translateXML')
+        @self.app.route('/translateXML', methods=['POST'])
         def translate_xml():
-            trans = self._get_decoder(request.args.get('decoder'))
-            lang_from = request.args.get('from')
-            lang_to = request.args.get('to')
-            xml_filename = request.args.get('xml_filename')
-            xml_file = os.path.join(self.app.config['UPLOAD_FOLDER'], xml_filename)
-            out = json.dumps(trans.translate_xml(xml_file, lang_from, lang_to))
+            data = json.loads(request.data)
+            trans = self._get_decoder(data['decoder'], data['decoder_settings'])
+            xml_file = os.path.join(self.app.config['UPLOAD_FOLDER'], data['xml_filename'])
+            out = json.dumps(trans.translate_xml(xml_file, data['lang_from'], data['lang_to']))
             return Response(out, mimetype='application/json')
 
-
-        @self.app.route('/get')
+        @self.app.route('/translateStrings', methods=['POST'])
         def get_translation():
-            trans = self._get_decoder(request.args.get('decoder'))
-            string = request.args.get('string')
-            lang_from = request.args.get('from')
-            lang_to = request.args.get('to')
-            out = json.dumps(trans.get(string, lang_from, lang_to))
+            data = json.loads(request.data)
+            trans = self._get_decoder(data['decoder'], data['decoder_settings'])
+            print data['strings']
+            out = json.dumps(trans.get(data['strings'], data['lang_from'], data['lang_to']))
             return Response(out, mimetype='application/json')
 
-    def _get_decoder(self, type):
+    def _get_decoder(self, type, settings):
         if type == 'moses':
-            return translator.TranslatorMoses(self.config['moses'])
+            return translator.TranslatorMoses(self.config['moses'], settings)
         elif type == 'lamtram':
             return translator.TranslatorLamtram(self.config['lamtram'])
 

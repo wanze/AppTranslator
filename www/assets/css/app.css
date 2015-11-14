@@ -20,6 +20,8 @@ h2.ui.header {
   text-align: center; }
 .ui.form .field .desc {
   color: #898989; }
+  .ui.form .field .desc.offset {
+    padding-left: 65px; }
 
 .drop-box {
   background: #F8F8F8;
@@ -27,5 +29,3 @@ h2.ui.header {
   display: inline-block;
   padding: 3em 5em;
   border-radius: 5px; }
-
-/*# sourceMappingURL=app.css.map */

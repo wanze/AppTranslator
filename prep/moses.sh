@@ -73,14 +73,14 @@ train(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice $MOSES_DIR/scripts/training/train-model.perl -root-dir train -corpus "$corpus_parallel_dir/strings-train.clean" -f "$lang_from" -e "$lang_to" -alignment grow-diag-final-and -reordering msd-bidirectional-fe -lm "0:3:$LANGUAGE_MODELS_DIR/$lang_to.arpa.bin:8" -external-bin-dir "$MOSES_DIR/word_align_tools" -mgiza >& training.out &
+    nohup nice $MOSES_DIR/scripts/training/train-model.perl -root-dir train -corpus "$corpus_parallel_dir/strings-train.clean" -f "$lang_from" -e "$lang_to" -alignment grow-diag-final-and -reordering msd-bidirectional-fe -cores 4 -lm "0:3:$LANGUAGE_MODELS_DIR/$lang_to.arpa.bin:8" -external-bin-dir "$MOSES_DIR/word_align_tools" -mgiza >& training.out &
 }
 
 tune(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-tune.clean.$lang_from" "$corpus_parallel_dir/strings-tune.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" &> mert.out &
+    nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-tune.clean.$lang_from" "$corpus_parallel_dir/strings-tune.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" --decoder-flags="-threads 4" &> mert.out &
 }
 
 cd $OUTPUT_DIR

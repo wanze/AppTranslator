@@ -2,5 +2,6 @@
   "port": 5000,
   "debug": true,
   "moses": "/home/vagrant/mosesdecoder",
-  "lamtram": "/home/vagrant/lamtram"
+  "lamtram": "/home/vagrant/lamtram",
+  "solr": "/home/vagrant/solr"
 }

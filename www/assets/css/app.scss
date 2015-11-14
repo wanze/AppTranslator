@@ -32,6 +32,9 @@ h2.ui.header {
     }
     .desc {
       color: #898989;
+      &.offset {
+        padding-left: 65px;
+      }
     }
   }
 }

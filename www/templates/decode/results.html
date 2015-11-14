@@ -1,0 +1,41 @@
+<div class="ui segment" ng-show="state.isLoading">
+    <div class="ui active inverted dimmer">
+        <div class="ui text loader">Loading</div>
+    </div>
+    <p>&nbsp;</p>
+
+    <p>&nbsp;</p>
+
+    <p>&nbsp;</p>
+</div>
+
+<div ng-show="state.loaded && !state.isLoading">
+    <div class="ui pointing secondary menu">
+        <a class="item active" data-tab="translations">Translation(s)</a>
+        <a class="item" data-tab="debug">Debug</a>
+    </div>
+    <div class="ui tab active" data-tab="translations">
+        <ul ng-if="input.translationMode == 'string'">
+            <li ng-repeat="translation in results.translations">{{translation}}</li>
+        </ul>
+        <table ng-if="input.translationMode == 'xml'" class="ui celled striped table">
+            <thead>
+            <tr>
+                <th>Key</th>
+                <th>Source</th>
+                <th>Translation</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="row in results.translations">
+                <td>{{row.key}}</td>
+                <td>{{row.source}}</td>
+                <td>{{row.target}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="ui tab" data-tab="debug">
+        <textarea ng-bind-html="results.debug" rows="50"></textarea>
+    </div>
+</div>
