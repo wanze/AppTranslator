@@ -30,6 +30,12 @@ h2.ui.header {
     &.centered {
       text-align: center;
     }
+    &.right {
+      text-align: right;
+    }
+    &.file-button {
+      line-height: 8em;
+    }
     .desc {
       color: #898989;
       &.offset {
@@ -45,4 +51,8 @@ h2.ui.header {
   display: inline-block;
   padding: 3em 5em;
   border-radius: 5px;
+  &.dragover {
+    background: #008080;
+    color: #ffffff;
+  }
 }

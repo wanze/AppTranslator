@@ -34,21 +34,22 @@
             Or
         </div>
     </div>
-    <div class="field centered">
-        <button type="file" class="ui teal labeled icon button" ngf-select="uploadFile($file)"
-                ng-model="data.input.file" name="file"
-                ng-class="{'loading' : state.progress > 0 && state.progress < 100}">
-            Upload XML translation file
-            <i class="upload icon"></i>
-        </button>
-    </div>
-    <div class="field centered">
-        <div ngf-drop ngf-select ng-model="file" class="drop-box"
-             ngf-drag-over-class="'dragover'" ngf-multiple="false" ngf-allow-dir="false">
-            Drop XML translation file here
+    <div class="two fields">
+        <div class="field right file-button">
+            <button type="file" class="ui teal labeled icon button" ngf-select="uploadFile($file)"
+                    ng-model="data.input.file" name="file"
+                    ng-class="{'loading' : state.progress > 0 && state.progress < 100}">
+                Upload XML translation file
+                <i class="upload icon"></i>
+            </button>
+        </div>
+        <div class="field">
+            <div ngf-drop="uploadFile($file)" ng-model="data.input.file" class="drop-box"
+                 ngf-drag-over-class="'dragover'" ngf-multiple="false" ngf-allow-dir="false">
+                Drop XML translation file here
+            </div>
         </div>
     </div>
-
     <div class="field" ng-show="state.progress > 0">
         <div id="progress" class="ui progress" data-percent="{{state.progress}}">
             <div class="bar" style="transition-duration: 300ms">

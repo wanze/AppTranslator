@@ -72,16 +72,13 @@ class TranslatorMoses(Translator):
         e = ExtractTranslationsFromXML(xml)
         translations = e.extract()
         # Write a file with one translation per line that can be processed by Moses
-        filename_input = self._get_temp_filename(xml + 'in', lang_from, lang_to)
-        file_input = open(filename_input, 'w')
-        for key, value in translations.iteritems():
-            file_input.write(value + '\n')
-        file_input.close()
+        filename_in = self._get_temp_filename(xml + 'in', lang_from, lang_to)
+        self._write_translations_to_file(translations.values(), filename_in)
         filename_debug = self._get_temp_filename(xml + 'debug', lang_from, lang_to)
-        cmd = self._get_command(lang_from, lang_to, filename_input, '', filename_debug)
+        cmd = self._get_command(lang_from, lang_to, filename_in, '', filename_debug)
         result = subprocess.check_output(cmd, shell=True)
         dbg = self._get_debug_from_file(filename_debug)
-        os.remove(filename_input)
+        os.remove(filename_in)
         out = []
         i = 0
         trans = result.split('\n')
@@ -135,12 +132,22 @@ class TranslatorMoses(Translator):
 
     def _get_config_command(self):
         cmd = ''
+        mappings = {
+            'weight_w': 'WordPenalty0',
+            'weight_l': 'LM0',
+            'weight_d': 'Distortion0',
+            'weight_t': 'TranslationModel0'
+        }
         for key, value in self.config.iteritems():
             if key == 'tune_weights':
                 continue
             if not self.config['tune_weights'] and key.startswith('weight'):
                 continue
-            cmd = cmd + ' -' + key.replace('_', '-') + ' ' + str(value)
+            elif self.config['tune_weights'] and key.startswith('weight'):
+                key_new = mappings[key]
+                cmd = cmd + " -weight-overwrite '" + key_new + "= " + value + "'"
+            else:
+                cmd = cmd + ' -' + key.replace('_', '-') + ' ' + str(value)
         return cmd
 
     def _get_temp_filename(self, string, lang_from, lang_to):

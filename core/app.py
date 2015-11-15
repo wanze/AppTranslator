@@ -43,7 +43,7 @@ class AppTranslator:
             # TODO Move to class
             f = request.files['file']
             if f and f.filename.rsplit('.', 1)[1] == 'xml':
-                filename = hashlib.md5(f.filename)
+                filename = hashlib.md5(f.filename).hexdigest()
                 f.save(os.path.join(self.app.config['UPLOAD_FOLDER'], filename))
                 out = json.dumps({'success': True, 'filename': filename})
             else:

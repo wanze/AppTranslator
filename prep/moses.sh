@@ -87,7 +87,9 @@ cd $OUTPUT_DIR
 
 for language in "${LANGUAGES[@]}"; do
     if [[ $language =~ ^([a-z]{2})-([a-z]{2})$ ]]; then
-        mkdir $language
+        if [ ! -d "$language" ]; then
+            mkdir $language
+        fi
         cd $language
         lang1=${BASH_REMATCH[1]}
         lang2=${BASH_REMATCH[2]}

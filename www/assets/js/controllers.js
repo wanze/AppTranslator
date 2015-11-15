@@ -36,7 +36,7 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             tune_weights: 0,
             weight_d: '0.3',
             weight_l: '0.5',
-            weight_t: '0.2',
+            weight_t: '0.2 0.2 0.2 0.2',
             weight_w: '-1'
         },
         solr: {},
@@ -133,7 +133,19 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
         $scope.changeStep(3)
         $http.post(endpoint, data).then(function (response) {
             console.log(response);
-            $scope.results.translations = response.data.translations;
+            $scope.results.translations = []
+            for (var i = 0; i < response.data.translations.length; i++) {
+                var translation = response.data.translations[i];
+                if (typeof translation == 'string') {
+                    $scope.results.translations.push($sce.trustAsHtml(translation));
+                } else if (typeof translation == 'object') {
+                    var escapedObject = {};
+                    for (var key in translation) {
+                        escapedObject[key] = $sce.trustAsHtml(translation[key])
+                    }
+                    $scope.results.translations.push(escapedObject);
+                }
+            }
             var debug = JSON.stringify(response.data.debug);
             debug = debug.replace(/\\n/g, '&#13;&#10;');
             debug = debug.replace(/\\t/g, '    ');
