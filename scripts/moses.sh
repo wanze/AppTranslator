@@ -88,9 +88,9 @@ cd $OUTPUT_DIR
 for language in "${LANGUAGES[@]}"; do
     if [[ $language =~ ^([a-z]{2})-([a-z]{2})$ ]]; then
         if [ ! -d "$language" ]; then
-            mkdir $language
+            mkdir "$language"
         fi
-        cd $language
+        cd "$language"
         lang1=${BASH_REMATCH[1]}
         lang2=${BASH_REMATCH[2]}
         corpus_parallel_dir="$CORPUS_DIR/parallel/$lang1-$lang2"

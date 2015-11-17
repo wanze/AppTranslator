@@ -53,14 +53,16 @@ train(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice "$LAMTRAM_DIR/src/lamtram/lamtram-train" --model_type encdec --context 2 --layers "lstm:100:1" --trainer sgd --learning_rate 0.1 --seed 0 --train_src "$corpus_parallel_dir/strings-train.clean.$lang_from" --train_trg "$corpus_parallel_dir/strings-train.clean.$lang_to" --dev_src "$corpus_parallel_dir/strings-test.clean.$lang_from" --dev_trg "$corpus_parallel_dir/strings-test.clean.$lang_to" --model_out transmodel.out
+    nohup nice "$LAMTRAM_DIR/src/lamtram/lamtram-train" --model_type encdec --context 2 --layers "lstm:100:1" --trainer sgd --learning_rate 0.1 --seed 0 --train_src "$corpus_parallel_dir/strings-train.clean.$lang_from" --train_trg "$corpus_parallel_dir/strings-train.clean.$lang_to" --dev_src "$corpus_parallel_dir/strings-tune.clean.$lang_from" --dev_trg "$corpus_parallel_dir/strings-tune.clean.$lang_to" --model_out transmodel.out
 }
 
 cd "$OUTPUT_DIR"
 
 for language in "${LANGUAGES[@]}"; do
     if [[ $language =~ ^([a-z]{2})-([a-z]{2})$ ]]; then
-        mkdir "$language"
+        if [ ! -d "$language" ]; then
+            mkdir "$language"
+        fi
         cd "$language"
         lang1=${BASH_REMATCH[1]}
         lang2=${BASH_REMATCH[2]}
