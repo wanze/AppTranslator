@@ -107,7 +107,7 @@ class CorpusWriterBleu:
                 os.remove(filepath_train)
             for f in files:
                 # All files except the file marked with the current index are used for training, current index = testing
-                if str(i) in f:
+                if f.endswith(str(i) + '.' + lang):
                     # File is used as test -> copy
                     shutil.copy(os.path.join(dir_in, f), os.path.join(dir_run, 'strings-test.clean.' + lang))
                 else:

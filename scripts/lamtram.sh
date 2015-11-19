@@ -7,6 +7,9 @@
 # --output_dir Absolute path to a directory where the files are written
 # --corpus_dir Absolute path to directory containing the monolingual and parallel data of the languages
 # --languages Language codes of source and target languages to train, separated by a comma, e.g. "fr-en,en-fr,en-de,de-en"
+# --nodes Number of nodes for the LSTM layer
+
+NODES=10
 
 while [[ $# > 1 ]]
 do
@@ -26,6 +29,10 @@ case $key in
     ;;
     -c|--corpus_dir)
     CORPUS_DIR="$2"
+    shift # past argument
+    ;;
+    -n|--nodes)
+    NODES="$2"
     shift # past argument
     ;;
     *)
@@ -53,7 +60,7 @@ train(){
     local lang_from=$1
     local lang_to=$2
     local corpus_parallel_dir=$3
-    nohup nice "$LAMTRAM_DIR/src/lamtram/lamtram-train" --model_type encdec --context 2 --layers "lstm:100:1" --trainer sgd --learning_rate 0.1 --seed 0 --train_src "$corpus_parallel_dir/strings-train.clean.$lang_from" --train_trg "$corpus_parallel_dir/strings-train.clean.$lang_to" --dev_src "$corpus_parallel_dir/strings-tune.clean.$lang_from" --dev_trg "$corpus_parallel_dir/strings-tune.clean.$lang_to" --model_out transmodel.out
+    nohup nice "$LAMTRAM_DIR/src/lamtram/lamtram-train" --model_type encdec --context 2 --layers "lstm:$NODES:1" --trainer sgd --learning_rate 0.1 --seed 0 --train_src "$corpus_parallel_dir/strings-train.clean.$lang_from" --train_trg "$corpus_parallel_dir/strings-train.clean.$lang_to" --dev_src "$corpus_parallel_dir/strings-tune.clean.$lang_from" --dev_trg "$corpus_parallel_dir/strings-tune.clean.$lang_to" --model_out transmodel.out &
 }
 
 cd "$OUTPUT_DIR"

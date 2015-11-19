@@ -31,8 +31,7 @@
             </div>
         </div>
 
-        <!--<div ng-include="steps.template[steps.active]"></div>-->
-        <ng-include src="stepsTemplate"></ng-include>
+        <ng-include src="stepsTemplate" onload="onFinishedLoadingTemplate()"></ng-include>
 
     </div>
 </div>

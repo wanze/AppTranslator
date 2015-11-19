@@ -9,11 +9,13 @@
 # --language_models_dir Absolute path to a directory containing the language models
 # --languages Language codes of source and target languages to train, separated by a comma, e.g. "fr-en,en-fr,en-de,de-en"
 # --mode train|tune (default='train') Start first with mode 'train', afterwards with mode 'tune'
+# --run Integer (1,2,3...) -> Specify the run-ID, if parallel data is split up into multiple run directories, e.g. "run-1", "run-2"
 #
 # For testing, parallel data must be in files "strings-train.clean.<lang_source>" and "strings-train.clean.<lang_target>"
 # For tuning, parallel data must be in files "strings-tune.clean.<lang_source>" and "strings-tune.clean.<lang_target>"
 #
 MODE="train"
+RUN=0
 
 while [[ $# > 1 ]]
 do
@@ -35,8 +37,12 @@ case $key in
     IFS=',' read -a LANGUAGES <<< "$2"
     shift # past argument
     ;;
-    -l|--mode)
+    -m|--mode)
     MODE="$2"
+    shift # past argument
+    ;;
+    -r|--run)
+    RUN="$2"
     shift # past argument
     ;;
     -c|--corpus_dir)
@@ -83,7 +89,7 @@ tune(){
     nohup nice $MOSES_DIR/scripts/training/mert-moses.pl "$corpus_parallel_dir/strings-tune.clean.$lang_from" "$corpus_parallel_dir/strings-tune.clean.$lang_to" "$MOSES_DIR/bin/moses" train/model/moses.ini --mertdir "$MOSES_DIR/bin/" --decoder-flags="-threads 4" &> mert.out &
 }
 
-cd $OUTPUT_DIR
+cd "$OUTPUT_DIR"
 
 for language in "${LANGUAGES[@]}"; do
     if [[ $language =~ ^([a-z]{2})-([a-z]{2})$ ]]; then
@@ -93,9 +99,13 @@ for language in "${LANGUAGES[@]}"; do
         cd "$language"
         lang1=${BASH_REMATCH[1]}
         lang2=${BASH_REMATCH[2]}
-        corpus_parallel_dir="$CORPUS_DIR/parallel/$lang1-$lang2"
+        parallel_dir="parallel"
+        if [ "$RUN" -gt 0 ]; then
+            parallel_dir="parallel/run-$RUN"
+        fi
+        corpus_parallel_dir="$CORPUS_DIR/$parallel_dir/$lang1-$lang2"
         if [ ! -d "$corpus_parallel_dir" ]; then
-            corpus_parallel_dir="$CORPUS_DIR/parallel/$lang2-$lang1"
+            corpus_parallel_dir="$CORPUS_DIR/$parallel_dir/$lang2-$lang1"
         fi
         if [[ $MODE == "train" ]]; then
             train "$lang1" "$lang2" "$corpus_parallel_dir"
@@ -103,5 +113,5 @@ for language in "${LANGUAGES[@]}"; do
             tune "$lang1" "$lang2" "$corpus_parallel_dir"
         fi
     fi
-    cd $OUTPUT_DIR
+    cd "$OUTPUT_DIR"
 done

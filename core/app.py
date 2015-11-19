@@ -62,7 +62,6 @@ class AppTranslator:
         def get_translation():
             data = json.loads(request.data)
             trans = self._get_decoder(data['decoder'], data['decoder_settings'])
-            print data['strings']
             out = json.dumps(trans.get(data['strings'], data['lang_from'], data['lang_to']))
             return Response(out, mimetype='application/json')
 
@@ -70,7 +69,7 @@ class AppTranslator:
         if type == 'moses':
             return translator.TranslatorMoses(self.config['moses'], settings)
         elif type == 'lamtram':
-            return translator.TranslatorLamtram(self.config['lamtram'])
+            return translator.TranslatorLamtram(self.config['lamtram'], settings)
 
     def run(self):
         self.app.run(host='0.0.0.0', port=self.config['port'], debug=self.config['debug'])

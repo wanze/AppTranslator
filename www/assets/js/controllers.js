@@ -40,7 +40,10 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             weight_w: '-1'
         },
         solr: {},
-        lamtram: {}
+        lamtram: {
+            word_pen: 0.0,
+            beam: 5
+        }
     };
 
     $scope.langs = {
@@ -84,6 +87,9 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             $scope.steps.progress = index;
         }
         $scope.stepsTemplate = $scope.steps.templates[$scope.steps.active];
+    };
+
+    $scope.onFinishedLoadingTemplate = function() {
     };
 
     $scope.uploadFile = function (file) {
