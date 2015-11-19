@@ -185,11 +185,13 @@ app.controller('DataAnalysisController', function ($scope, config, $http) {
     $scope.drawChart = function() {
         Chart.defaults.global.responsive = true;
         var counts = [];
+        var labels = [];
         for (var i = 0; i < $scope.top_terms.terms.length; i++) {
             counts.push($scope.top_terms.terms[i].count);
+            labels.push('');
         }
         var data = {
-            labels: ['', '', '', ''],
+            labels: labels,
             datasets: [
                 {
                     label: 'Terms',
