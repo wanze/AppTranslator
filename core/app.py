@@ -6,6 +6,7 @@ from flask import Flask
 from flask import request
 from flask import Response
 import translator
+import solr
 
 
 class AppTranslator:
@@ -64,6 +65,13 @@ class AppTranslator:
             trans = self._get_decoder(data['decoder'], data['decoder_settings'])
             out = json.dumps(trans.get(data['strings'], data['lang_from'], data['lang_to']))
             return Response(out, mimetype='application/json')
+
+        @self.app.route('/getTopTerms')
+        def get_top_terms():
+            lang = request.args.get('lang')
+            s = solr.Solr(self.config['solr'])
+            terms = s.get_top_terms(lang, 100)
+            return Response(json.dumps(terms), mimetype='application/json')
 
     def _get_decoder(self, type, settings):
         if type == 'moses':

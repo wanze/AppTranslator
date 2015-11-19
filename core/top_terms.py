@@ -29,17 +29,8 @@ if __name__ == "__main__":
     solr = Solr('', solr_url)
     for core in solr.get_cores():
         print "Getting and writing top terms for " + core
-        req = solr.get_top_terms(core, n_terms)
-        json_response = json.load(req)
+        terms = solr.get_top_terms(core, n_terms)
         f = open(os.path.join(output_dir, core + '.csv'), 'w')
-        out = ''
-        i = 0
-        for value in json_response['terms']['value']:
-            if i % 2 == 0:
-                out = value.encode('utf-8') + ';'
-            else:
-                out = out + str(value) + "\n"
-                f.write(out)
-                out = ''
-            i += 1
+        for term in terms:
+            f.write(term['value'] + ';' + str(term['count']) + "\n")
         f.close()

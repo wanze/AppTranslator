@@ -12,6 +12,14 @@ app.controller('AppController', function ($scope, $location) {
         $location.path('/' + state);
     };
 
+    $scope.languages =  [
+        {code: 'en', name: 'English'},
+        {code: 'de', name: 'German'},
+        {code: 'fr', name: 'French'}
+        //{code: 'it', name: 'Italian'},
+        //{code: 'ru', name: 'Russian'}
+    ];
+
 });
 
 /**
@@ -72,14 +80,6 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
         }
     };
     $scope.stepsTemplate = $scope.steps.templates[$scope.steps.active];
-
-    $scope.languages =  [
-        {code: 'en', name: 'English'},
-        {code: 'de', name: 'German'},
-        {code: 'fr', name: 'French'}
-        //{code: 'it', name: 'Italian'},
-        //{code: 'ru', name: 'Russian'}
-    ];
 
     $scope.changeStep = function(index) {
         $scope.steps.active = index;
@@ -158,6 +158,7 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             $scope.results.debug = $sce.trustAsHtml(debug);
             $scope.state.isLoading = false;
             $scope.state.loaded = true;
+            $('.secondary.pointing.menu .item').tab();
         }, function (response) {
             console.log(response);
             $scope.state.isLoading = false;
@@ -169,6 +170,53 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
 /**
  * Controller for /analysis
  */
-app.controller('DataAnalysisController', function ($scope, config) {
+app.controller('DataAnalysisController', function ($scope, config, $http) {
+
+    $scope.top_terms = {
+        'lang': 'en',
+        'terms': [],
+    };
+
+    $scope.state = {
+        isLoading: false,
+        loaded: false
+    };
+
+    $scope.drawChart = function() {
+        Chart.defaults.global.responsive = true;
+        var counts = [];
+        for (var i = 0; i < $scope.top_terms.terms.length; i++) {
+            counts.push($scope.top_terms.terms[i].count);
+        }
+        var data = {
+            labels: ['', '', '', ''],
+            datasets: [
+                {
+                    label: 'Terms',
+                    fillColor: "rgba(220,220,220,0.2)",
+                    strokeColor: "rgba(220,220,220,1)",
+                    pointColor: "rgba(220,220,220,1)",
+                    pointStrokeColor: "#fff",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(220,220,220,1)",
+                    data: counts
+                }
+            ]
+        }
+        var ctx = document.getElementById("top-terms-chart").getContext("2d");
+        var chart = new Chart(ctx).Line(data);
+    };
+
+    $scope.getTopTerms = function() {
+        $scope.state.isLoading = true;
+        var url = config.url + 'getTopTerms'
+        $http.get(url, {'lang': $scope.top_terms.lang}).then(function (response) {
+            console.log(response);
+            $scope.state.isLoading = false;
+            $scope.state.loaded = true;
+            $scope.top_terms.terms = response.data;
+            $scope.drawChart();
+        });
+    };
 
 });

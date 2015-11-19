@@ -4,6 +4,7 @@ import urllib2
 import urllib
 import subprocess
 import time
+import json
 
 
 class Solr:
@@ -80,8 +81,20 @@ class Solr:
         """
         if not self.exists_core(core):
             raise Exception("Core '" + core + "' does not exist")
-        return self._call_solr_api(core + '/terms', {'terms.fl': 'value', 'terms.limit': n})
-
+        req = self._call_solr_api(core + '/terms', {'terms.fl': 'value', 'terms.limit': n})
+        json_response = json.load(req)
+        i = 0
+        terms = []
+        term = {}
+        for value in json_response['terms']['value']:
+            if i % 2 == 0:
+                term['value'] = value.encode('utf-8')
+            else:
+                term['count'] = value
+                terms.append(term)
+                term = {}
+            i += 1
+        return terms
 
     def _call_solr_api(self, endpoint, params):
         """

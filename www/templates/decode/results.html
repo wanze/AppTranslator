@@ -10,7 +10,7 @@
 </div>
 
 <div ng-show="state.loaded && !state.isLoading">
-    <div class="ui pointing secondary menu">
+    <div class="ui secondary pointing menu">
         <a class="item active" data-tab="translations">Translation(s)</a>
         <a class="item" data-tab="debug">Debug</a>
     </div>
@@ -48,6 +48,10 @@
         </table>
     </div>
     <div class="ui tab" data-tab="debug">
-        <textarea ng-bind-html="results.debug" rows="50"></textarea>
+        <div class="ui form">
+            <div class="field">
+                <textarea ng-bind-html="results.debug" rows="50"></textarea>
+            </div>
+        </div>
     </div>
 </div>
