@@ -211,8 +211,13 @@ app.controller('DataAnalysisController', function ($scope, config, $http) {
 
     $scope.getTopTerms = function() {
         $scope.state.isLoading = true;
-        var url = config.url + 'getTopTerms'
-        $http.get(url, {'lang': $scope.top_terms.lang}).then(function (response) {
+        var url = config.url + 'getTopTerms';
+        var config = {
+            params: {
+                'lang': $scope.top_terms.lang
+            }
+        };
+        $http.get(url, config).then(function (response) {
             console.log(response);
             $scope.state.isLoading = false;
             $scope.state.loaded = true;
