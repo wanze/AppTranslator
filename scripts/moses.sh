@@ -102,6 +102,10 @@ for language in "${LANGUAGES[@]}"; do
         parallel_dir="parallel"
         if [ "$RUN" -gt 0 ]; then
             parallel_dir="parallel/run-$RUN"
+            if [ ! -d "run-$RUN" ]; then
+                mkdir "run-$RUN"
+            fi
+            cd "run-$RUN"
         fi
         corpus_parallel_dir="$CORPUS_DIR/$parallel_dir/$lang1-$lang2"
         if [ ! -d "$corpus_parallel_dir" ]; then
