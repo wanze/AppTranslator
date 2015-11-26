@@ -10,7 +10,8 @@ import json
 class Solr:
 
     SOLR_DATA_DIR = os.path.join('solr', 'data')
-    SOLR_CONFIGSET = 'transapp'
+    CONFIGSET_TRANSLATIONS = 'translations'
+    CONFIGSET_APPS = 'apps'
 
     def __init__(self, dir_solr='', solr_url=''):
         """
@@ -35,9 +36,11 @@ class Solr:
         return [core.attrib['name'] for core in xml.getroot()[2]]
 
 
-    def create_core(self, name):
+    def create_core(self, name, configset):
         """
         Create a new core in Solr with the given name, based on a configSet providing the solrconfig.xml and schema.xml files
+        :param name: Name of the core
+        :param configset: Name of configset
         """
         if self.exists_core(name):
             return
@@ -46,7 +49,7 @@ class Solr:
             'action': 'CREATE',
             'name': name,
             'instanceDir': self.dir_data + name,
-            'configSet': self.SOLR_CONFIGSET,
+            'configSet': configset,
         }
 
         xml_response = self._call_solr_core_api(params)
@@ -59,15 +62,16 @@ class Solr:
             raise Exception(xml.getroot()[1][0].text)  # TODO Check available errors, no docs available?
 
 
-    def index(self, document, core):
+    def index(self, document, core, configset):
         """
         Index a Solr xml document (or path containing xml documents) into the given core
         """
+        configset = self.CONFIGSET_TRANSLATIONS if not configset else configset
         if not self.exists_core(core):
-            self.create_core(core)
+            self.create_core(core, configset)
         cmd = self.dir_solr + os.path.join('bin', 'post')
         result = subprocess.call([cmd, '-c', core, document])
-        time.sleep(5)
+        time.sleep(1)
         return result
 
 

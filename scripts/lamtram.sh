@@ -81,7 +81,6 @@ for language in "${LANGUAGES[@]}"; do
         lang2=${BASH_REMATCH[2]}
         parallel_dir="parallel"
         if [ "$RUN" -gt 0 ]; then
-            parallel_dir="parallel/run-$RUN"
             if [ ! -d "run-$RUN" ]; then
                 mkdir "run-$RUN"
             fi
@@ -90,6 +89,9 @@ for language in "${LANGUAGES[@]}"; do
         corpus_parallel_dir="$CORPUS_DIR/$parallel_dir/$lang1-$lang2"
         if [ ! -d "$corpus_parallel_dir" ]; then
             corpus_parallel_dir="$CORPUS_DIR/$parallel_dir/$lang2-$lang1"
+        fi
+        if [ "$RUN" -gt 0 ]; then
+            corpus_parallel_dir="$corpus_parallel_dir/run-$RUN"
         fi
         train "$lang1" "$lang2" "$corpus_parallel_dir"
     fi

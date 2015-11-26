@@ -19,11 +19,11 @@ Arguments:
 
 @author Stefan Wanzenried <stefan.wanzenried@gmail.com>
 """
-
 class Translations2Solr:
 
     # Contains extracted translations and preprocessed solr xml files
     TMP_DIR_SOLR_XML = 'solr_xml'
+    SUBDIR_APPS = 'apps'
 
     def __init__(self, dir_apks_in, dir_xml_out, solr):
         """
@@ -35,6 +35,8 @@ class Translations2Solr:
         self.dir_xml_out = dir_xml_out.rstrip('/') + '/'
         if not os.path.isdir(self.dir_xml_out):
             os.makedirs(self.dir_xml_out)
+        if not os.path.isdir(os.path.join(self.dir_xml_out, self.SUBDIR_APPS)):
+            os.makedirs(os.path.join(self.dir_xml_out, self.SUBDIR_APPS))
         self.solr = solr
 
 
@@ -42,7 +44,6 @@ class Translations2Solr:
         """
         Create solr xml files of extracted translations
         """
-        print self.dir_apks_in
         for f in os.listdir(self.dir_apks_in):
             if f[0] == '.':
                 continue
@@ -51,22 +52,46 @@ class Translations2Solr:
             app_id = ext.extract_app_id()
             print "\nPrepare solr xml for app: " + app_id + "\n"
             translations = ext.extract_translations()
+            self._write_app_xml(app_id, translations)
             for language in translations:
-                self._create_solr_xml_file(app_id, language, translations[language])
+                self._write_translations_xml(app_id, language, translations[language])
 
 
     def index(self):
         """
         Index solr xml files into Solr
         """
+        dir_apps = os.path.join(self.dir_xml_out, self.SUBDIR_APPS)
+        for app in os.listdir(dir_apps):
+            if app == '.':
+                continue
+            xml = os.path.join(dir_apps, app)
+            self.solr.index(xml, 'apps', Solr.CONFIGSET_APPS)
+
         for language in os.listdir(self.dir_xml_out):
             if language == '.':
                 continue
-            dir_xml_docs = os.path.join(self.dir_xml_out, language)
-            self.solr.index(dir_xml_docs, language)
+            xml = os.path.join(self.dir_xml_out, language)
+            self.solr.index(xml, language)
 
 
-    def _create_solr_xml_file(self, app_id, language, translations):
+    def _write_app_xml(self, app_id, translations):
+        langs = list(translations.keys())
+        dir_out = os.path.join(self.dir_xml_out, self.SUBDIR_APPS)
+        temp_filename = os.path.join(dir_out, app_id + '.xml')
+        f_temp = open(temp_filename, 'w+')
+        f_temp.write('<add>\n')
+        f_temp.write('<doc>\n')
+        f_temp.write('<field name="app_id">' + app_id + '</field>\n')
+        for lang in langs:
+            f_temp.write('<field name="languages">' + lang + '</field>\n')
+            f_temp.write('<field name="count_' + lang + '">' + str(len(translations[lang])) + '</field>\n')
+        f_temp.write('</doc>\n')
+        f_temp.write('</add>\n')
+        f_temp.close()
+
+
+    def _write_translations_xml(self, app_id, language, translations):
         """
         Write an xml file
         """
