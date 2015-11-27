@@ -45,7 +45,7 @@
     that avoids logging every request
 -->
 
-<schema name="transapp" version="1.5">
+<schema name="translations" version="1.5">
   <!-- attribute "name" is the name of this schema and is only used for display purposes.
        version="x.y" is Solr's version number for the schema syntax and 
        semantics.  It should not normally be changed by applications.
@@ -106,24 +106,14 @@
       trailing underscores (e.g. _version_) are reserved.
    -->
 
-   <!-- If you remove this field, you must _also_ disable the update log in solrconfig.xml
-      or Solr won't start. _version_ and update log are required for SolrCloud
-   --> 
-   <field name="_version_" type="long" indexed="true" stored="true"/>
-   
-   <!-- points to the root document of a block of nested documents. Required for nested
-      document support, may be removed otherwise
-   -->
-   <field name="_root_" type="string" indexed="true" stored="false"/>
-
    <!-- Only remove the "id" field if you have a very good reason to. While not strictly
      required, it is highly recommended. A <uniqueKey> is present in almost all Solr 
      installations. See the <uniqueKey> declaration below where <uniqueKey> is set to "id".
    -->   
-   <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-  
+   <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
    <field name="key" type="string" indexed="true" stored="true" required="true" />
-   <field name="value" type="string" indexed="true" stored="true" required="true" />
+   <field name="value" type="text" indexed="true" stored="true" required="true" />
+   <field name="value_lc" type="text_lowercase" indexed="true" stored="true" required="true" />
    <field name="app_id" type="string" indexed="true" stored="true" required="true" />
 
  <!-- Field to use to determine and enforce document uniqueness. 
@@ -131,5 +121,17 @@
    -->
  <uniqueKey>id</uniqueKey>
 
+ <fieldType name="string" class="solr.StrField"/>
+ <fieldType name="text" class="solr.TextField"/>
+ <fieldType name="text_lowercase" class="solr.TextField">
+  <analyzer type="index">
+    <tokenizer class="solr.StandardTokenizerFactory"/>
+    <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+  <analyzer type="query">
+    <tokenizer class="solr.StandardTokenizerFactory"/>
+    <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+ </fieldType>
 
 </schema>

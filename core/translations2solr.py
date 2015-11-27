@@ -82,6 +82,7 @@ class Translations2Solr:
         f_temp = open(temp_filename, 'w+')
         f_temp.write('<add>\n')
         f_temp.write('<doc>\n')
+        f_temp.write('<field name="id">' + app_id + '</field>\n')
         f_temp.write('<field name="app_id">' + app_id + '</field>\n')
         for lang in langs:
             f_temp.write('<field name="languages">' + lang + '</field>\n')
@@ -111,6 +112,7 @@ class Translations2Solr:
             file_temp.write('<field name="app_id">' + app_id + '</field>\n')
             file_temp.write('<field name="key">' + key + '</field>\n')
             file_temp.write('<field name="value">' + value + '</field>\n')
+            file_temp.write('<field name="value_lc">' + value + '</field>\n')
             file_temp.write('</doc>\n')
         file_temp.write('</add>\n')
         file_temp.close()

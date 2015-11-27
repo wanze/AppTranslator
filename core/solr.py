@@ -62,7 +62,7 @@ class Solr:
             raise Exception(xml.getroot()[1][0].text)  # TODO Check available errors, no docs available?
 
 
-    def index(self, document, core, configset):
+    def index(self, document, core, configset=''):
         """
         Index a Solr xml document (or path containing xml documents) into the given core
         """
@@ -71,7 +71,6 @@ class Solr:
             self.create_core(core, configset)
         cmd = self.dir_solr + os.path.join('bin', 'post')
         result = subprocess.call([cmd, '-c', core, document])
-        time.sleep(1)
         return result
 
 
@@ -99,6 +98,22 @@ class Solr:
                 term = {}
             i += 1
         return terms
+
+
+    def query(self, core, query_params):
+        results = json.load(self._call_solr_api(core + '/select', query_params))
+        if not results['response']['numFound']:
+            return []
+        ret = []
+        for doc in results['response']['docs']:
+            d = {}
+            for key, value in doc.iteritems():
+                if not isinstance(value, list):
+                    continue
+                d[key] = value[0]
+            ret.append(d)
+        return ret
+
 
     def _call_solr_api(self, endpoint, params):
         """

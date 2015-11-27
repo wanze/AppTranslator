@@ -2,6 +2,7 @@ import os
 import re
 import xml.etree.ElementTree as ElementTree
 from HTMLParser import HTMLParser
+import cgi
 
 
 class Extractor(object):
@@ -75,7 +76,7 @@ class TranslationStringSanitizer(object):
 
     def sanitize(self, value):
         value = value.strip()
-        if len(value) <= 1:
+        if len(value) <= 3:
             return ''
         # Ignore numbers and floats
         if self.is_number(value):
@@ -93,7 +94,8 @@ class TranslationStringSanitizer(object):
         value = s.get_data()
         # Replace %s and %1$s with a placeholder token
         value = re.sub(r"%(s|[0-9]+\$s)", self.PLACEHOLDER_TOKEN, value)
-
+        # Encode special chars
+        value = cgi.escape(value)
         return value
 
     @staticmethod
