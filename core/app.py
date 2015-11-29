@@ -78,6 +78,8 @@ class AppTranslator:
             return translator.TranslatorMoses(self.config['moses'], settings)
         elif type == 'lamtram':
             return translator.TranslatorLamtram(self.config['lamtram'], settings)
+        elif type == 'solr':
+            return translator.TranslatorSolr()
 
     def run(self):
         self.app.run(host='0.0.0.0', port=self.config['port'], debug=self.config['debug'])

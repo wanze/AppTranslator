@@ -5,6 +5,7 @@ import subprocess
 import hashlib
 import os
 from extractor import ExtractTranslationsFromXML
+from solr import Solr
 
 
 class Translator(object):
@@ -247,46 +248,127 @@ class TranslatorLamtram(Translator):
 
 class TranslatorSolr(Translator):
     def __init__(self, url='http://localhost:8983', config={}):
-        self.url = url
         self.config = config
+        self.solr = Solr('', url)
 
     def get_all(self, string, lang_from, lang_to):
-        response1 = self._query(string, lang_from)
-        # Extract all translation keys from the response dictionary
-        keys = self._extract_translation_keys(response1)
-        # Perform search in target language based on keys
-        translations = []
-        debug = {'keys': keys}
-        for key in keys:
-            response = self._query('key:%s' % key, lang_to)
-            if int(response['response']['numFound']) > 0:
-                results = [doc['value'][0] for doc in response['response']['docs']]
-                debug[key] = results
-                translations.extend(results)
-        translations = set(translations)
-        return {
-            'debug': response1,
-            'translations': list(translations)
-        }
+        pass
 
     def translate_xml(self, xml, lang_from, lang_to):
-        pass
+        translations = []
+        e = ExtractTranslationsFromXML(xml)
+        strings = e.extract()
+        debug = ''
+        for string in strings.values():
+            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr)
+            translations.append(t.get_translation())
+            debug += t.debug
+        return {
+            'debug': debug,
+            'translations': translations
+        }
 
-    def get(self, string, lang_from, lang_to):
-        pass
 
-    def _query(self, string, lang):
-        """
-        Query Solr for the given string and language
-        """
-        query = {'q': string.encode('utf-8')}
-        url = self.url + '/solr/' + lang + '/select?' + urllib.urlencode(query) + '&wt=json'
-        response = urllib2.urlopen(url)
-        return json.loads(response.read())
+    def get(self, strings, lang_from, lang_to):
+        translations = []
+        debug = ''
+        for string in strings:
+            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr)
+            translations.append(t.get_translation())
+            debug += t.debug
+        return {
+            'debug': debug,
+            'translations': translations
+        }
+
+
+
+
+
+class LongestStubstringMatch(object):
+
+    def __init__(self, string, lang_from, lang_to, solr):
+        self.solr = solr
+        self.string = string
+        self.debug = ''
+        self.lang_from = lang_from
+        self.lang_to = lang_to
+
+    def get_translation(self):
+        # Try to find a translation from the given string
+        result = self._translate_substring(self.string)
+        if result:
+            return result
+        # Reduce string from right and try to match substrings
+        tokens = self.string.split()
+        words = [tokens[-1]]
+        result = ''
+        while not result:
+            index_last = len(words)
+            string = ' '.join(tokens[0:-index_last])
+            result = self._translate_substring(string)
+            if result or index_last == len(tokens):
+                # Translate and append all single words
+                result_words = []
+                for word in reversed(words):
+                    w = self._translate_substring(word)
+                    if w:
+                        result_words.append(w)
+                    else:
+                        result_words.append(word)
+                result += ' '.join(result_words)
+            else:
+                index_last += 1
+                words.append(tokens[-index_last])
+        return result
+
+
+    def _translate_substring(self, string):
+        self.debug += '\n\nTranslating "%s"\n' % string
+        self.debug += 'Try to find exact match in source langauge\n'
+        results = self._find_exact(string, self.lang_from)
+        for result in results:
+            params = {
+                'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
+            }
+            self.debug += 'Found exact match for app_id=%s, key=%s\n' % (result['app_id'], result['key'])
+            # Search for a translation with same app_id and key in target language
+            translation = self.solr.query(self.lang_to, params)
+            if len(translation):
+                t = translation[0]['value']
+                self.debug += 'Found translation "%s"' % t
+                return t
+        self.debug += 'No translations for target language available\n'
+        return ''
+
+
+    def _find_exact(self, string, lang):
+        params = {'q': 'value_lc:%s' % self._quote(string)}
+        return self.solr.query(lang, params)
+
 
     @staticmethod
-    def _extract_translation_keys(response):
-        """
-        Parses a json response object from Solr and returns the translation keys of all strings found
-        """
-        return set([doc['key'][0] for doc in response['response']['docs']])
+    def _quote(string):
+        string = string.encode('utf-8')
+        return '"' + string.replace('"', '') + '"'
+
+
+import getopt
+import sys
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 's:t:', ['string=', 'target='])
+    except getopt.GetoptError as err:
+        print str(err)
+        sys.exit(2)
+
+    string = ''
+    target = 'de'
+    for opt, arg in opts:
+        if opt in ('-s', '--string'):
+            string = arg
+        if opt in ('-t', '--target'):
+            target = arg
+
+    trans = TranslatorSolr()
+    print trans.get([string], 'en', target)

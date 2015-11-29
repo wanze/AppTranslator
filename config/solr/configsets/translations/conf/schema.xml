@@ -126,10 +126,12 @@
  <fieldType name="text_lowercase" class="solr.TextField">
   <analyzer type="index">
     <tokenizer class="solr.StandardTokenizerFactory"/>
+    <!--<tokenizer class="solr.KeywordTokenizerFactory"/>-->
     <filter class="solr.LowerCaseFilterFactory"/>
   </analyzer>
   <analyzer type="query">
     <tokenizer class="solr.StandardTokenizerFactory"/>
+    <!--<tokenizer class="solr.KeywordTokenizerFactory"/>-->
     <filter class="solr.LowerCaseFilterFactory"/>
   </analyzer>
  </fieldType>

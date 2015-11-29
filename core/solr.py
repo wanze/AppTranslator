@@ -101,18 +101,14 @@ class Solr:
 
 
     def query(self, core, query_params):
-        results = json.load(self._call_solr_api(core + '/select', query_params))
-        if not results['response']['numFound']:
+        try:
+            results = json.load(self._call_solr_api(core + '/select', query_params))
+            if not results['response']['numFound']:
+                return []
+            return results['response']['docs']
+        except urllib2.HTTPError as e:
+            print e.strerror
             return []
-        ret = []
-        for doc in results['response']['docs']:
-            d = {}
-            for key, value in doc.iteritems():
-                if not isinstance(value, list):
-                    continue
-                d[key] = value[0]
-            ret.append(d)
-        return ret
 
 
     def _call_solr_api(self, endpoint, params):
