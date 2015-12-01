@@ -12,6 +12,8 @@ class Solr:
     SOLR_DATA_DIR = os.path.join('solr', 'data')
     CONFIGSET_TRANSLATIONS = 'translations'
     CONFIGSET_APPS = 'apps'
+    DELIMITER_START = 'SOLR_S'
+    DELIMITER_END = 'SOLR_E'
 
     def __init__(self, dir_solr='', solr_url=''):
         """

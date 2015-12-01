@@ -1,6 +1,3 @@
-import urllib
-import urllib2
-import json
 import subprocess
 import hashlib
 import os
@@ -301,12 +298,15 @@ class LongestStubstringMatch(object):
             return result
         # Reduce string from right and try to match substrings
         tokens = self.string.split()
+        if len(tokens) == 1:
+            return self.string
         words = [tokens[-1]]
         result = ''
         while not result:
             index_last = len(words)
             string = ' '.join(tokens[0:-index_last])
-            result = self._translate_substring(string)
+            if string:
+                result = self._translate_substring(string)
             if result or index_last == len(tokens):
                 # Translate and append all single words
                 result_words = []
@@ -343,14 +343,14 @@ class LongestStubstringMatch(object):
 
 
     def _find_exact(self, string, lang):
-        params = {'q': 'value_lc:%s' % self._quote(string)}
+        params = {'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, self._quote(string), Solr.DELIMITER_END)}
         return self.solr.query(lang, params)
 
 
     @staticmethod
     def _quote(string):
         string = string.encode('utf-8')
-        return '"' + string.replace('"', '') + '"'
+        return string.replace('"', '')
 
 
 import getopt
