@@ -1,128 +1,135 @@
-<form ng-show="decoder.decoder == 'moses'" class="ui form">
-    <div class="field">
-        <h3>Moses Settings</h3>
-    </div>
-    <div class="two fields">
+<form class="ui form">
+    <div ng-show="decoder.decoder == 'moses'">
         <div class="field">
-            <label>Drop unknown words</label>
-            <select class="ui dropdown" ng-model="decoder.moses.drop_unknown">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-
-            <div class="desc">drop unknown words instead of copying them</div>
+            <h3>Moses Settings</h3>
         </div>
-        <div class="field">
-            <label>Maximum phrase length</label>
-            <input ng-model="decoder.moses.max_phrase_length" type="text">
-        </div>
-    </div>
-    <div class="two fields">
-        <div class="field">
-            <label>Search algorithm</label>
-            <input ng-model="decoder.moses.search_algorithm" type="text">
-
-            <div class="desc">0 = normal stack, 1 = cube pruning</div>
-        </div>
-        <div class="field">
-            <label>Verbose</label>
-            <input ng-model="decoder.moses.verbose" type="text">
-
-            <div class="desc">verbosity level of the debug output, 1-3</div>
-        </div>
-    </div>
-
-    <div class="two fields">
-        <div class="field">
-            <label>Stack size</label>
-            <input ng-model="decoder.moses.stack" type="text">
-
-            <div class="desc">maximum stack size for histogram pruning</div>
-        </div>
-    </div>
-
-    <div class="field">
-        <div class="ui toggle checkbox">
-            <input type="checkbox" name="example" ng-model="decoder.moses.tune_weights">
-            <label>Tune weights manually</label>
-            <div class="desc offset">If checked, you can manually set the weights of the Moses equation</div>
-        </div>
-    </div>
-
-    <div ng-show="decoder.moses.tune_weights">
-
         <div class="two fields">
             <div class="field">
-                <label>Weight distortion</label>
-                <input ng-model="decoder.moses.weight_d" type="text">
+                <label>Drop unknown words</label>
+                <select class="ui dropdown" ng-model="decoder.moses.drop_unknown">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
 
-                <div class="desc">Allows for reordering of the input sentence, but at a cost: The more
-                    reordering, the more expensive is the translation. Use [0.1-1]</div>
+                <div class="desc">drop unknown words instead of copying them</div>
             </div>
             <div class="field">
-                <label>Weight for language model</label>
-                <input ng-model="decoder.moses.weight_l" type="text">
+                <label>Maximum phrase length</label>
+                <input ng-model="decoder.moses.max_phrase_length" type="text">
+            </div>
+        </div>
+        <div class="two fields">
+            <div class="field">
+                <label>Search algorithm</label>
+                <input ng-model="decoder.moses.search_algorithm" type="text">
 
-                <div class="desc">Ensures that the output is fluent. Use [0.1;1]</div>
+                <div class="desc">0 = normal stack, 1 = cube pruning</div>
+            </div>
+            <div class="field">
+                <label>Verbose</label>
+                <input ng-model="decoder.moses.verbose" type="text">
+
+                <div class="desc">verbosity level of the debug output, 1-3</div>
             </div>
         </div>
 
         <div class="two fields">
             <div class="field">
-                <label>Weight translation table</label>
-                <input ng-model="decoder.moses.weight_t" type="text">
+                <label>Stack size</label>
+                <input ng-model="decoder.moses.stack" type="text">
 
-                <div class="desc">The table ensures that the source and target phrases
-                    are good translations of each other. Use [0.1;1]</div>
+                <div class="desc">maximum stack size for histogram pruning</div>
             </div>
-            <div class="field">
-                <label>Weight for word penalty</label>
-                <input ng-model="decoder.moses.weight_w" type="text">
+        </div>
 
-                <div class="desc">Negative values for the word penalty favor longer output, positive values favor
-                    shorter output. Use [-3;3]
+        <div class="field">
+            <div class="ui toggle checkbox">
+                <input type="checkbox" name="example" ng-model="decoder.moses.tune_weights">
+                <label>Tune weights manually</label>
+
+                <div class="desc offset">If checked, you can manually set the weights of the Moses equation</div>
+            </div>
+        </div>
+
+        <div ng-show="decoder.moses.tune_weights">
+
+            <div class="two fields">
+                <div class="field">
+                    <label>Weight distortion</label>
+                    <input ng-model="decoder.moses.weight_d" type="text">
+
+                    <div class="desc">Allows for reordering of the input sentence, but at a cost: The more
+                        reordering, the more expensive is the translation. Use [0.1-1]
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Weight for language model</label>
+                    <input ng-model="decoder.moses.weight_l" type="text">
+
+                    <div class="desc">Ensures that the output is fluent. Use [0.1;1]</div>
+                </div>
+            </div>
+
+            <div class="two fields">
+                <div class="field">
+                    <label>Weight translation table</label>
+                    <input ng-model="decoder.moses.weight_t" type="text">
+
+                    <div class="desc">The table ensures that the source and target phrases
+                        are good translations of each other. Use [0.1;1]
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Weight for word penalty</label>
+                    <input ng-model="decoder.moses.weight_w" type="text">
+
+                    <div class="desc">Negative values for the word penalty favor longer output, positive values favor
+                        shorter output. Use [-3;3]
+                    </div>
                 </div>
             </div>
         </div>
+
+    </div>
+    <div ng-show="decoder.decoder == 'lamtram'">
+        <div class="field">
+            <h3>Lamtram Settings</h3>
+        </div>
+        <div class="two fields">
+            <div class="field">
+                <label>Beam</label>
+                <input ng-model="decoder.lamtram.beam" type="text">
+
+                <div class="desc">Parameter for beam search</div>
+            </div>
+            <div class="field">
+                <label>Word Penalty</label>
+                <input ng-model="decoder.lamtram.word_pen" type="text">
+
+                <div class="desc">The word penalty can be used to increase or decrease the average length of the
+                    sentence (positive for more words)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="decoder.decoder == 'solr'" class="ui form">
+        <div class="field">
+            <h3>Solr Settings</h3>
+        </div>
+
+
+    </div>
+    <div ng-show="decoder.decoder == 'compare'" class="ui form">
+        <div class="field">
+            <h3>Comparison Settings</h3>
+        </div>
+
+
     </div>
 
     <div class="field last">
         <button ng-click="getTranslations()" class="ui big labeled icon primary button">Start Translation <i
                 class="angle right icon"></i></button>
-    </div>
-
-</form>
-
-<form ng-show="decoder.decoder == 'lamtram'" class="ui form">
-    <div class="field">
-        <h3>Lamtram Settings</h3>
-    </div>
-    <div class="two fields">
-        <div class="field">
-            <label>Beam</label>
-            <input ng-model="decoder.lamtram.beam" type="text">
-            <div class="desc">Parameter for beam search</div>
-        </div>
-        <div class="field">
-            <label>Word Penalty</label>
-            <input ng-model="decoder.lamtram.word_pen" type="text">
-            <div class="desc">The word penalty can be used to increase or decrease the average length of the sentence (positive for more words)</div>
-        </div>
-    </div>
-
-    <div class="field last">
-        <button ng-click="getTranslations()" class="ui big labeled icon primary button">Start Translation <i class="angle right icon"></i></button>
-    </div>
-
-</form>
-
-<form ng-show="decoder.decoder == 'solr'" class="ui form">
-    <div class="field">
-        <h3>Solr Settings</h3>
-    </div>
-
-    <div class="field last">
-        <button ng-click="getTranslations()" class="ui big labeled icon primary button">Start Translation <i class="angle right icon"></i></button>
     </div>
 
 </form>

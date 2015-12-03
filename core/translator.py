@@ -256,9 +256,14 @@ class TranslatorSolr(Translator):
         e = ExtractTranslationsFromXML(xml)
         strings = e.extract()
         debug = ''
-        for string in strings.values():
+        for key, string in strings.iteritems():
             t = LongestStubstringMatch(string, lang_from, lang_to, self.solr)
-            translations.append(t.get_translation())
+            row = {
+                'key': key,
+                'source': string,
+                'target': t.get_translation()
+            }
+            translations.append(row)
             debug += t.debug
         return {
             'debug': debug,
@@ -277,9 +282,6 @@ class TranslatorSolr(Translator):
             'debug': debug,
             'translations': translations
         }
-
-
-
 
 
 class LongestStubstringMatch(object):
@@ -324,7 +326,7 @@ class LongestStubstringMatch(object):
 
 
     def _translate_substring(self, string):
-        self.debug += '\n\nTranslating "%s"\n' % string
+        self.debug += 'Translating "%s"\n' % string
         self.debug += 'Try to find exact match in source langauge\n'
         results = self._find_exact(string, self.lang_from)
         for result in results:
@@ -336,9 +338,10 @@ class LongestStubstringMatch(object):
             translation = self.solr.query(self.lang_to, params)
             if len(translation):
                 t = translation[0]['value']
-                self.debug += 'Found translation "%s"' % t
+                self.debug += 'Found translation "%s"\n' % t
                 return t
         self.debug += 'No translations for target language available\n'
+        self.debug += '\n'
         return ''
 
 
@@ -353,22 +356,79 @@ class LongestStubstringMatch(object):
         return string.replace('"', '')
 
 
+class TranslatorCompare(Translator):
+    def __init__(self, config={}, decoder_settings={}):
+        self.config = config
+        self.decoder_settings = decoder_settings
+        self.solr = TranslatorSolr(config['solr_url'], decoder_settings['solr'])
+        self.moses = TranslatorMoses(config['moses'], decoder_settings['moses'])
+        self.lamtram = TranslatorLamtram(config['lamtram'], decoder_settings['lamtram'])
+
+    def get_all(self, string, lang_from, lang_to):
+        pass
+
+    def translate_xml(self, xml, lang_from, lang_to):
+        translations = []
+        e = ExtractTranslationsFromXML(xml)
+        strings = e.extract()
+        for key, string in strings.iteritems():
+            result_moses = self.moses.get([string], lang_from, lang_to)
+            result_lamtram = self.lamtram.get([string], lang_from, lang_to)
+            result_solr = self.solr.get([string], lang_from, lang_to)
+            results = {
+                'key': key,
+                'source': string,
+                'target_moses': result_moses['translations'][0],
+                'target_lamtram': result_lamtram['translations'][0],
+                'target_solr': result_solr['translations'][0]
+            }
+            translations.append(results)
+        return {
+            'debug': '',
+            'translations': translations
+        }
+
+
+    def get(self, strings, lang_from, lang_to):
+        translations = []
+        for string in strings:
+            result_moses = self.moses.get([string], lang_from, lang_to)
+            result_lamtram = self.lamtram.get([string], lang_from, lang_to)
+            result_solr = self.solr.get([string], lang_from, lang_to)
+            results = {
+                'source': string,
+                'target_moses': result_moses['translations'][0],
+                'target_lamtram': result_lamtram['translations'][0],
+                'target_solr': result_solr['translations'][0]
+            }
+            translations.append(results)
+        return {
+            'debug': '',
+            'translations': translations
+        }
+
+
+
 import getopt
 import sys
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 's:t:', ['string=', 'target='])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target=', 'soruce='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
 
-    string = ''
-    target = 'de'
+    input = ''
+    source = 'en'
+    target = 'fr'
     for opt, arg in opts:
-        if opt in ('-s', '--string'):
-            string = arg
+        if opt in ('-s', '--source'):
+            source = arg
         if opt in ('-t', '--target'):
             target = arg
+        if opt in ('-i', '--input'):
+            input = arg
 
     trans = TranslatorSolr()
-    print trans.get([string], 'en', target)
+    result = trans.get([input], source, target)
+    print result[0]

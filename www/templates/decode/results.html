@@ -15,34 +15,15 @@
         <a class="item" data-tab="debug">Debug</a>
     </div>
     <div class="ui tab active" data-tab="translations">
-        <table ng-if="input.translationMode == 'string'" class="ui celled striped fixed table">
+        <table class="ui celled striped fixed table">
             <thead>
             <tr>
-                <th>Input string</th>
-                <th>Translation</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="translation in results.translations">
-                <td>{{input.strings[$index]}}</td>
-                <td ng-bind-html="translation"></td>
-            </tr>
-            </tbody>
-        </table>
-
-        <table ng-if="input.translationMode == 'xml'" class="ui celled striped fixed table">
-            <thead>
-            <tr>
-                <th>Key</th>
-                <th>Source</th>
-                <th>Translation</th>
+                <th ng-repeat="column in results.columns">{{column}}</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="row in results.translations">
-                <td>{{row.key}}</td>
-                <td>{{row.source}}</td>
-                <td ng-bind-html="row.target"></td>
+                <td ng-repeat="column in row track by $index" ng-bind-html="column">{{column}}</td>
             </tr>
             </tbody>
         </table>

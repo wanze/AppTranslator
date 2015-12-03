@@ -84,6 +84,14 @@
                 <label for="solr">Solr</label>
             </div>
         </div>
+        <div class="field">
+            <div class="ui radio checkbox">
+
+                <input id="compare" type="radio" name="decoder" class="hidden" value="compare"
+                       ng-model="decoder.decoder">
+                <label for="compare">Compare results of all decoders</label>
+            </div>
+        </div>
     </div>
     <div class="field last">
         <button ng-click="changeStep(2)" class="ui primary button">Decoder Options <i class="angle right icon"></i>

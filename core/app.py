@@ -16,7 +16,8 @@ class AppTranslator:
         'port': 5000,
         'moses': '/home/vagrant/mosesdecoder',
         'lamtram': '/home/vagrant/lamtram',
-        'solr': '/home/vagrant/solr'
+        'solr': '/home/vagrant/solr',
+        'solr_url': 'http://localhost:8983',
     }
 
     def __init__(self, config):
@@ -79,7 +80,9 @@ class AppTranslator:
         elif type == 'lamtram':
             return translator.TranslatorLamtram(self.config['lamtram'], settings)
         elif type == 'solr':
-            return translator.TranslatorSolr()
+            return translator.TranslatorSolr(self.config['solr_url'], settings)
+        elif type == 'compare':
+            return translator.TranslatorCompare(self.config, settings)
 
     def run(self):
         self.app.run(host='0.0.0.0', port=self.config['port'], debug=self.config['debug'])

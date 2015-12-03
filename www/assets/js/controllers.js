@@ -51,7 +51,8 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
         lamtram: {
             word_pen: 0.0,
             beam: 5
-        }
+        },
+        compare: {},
     };
 
     $scope.langs = {
@@ -67,7 +68,8 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
 
     $scope.results = {
         translations: [],
-        debug: ''
+        debug: '',
+        columns: []
     };
 
     $scope.steps = {
@@ -122,11 +124,13 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
     $scope.getTranslations = function () {
         $scope.state.isLoading = true;
         $scope.state.loaded = false;
+        var decoder = $scope.decoder.decoder;
+        var settings = (decoder == 'compare') ? $scope.decoder : $scope.decoder[decoder]
         var data = {
             'lang_from': $scope.langs.source,
             'lang_to': $scope.langs.target,
             'decoder': $scope.decoder.decoder,
-            'decoder_settings': $scope.decoder[$scope.decoder.decoder]
+            'decoder_settings': settings
         };
         var endpoint = '';
         if ($scope.input.translationMode == 'xml') {
@@ -140,18 +144,37 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
         $http.post(endpoint, data).then(function (response) {
             console.log(response);
             $scope.results.translations = []
+            var columns = ['Input', 'Output']
+            var decoders = ['Output Moses', 'Output Lamtram', 'Output Solr'];
+            if ($scope.input.translationMode == 'string' && $scope.decoder.decoder == 'compare') {
+                columns = ['Input'].concat(decoders)
+            } else if ($scope.input.translationMode == 'xml') {
+                columns = ['Key', 'Source'];
+                if ($scope.decoder.decoder == 'compare') {
+                    columns = columns.concat(decoders);
+                } else {
+                    columns = columns.concat(['Output']);
+                }
+            }
+            $scope.results.columns = columns;
+            var sorting = {'key': 0, 'source': 1, 'target': 2, 'target_moses': 3, 'target_lamtram' : 4, 'target_solr' : 5};
             for (var i = 0; i < response.data.translations.length; i++) {
                 var translation = response.data.translations[i];
                 if (typeof translation == 'string') {
-                    $scope.results.translations.push($sce.trustAsHtml(translation));
+                    var row = [$sce.trustAsHtml($scope.input.strings[i]), $sce.trustAsHtml(translation)]
+                    $scope.results.translations.push(row);
                 } else if (typeof translation == 'object') {
-                    var escapedObject = {};
+                    var row = [];
                     for (var key in translation) {
-                        escapedObject[key] = $sce.trustAsHtml(translation[key])
+                        var sort = sorting[key];
+                        var value = translation[key] || '&nbsp;';
+                        row[sort] = $sce.trustAsHtml(value);
                     }
-                    $scope.results.translations.push(escapedObject);
+                    // row.filter -> shortest way to re-index array
+                    $scope.results.translations.push(row.filter(function(val) {return val;}));
                 }
             }
+            console.log($scope.results);
             var debug = JSON.stringify(response.data.debug);
             debug = debug.replace(/\\n/g, '&#13;&#10;');
             debug = debug.replace(/\\t/g, '    ');
