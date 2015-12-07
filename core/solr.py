@@ -3,9 +3,7 @@ import xml.etree.ElementTree as ElementTree
 import urllib2
 import urllib
 import subprocess
-import time
 import json
-
 
 class Solr:
 
@@ -101,6 +99,21 @@ class Solr:
             i += 1
         return terms
 
+    def get_term_variations(self, lang, term):
+        if not self.exists_core(lang):
+            raise Exception("Core '" + lang + "' does not exist")
+        term = term.lower()
+        keys = self.query(lang, {'q': 'value_lc:"%s %s %s"' % (self.DELIMITER_START, term, self.DELIMITER_END)})
+        unique = []
+        for k in keys:
+            key = k['key']
+            values = self.query(lang, {'q': 'key:%s' % key})
+            for v in values:
+                value = v['value'].lower()
+                if value not in unique and value != term:
+                    unique.append(value)
+        return unique
+
 
     def query(self, core, query_params):
         try:
@@ -109,7 +122,6 @@ class Solr:
                 return []
             return results['response']['docs']
         except urllib2.HTTPError as e:
-            print e.strerror
             return []
 
 

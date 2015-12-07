@@ -15,7 +15,7 @@
 
         <div class="ui secondary pointing menu">
             <a class="item active" data-tab="top-terms">Top Terms</a>
-            <a class="item" data-tab="apps">Apps</a>
+            <a class="item" data-tab="term-variations">Term Variations</a>
         </div>
 
         <div class="ui tab active" data-tab="top-terms">
@@ -28,12 +28,13 @@
                         </select>
                     </div>
                     <div class="field">
-                        <button class="ui icon primary button" ng-click="getTopTerms()">Load <i class="angle right icon"></i></button>
+                        <button class="ui icon primary button" ng-click="getTopTerms()">Load <i
+                                class="angle right icon"></i></button>
                     </div>
                 </div>
                 <div class="two fields">
                     <div class="field">
-                        <table class="ui celled striped fixed table" ng-show="state.loaded">
+                        <table class="ui celled striped fixed table" ng-show="top_terms.terms.length">
                             <thead>
                             <tr>
                                 <th>Term</th>
@@ -55,6 +56,43 @@
             </form>
 
         </div>
+
+        <div class="ui tab" data-tab="term-variations">
+            <form class="ui form">
+                <div class="two fields">
+                    <div class="field">
+                        <label>Language</label>
+                        <select name="lang" class="ui dropdown" ng-model="term_variations.lang">
+                            <option ng-repeat="language in languages" value="{{language.code}}">{{language.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Term</label>
+                        <input type="text" name="term" ng-model="term_variations.term">
+                    </div>
+                </div>
+                <div class="two fields">
+                    <div class="field">
+                        <button class="ui icon primary button" ng-click="getTermVariations()">Show Terms <i
+                                class="angle right icon"></i></button>
+                    </div>
+                </div>
+            </form>
+            <table class="ui celled striped fixed table" ng-show="term_variations.variations.length">
+                <thead>
+                <tr>
+                    <th>Variation</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="variation in term_variations.variations">
+                    <td>{{variation}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
 
     </div>
 

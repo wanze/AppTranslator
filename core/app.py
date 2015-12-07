@@ -72,6 +72,15 @@ class AppTranslator:
             lang = request.args.get('lang')
             s = solr.Solr(self.config['solr'])
             terms = s.get_top_terms(lang, 100)
+            print terms
+            return Response(json.dumps(terms), mimetype='application/json')
+
+        @self.app.route('/getTermVariations')
+        def get_term_variations():
+            lang = request.args.get('lang')
+            term = request.args.get('term')
+            s = solr.Solr(self.config['solr'], self.config['solr_url'])
+            terms = s.get_term_variations(lang, term)
             return Response(json.dumps(terms), mimetype='application/json')
 
     def _get_decoder(self, type, settings):

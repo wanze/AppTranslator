@@ -195,9 +195,17 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
  */
 app.controller('DataAnalysisController', function ($scope, config, $http) {
 
+    $('.secondary.pointing.menu .item').tab();
+
     $scope.top_terms = {
         'lang': 'en',
         'terms': [],
+    };
+
+    $scope.term_variations = {
+        'lang': 'en',
+        'term': '',
+        'variations': []
     };
 
     $scope.state = {
@@ -230,6 +238,24 @@ app.controller('DataAnalysisController', function ($scope, config, $http) {
         }
         var ctx = document.getElementById("top-terms-chart").getContext("2d");
         var chart = new Chart(ctx).Line(data);
+    };
+
+
+    $scope.getTermVariations = function() {
+        $scope.state.isLoading = true;
+        var url = config.url + 'getTermVariations';
+        var conf = {
+            params: {
+                'lang': $scope.term_variations.lang,
+                'term': $scope.term_variations.term
+            }
+        };
+        $http.get(url, conf).then(function (response) {
+            console.log(response);
+            $scope.state.isLoading = false;
+            $scope.state.loaded = true;
+            $scope.term_variations.variations = response.data;
+        });
     };
 
     $scope.getTopTerms = function() {
