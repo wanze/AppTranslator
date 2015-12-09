@@ -44,7 +44,7 @@
 
         <div class="field">
             <div class="ui toggle checkbox">
-                <input type="checkbox" name="example" ng-model="decoder.moses.tune_weights">
+                <input type="checkbox" name="moses_tune_weights" ng-model="decoder.moses.tune_weights">
                 <label>Tune weights manually</label>
 
                 <div class="desc offset">If checked, you can manually set the weights of the Moses equation</div>
@@ -115,6 +115,24 @@
     <div ng-show="decoder.decoder == 'solr'" class="ui form">
         <div class="field">
             <h3>Solr Settings</h3>
+        </div>
+        <div class="two fields">
+            <div class="field">
+                <label>Rows</label>
+                <input ng-model="decoder.solr.rows" type="text">
+
+                <div class="desc">Max. number of rows returned by Solr when searching for a translation</div>
+            </div>
+            <div class="field">
+            </div>
+        </div>
+        <div class="field">
+            <div class="ui checkbox">
+                <input type="checkbox" id="solr_debug" name="solr_debug" ng-model="decoder.solr.detailed_debug">
+                <label>Detailed Debug Output</label>
+                <div class="desc">Include all possible translation candidates in the debug output</div>
+            </div>
+
         </div>
 
 

@@ -244,8 +244,15 @@ class TranslatorLamtram(Translator):
 
 
 class TranslatorSolr(Translator):
+
+    DEFAULT_CONFIG = {
+        'rows': 20,  # Number of rows returned from search result
+        'detailed_debug': False  # True to include all found translations in debug
+    }
+
     def __init__(self, url='http://localhost:8983', config={}):
-        self.config = config
+        self.config = self.DEFAULT_CONFIG.copy()
+        self.config.update(config)
         self.solr = Solr('', url)
 
     def get_all(self, string, lang_from, lang_to):
@@ -275,7 +282,7 @@ class TranslatorSolr(Translator):
         translations = []
         debug = ''
         for string in strings:
-            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr)
+            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr, self.config)
             translations.append(t.get_translation())
             debug += t.debug
         return {
@@ -286,7 +293,8 @@ class TranslatorSolr(Translator):
 
 class LongestStubstringMatch(object):
 
-    def __init__(self, string, lang_from, lang_to, solr):
+    def __init__(self, string, lang_from, lang_to, solr, config):
+        self.config = config
         self.solr = solr
         self.string = string
         self.debug = ''
@@ -327,33 +335,44 @@ class LongestStubstringMatch(object):
 
     def _translate_substring(self, string):
         self.debug += 'Translating "%s"\n' % string
-        self.debug += 'Try to find exact match in source langauge\n'
         results = self._find_exact(string, self.lang_from)
-        for result in results:
+        self.debug += 'Found a total of %s translations matching the source string\n' % results['numFound']
+        variations = []
+        for result in results['docs']:
             params = {
                 'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
             }
-            self.debug += 'Found exact match for app_id=%s, key=%s\n' % (result['app_id'], result['key'])
+            self.debug += 'Looking for a translation in target language -> app_id=%s, key=%s' % (result['app_id'], result['key'])
             # Search for a translation with same app_id and key in target language
-            translation = self.solr.query(self.lang_to, params)
-            if len(translation):
-                t = translation[0]['value']
-                self.debug += 'Found translation "%s"\n' % t
-                return t
-        self.debug += 'No translations for target language available\n'
+            translations = self.solr.query(self.lang_to, params)
+            if translations['numFound']:
+                t = translations['docs'][0]['value']
+                if not self.config['detailed_debug']:
+                    self.debug += '\nFound translation "%s"\n\n' % t
+                    return t
+                else:
+                    variations.append(t)
+                    self.debug += ' -> Found translation "%s"\n' % t
+            else:
+                self.debug += ' -> no translation available\n'
+        if self.config['detailed_debug']:
+            t = variations[0]
+            unique = list(set(variations))
+            self.debug += 'Variations (%s):\n' % str(len(unique))
+            self.debug += '\t' + '\n\t'.join(unique) + '\n'
+            self.debug += '\n'
+            return t
+        self.debug += 'No translations available for target language\n'
         self.debug += '\n'
         return ''
 
 
     def _find_exact(self, string, lang):
-        params = {'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, self._quote(string), Solr.DELIMITER_END)}
+        params = {
+            'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, string.encode('utf-8'), Solr.DELIMITER_END),
+            'rows': self.config['rows']
+        }
         return self.solr.query(lang, params)
-
-
-    @staticmethod
-    def _quote(string):
-        string = string.encode('utf-8')
-        return string.replace('"', '')
 
 
 class TranslatorCompare(Translator):

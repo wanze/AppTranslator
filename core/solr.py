@@ -105,10 +105,10 @@ class Solr:
         term = term.lower()
         keys = self.query(lang, {'q': 'value_lc:"%s %s %s"' % (self.DELIMITER_START, term, self.DELIMITER_END)})
         unique = []
-        for k in keys:
+        for k in keys['docs']:
             key = k['key']
             values = self.query(lang, {'q': 'key:%s' % key})
-            for v in values:
+            for v in values['docs']:
                 value = v['value'].lower()
                 if value not in unique and value != term:
                     unique.append(value)
@@ -118,11 +118,14 @@ class Solr:
     def query(self, core, query_params):
         try:
             results = json.load(self._call_solr_api(core + '/select', query_params))
-            if not results['response']['numFound']:
-                return []
-            return results['response']['docs']
+            results['response']['error'] = False
+            return results['response']
         except urllib2.HTTPError as e:
-            return []
+            return {
+                'numFound': 0,
+                'docs': [],
+                'error': e.strerror
+            }
 
 
     def _call_solr_api(self, endpoint, params):
@@ -131,6 +134,7 @@ class Solr:
         params   -- Dictionary of additional params to send
         """
         params['wt'] = 'json'
+        # print self.solr_url + '/solr/' + endpoint + '?' + urllib.urlencode(params)
         return urllib2.urlopen(self.solr_url + '/solr/' + endpoint + '?' + urllib.urlencode(params))
 
 

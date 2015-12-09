@@ -47,7 +47,10 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             weight_t: '0.2 0.2 0.2 0.2',
             weight_w: '-1'
         },
-        solr: {},
+        solr: {
+            rows: 20,
+            detailed_debug: 0
+        },
         lamtram: {
             word_pen: 0.0,
             beam: 5
@@ -175,7 +178,7 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
                 }
             }
             console.log($scope.results);
-            var debug = JSON.stringify(response.data.debug);
+            var debug = response.data.debug;
             debug = debug.replace(/\\n/g, '&#13;&#10;');
             debug = debug.replace(/\\t/g, '    ');
             $scope.results.debug = $sce.trustAsHtml(debug);
