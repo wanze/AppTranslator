@@ -45,13 +45,13 @@ class Translator(object):
 
     @staticmethod
     def _get_temp_filename(string, lang_from, lang_to):
-        return hashlib.md5(''.join([string, lang_from, lang_to])).hexdigest()
+        return hashlib.md5(''.join([Translator._to_ascii(string), lang_from, lang_to])).hexdigest()
 
     @staticmethod
     def _write_translations_to_file(translations, filename):
         f = open(filename, 'w')
         for value in translations:
-            f.write(value + '\n')
+            f.write(Translator._to_utf8(value) + '\n')
         f.close()
 
     @staticmethod
@@ -62,7 +62,17 @@ class Translator(object):
         os.remove(filename)
         return translations
 
+    @staticmethod
+    def _to_utf8(string):
+        if isinstance(string, unicode):
+            return string.encode('utf-8')
+        return string
 
+    @staticmethod
+    def _to_ascii(string):
+        if isinstance(string, unicode):
+            return string.encode('ascii', 'replace')
+        return string
 
 class TranslatorMoses(Translator):
 
@@ -264,7 +274,7 @@ class TranslatorSolr(Translator):
         strings = e.extract()
         debug = ''
         for key, string in strings.iteritems():
-            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr)
+            t = LongestSubstringMatch(string, lang_from, lang_to, self.solr)
             row = {
                 'key': key,
                 'source': string,
@@ -282,7 +292,7 @@ class TranslatorSolr(Translator):
         translations = []
         debug = ''
         for string in strings:
-            t = LongestStubstringMatch(string, lang_from, lang_to, self.solr, self.config)
+            t = LongestSubstringMatch(self._to_utf8(string), lang_from, lang_to, self.solr, self.config)
             translations.append(t.get_translation())
             debug += t.debug
         return {
@@ -291,7 +301,7 @@ class TranslatorSolr(Translator):
         }
 
 
-class LongestStubstringMatch(object):
+class LongestSubstringMatch(object):
 
     def __init__(self, string, lang_from, lang_to, solr, config):
         self.config = config
@@ -326,7 +336,7 @@ class LongestStubstringMatch(object):
                         result_words.append(w)
                     else:
                         result_words.append(word)
-                result += ' '.join(result_words)
+                result = result + ' ' + ' '.join(result_words)
             else:
                 index_last += 1
                 words.append(tokens[-index_last])
@@ -367,7 +377,7 @@ class LongestStubstringMatch(object):
 
     def _find_exact(self, string, lang):
         params = {
-            'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, string.encode('utf-8'), Solr.DELIMITER_END),
+            'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, string, Solr.DELIMITER_END),
             'rows': self.config['rows']
         }
         return self.solr.query(lang, params)
@@ -430,22 +440,32 @@ import getopt
 import sys
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target=', 'source='])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target_lang=', 'source_lang='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
 
     input = ''
-    source = 'en'
-    target = 'fr'
+    source_lang = 'en'
+    target_lang = 'fr'
     for opt, arg in opts:
-        if opt in ('-s', '--source'):
-            source = arg
-        if opt in ('-t', '--target'):
-            target = arg
+        if opt in ('-s', '--source_lang'):
+            source_lang = arg
+        if opt in ('-t', '--target_lang'):
+            target_lang = arg
         if opt in ('-i', '--input'):
             input = arg
 
     trans = TranslatorSolr()
-    result = trans.get([input], source, target)
-    print result['translations'][0].encode('utf-8')
+    if os.path.isfile(input):
+        with open(input) as f:
+            i = 0
+            for string in f:
+                result = trans.get([string], source_lang, target_lang)
+                print result['translations'][0]
+                if i % 100 == 0:
+                    sys.stderr.write('Translated %s strings so far...\n' % str(i))
+                i += 1
+    else:
+        result = trans.get([input], source_lang, target_lang)
+        print result['translations'][0]
