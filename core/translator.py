@@ -355,15 +355,13 @@ class LongestStubstringMatch(object):
                     self.debug += ' -> Found translation "%s"\n' % t
             else:
                 self.debug += ' -> no translation available\n'
-        if self.config['detailed_debug']:
+        if self.config['detailed_debug'] and len(variations):
             t = variations[0]
             unique = list(set(variations))
             self.debug += 'Variations (%s):\n' % str(len(unique))
-            self.debug += '\t' + '\n\t'.join(unique) + '\n'
-            self.debug += '\n'
+            self.debug += '\t' + '\n\t'.join(unique) + '\n\n'
             return t
-        self.debug += 'No translations available for target language\n'
-        self.debug += '\n'
+        self.debug += 'No translations available for target language\n\n'
         return ''
 
 
@@ -432,7 +430,7 @@ import getopt
 import sys
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target=', 'soruce='])
+        opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target=', 'source='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -450,4 +448,4 @@ if __name__ == "__main__":
 
     trans = TranslatorSolr()
     result = trans.get([input], source, target)
-    print result[0]
+    print result['translations'][0].encode('utf-8')
