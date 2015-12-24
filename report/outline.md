@@ -1,7 +1,7 @@
 # Introduction
-Basic introduction to this thesis and the idea.
+Basic introduction to the problem of machine translation, advent of the mobile apps, untapped translation resources, and the current idea of utilizing them for targeted translations for mobile apps (the story).
 
-# PART I: PROBLEM
+# PROBLEM: 
 
 ## Automatic translation of android apps
 Describe the problem in detail
@@ -9,16 +9,15 @@ Describe the problem in detail
 ## Android apps and internationalization
 Overview how i18n is handled in android apps.
 
-# PART II: SOLUTION
+# SOLUTION
 
-## Collect apps and extract translations
+## Data collection: Collect apps and extract translations
 How to extract and preprocess translations from APK files.
+Some statistics here on how much data was collected in different dimentions (number of apps, translations, languages, etc.)
+(top terms?)
 
-## Store translation data (Solr)
+## Data storage and access (Solr)
 Some words about the storage engine and the strategy how we stored translations.
-
-## Statistics about data
-Show some statistics: apps, top terms, languages etc. --> Does this belong to the appendix?
 
 ## Statistical Machine translation
 Short introduction to statistical MT
@@ -33,12 +32,12 @@ How MT with neural networks works --> Lamtram, TensorFlow
 Describe how the developed application (frontend & backend) works.
 
 ### Backend
-Describe architecture and implemented decoders. TODO: One sub-chapter per decoder?
+Describe architecture and implemented decoders. TODO: One sub-chapter per decoder? (what is a decoder - let's discuss)
 
 ### Frontend
 Describe Frontend for the app with AngularJS
 
-# PART III: VALIDATION
+# PART III: EVALUATION
 
 ## Comparing results of the different decoders
 What kind of translations work well on which decoder?
