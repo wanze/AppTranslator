@@ -76,10 +76,11 @@ class AppTranslator:
 
         @self.app.route('/getTermVariations')
         def get_term_variations():
-            lang = request.args.get('lang')
+            source = request.args.get('source')
+            target = request.args.get('target')
             term = request.args.get('term')
             s = solr.Solr(self.config['solr'], self.config['solr_url'])
-            terms = s.get_term_variations(lang, term)
+            terms = s.get_term_variations(source, target, term)
             return Response(json.dumps(terms), mimetype='application/json')
 
     def _get_decoder(self, type, settings):

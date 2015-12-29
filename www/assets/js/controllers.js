@@ -206,7 +206,8 @@ app.controller('DataAnalysisController', function ($scope, config, $http) {
     };
 
     $scope.term_variations = {
-        'lang': 'en',
+        'source': 'en',
+        'target': 'fr',
         'term': '',
         'variations': []
     };
@@ -249,7 +250,8 @@ app.controller('DataAnalysisController', function ($scope, config, $http) {
         var url = config.url + 'getTermVariations';
         var conf = {
             params: {
-                'lang': $scope.term_variations.lang,
+                'source': $scope.term_variations.source,
+                'target': $scope.term_variations.target,
                 'term': $scope.term_variations.term
             }
         };

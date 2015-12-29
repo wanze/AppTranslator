@@ -4,6 +4,8 @@ import urllib2
 import urllib
 import subprocess
 import json
+import operator
+import translator
 
 class Solr:
 
@@ -99,21 +101,31 @@ class Solr:
             i += 1
         return terms
 
-    def get_term_variations(self, lang, term):
-        if not self.exists_core(lang):
-            raise Exception("Core '" + lang + "' does not exist")
-        term = term.lower()
-        keys = self.query(lang, {'q': 'value_lc:"%s %s %s"' % (self.DELIMITER_START, term, self.DELIMITER_END)})
-        unique = []
-        for k in keys['docs']:
-            key = k['key']
-            values = self.query(lang, {'q': 'key:%s' % key})
-            for v in values['docs']:
-                value = v['value'].lower()
-                if value not in unique and value != term:
-                    unique.append(value)
-        return unique
-
+    def get_term_variations(self, lang_from, lang_to, term, max_rows=100):
+        term = translator.Translator.to_utf8(term.lower())
+        params = {
+            'q': 'value_lc:"%s %s %s"' % (self.DELIMITER_START, term, self.DELIMITER_END),
+            'rows': max_rows
+        }
+        results = self.query(lang_from, params)
+        counts = {}
+        for result in results['docs']:
+            params = {
+                'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
+            }
+            translation = self.query(lang_to, params)
+            if translation['numFound']:
+                value = translation['docs'][0]['value']
+                counts[value] = 1 if value not in counts else counts[value] + 1
+        # Sort dict by counts
+        counts_sorted = sorted(counts.items(), key=operator.itemgetter(1), reverse=True)
+        variations = []
+        for item in counts_sorted:
+            variations.append({
+                'term': item[0],
+                'count': item[1]
+            })
+        return variations
 
     def query(self, core, query_params):
         try:

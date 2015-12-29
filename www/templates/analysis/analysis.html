@@ -61,20 +61,27 @@
             <form class="ui form">
                 <div class="two fields">
                     <div class="field">
-                        <label>Language</label>
-                        <select name="lang" class="ui dropdown" ng-model="term_variations.lang">
+                        <label>Source</label>
+                        <select name="lang" class="ui dropdown" ng-model="term_variations.source">
                             <option ng-repeat="language in languages" value="{{language.code}}">{{language.name}}
                             </option>
                         </select>
                     </div>
                     <div class="field">
-                        <label>Term</label>
-                        <input type="text" name="term" ng-model="term_variations.term">
+                        <label>Target</label>
+                        <select name="lang" class="ui dropdown" ng-model="term_variations.target">
+                            <option ng-repeat="language in languages" value="{{language.code}}">{{language.name}}
+                            </option>
+                        </select>
                     </div>
                 </div>
-                <div class="two fields">
+                <div class="field">
+                    <label>Term</label>
+                    <input type="text" name="term" ng-model="term_variations.term">
+                </div>
+                <div class="fields">
                     <div class="field">
-                        <button class="ui icon primary button" ng-click="getTermVariations()">Show Terms <i
+                        <button class="ui icon primary button" ng-click="getTermVariations()">Show Variations <i
                                 class="angle right icon"></i></button>
                     </div>
                 </div>
@@ -82,12 +89,14 @@
             <table class="ui celled striped fixed table" ng-show="term_variations.variations.length">
                 <thead>
                 <tr>
-                    <th>Variation</th>
+                    <th>Term</th>
+                    <th>Count</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="variation in term_variations.variations">
-                    <td>{{variation}}</td>
+                    <td>{{variation.term}}</td>
+                    <td>{{variation.count}}</td>
                 </tr>
                 </tbody>
             </table>
