@@ -131,10 +131,12 @@ def create_model(session, forward_only):
     model_dir = os.path.join(_get_base_output_dir(), 'model')
     ckpt = tf.train.get_checkpoint_state(model_dir)
     if ckpt and gfile.Exists(ckpt.model_checkpoint_path):
-        print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+        if not forward_only:
+            print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
         model.saver.restore(session, ckpt.model_checkpoint_path)
     else:
-        print("Created model with fresh parameters.")
+        if not forward_only:
+            print("Created model with fresh parameters.")
         session.run(tf.initialize_all_variables())
     return model
 

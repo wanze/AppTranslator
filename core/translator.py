@@ -458,6 +458,7 @@ class TranslatorCompare(Translator):
         self.solr = TranslatorSolr(config['solr_url'], decoder_settings['solr'])
         self.moses = TranslatorMoses(config['moses'], decoder_settings['moses'])
         self.lamtram = TranslatorLamtram(config['lamtram'], decoder_settings['lamtram'])
+        self.tensorflow = TranslatorTensorflow(decoder_settings['tensorflow'])
 
     def get_all(self, string, lang_from, lang_to):
         pass
@@ -470,12 +471,14 @@ class TranslatorCompare(Translator):
             result_moses = self.moses.get([string], lang_from, lang_to)
             result_lamtram = self.lamtram.get([string], lang_from, lang_to)
             result_solr = self.solr.get([string], lang_from, lang_to)
+            result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
             results = {
                 'key': key,
                 'source': string,
                 'target_moses': result_moses['translations'][0],
                 'target_lamtram': result_lamtram['translations'][0],
-                'target_solr': result_solr['translations'][0]
+                'target_solr': result_solr['translations'][0],
+                'target_tensorflow': result_tensorflow['translations'][0]
             }
             translations.append(results)
         return {
@@ -490,10 +493,12 @@ class TranslatorCompare(Translator):
             result_moses = self.moses.get([string], lang_from, lang_to)
             result_lamtram = self.lamtram.get([string], lang_from, lang_to)
             result_solr = self.solr.get([string], lang_from, lang_to)
+            result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
             results = {
                 'source': string,
                 'target_moses': result_moses['translations'][0],
                 'target_lamtram': result_lamtram['translations'][0],
+                'target_tensorflow': result_tensorflow['translations'][0],
                 'target_solr': result_solr['translations'][0]
             }
             translations.append(results)
