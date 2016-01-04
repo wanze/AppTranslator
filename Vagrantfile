@@ -10,9 +10,17 @@ Vagrant.configure(2) do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
+  config.vm.define "32bit" do |m1|
+    m1.vm.box = "hashicorp/precise32"
+  end
+
+  config.vm.define "64bit" do |m2|
+    m2.vm.box = "ubuntu/trusty64"
+  end
+
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "hashicorp/precise32"
+  # config.vm.box = "hashicorp/precise32"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -44,13 +52,13 @@ Vagrant.configure(2) do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
+  config.vm.provider "virtualbox" do |vb|
   #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #
   #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
+      vb.memory = "2048"
+  end
   #
   # View the documentation for the provider you are using for more
   # information on available options.

@@ -87,6 +87,14 @@
         <div class="field">
             <div class="ui radio checkbox">
 
+                <input id="tensorflow" type="radio" name="decoder" class="hidden" value="tensorflow"
+                       ng-model="decoder.decoder">
+                <label for="tensorflow">Tensorflow</label>
+            </div>
+        </div>
+        <div class="field">
+            <div class="ui radio checkbox">
+
                 <input id="compare" type="radio" name="decoder" class="hidden" value="compare"
                        ng-model="decoder.decoder">
                 <label for="compare">Compare results of all decoders</label>

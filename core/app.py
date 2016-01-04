@@ -90,6 +90,8 @@ class AppTranslator:
             return translator.TranslatorLamtram(self.config['lamtram'], settings)
         elif type == 'solr':
             return translator.TranslatorSolr(self.config['solr_url'], settings)
+        elif type == 'tensorflow':
+            return translator.TranslatorTensorflow(settings)
         elif type == 'compare':
             return translator.TranslatorCompare(self.config, settings)
 

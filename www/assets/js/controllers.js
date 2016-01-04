@@ -55,6 +55,10 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             word_pen: 0.0,
             beam: 5
         },
+        tensorflow: {
+            num_layers: 2,
+            size: 256
+        },
         compare: {},
     };
 

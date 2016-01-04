@@ -7,8 +7,6 @@ from solr import Solr
 
 class Translator(object):
 
-
-
     def get(self, strings, lang_from, lang_to):
         """
         Return the best translation for the given strings
@@ -203,7 +201,7 @@ class TranslatorLamtram(Translator):
         e = ExtractTranslationsFromXML(xml)
         translations = e.extract()
         # Write a file with one translation per line that can be processed by Lamtram
-        filename_input = os.path.join(self.dir_temp, self.get_temp_filename(xml + 'in', lang_from, lang_to))
+        filename_input = os.path.join(self.dir_temp, self._get_temp_filename(xml + 'in', lang_from, lang_to))
         self._write_translations_to_file(translations.values(), filename_input)
         cmd = self._get_command(lang_from, lang_to, filename_input)
         result = subprocess.check_output(cmd, shell=True)
@@ -230,7 +228,7 @@ class TranslatorLamtram(Translator):
     def get(self, strings, lang_from, lang_to):
         hash = ''.join(strings)
         file_in = os.path.join(self.dir_temp, self._get_temp_filename(hash, lang_from, lang_to))
-        file_out = os.path.join(self._get_temp_filename(hash + 'out', lang_from, lang_to))
+        file_out = os.path.join(self.dir_temp, self._get_temp_filename(hash + 'out', lang_from, lang_to))
         self._write_translations_to_file(strings, file_in)
         cmd = self._get_command(lang_from, lang_to, file_in, file_out)
         subprocess.check_output(cmd, shell=True)
@@ -249,8 +247,76 @@ class TranslatorLamtram(Translator):
         cmd = cmd + ' 2> ' + file_debug if file_debug else cmd
         return cmd
 
-    def get_temp_filename(self, string, lang_from, lang_to):
-        return self.dir_temp + hashlib.md5(''.join([string, lang_from, lang_to])).hexdigest()
+
+
+class TranslatorTensorflow(Translator):
+
+    DEFAULT_CONFIG = {
+        'num_layers': 2,
+        'size': 256,
+    }
+
+    def __init__(self, config={}):
+        self.config = self.DEFAULT_CONFIG.copy()
+        self.config.update(config)
+        dir_data = os.path.dirname(os.path.realpath(__file__)) + '/../data/'
+        self.dir_models = dir_data + 'tensorflow/'
+        self.dir_temp = dir_data + 'temp/tensorflow/'
+        if not os.path.isdir(self.dir_temp):
+            os.makedirs(self.dir_temp)
+
+    def translate_xml(self, xml, lang_from, lang_to):
+        e = ExtractTranslationsFromXML(xml)
+        translations = e.extract()
+        # Write a file with one translation per line that can be processed by Lamtram
+        filename_input = os.path.join(self.dir_temp, self._get_temp_filename(xml + 'in', lang_from, lang_to))
+        self._write_translations_to_file(translations.values(), filename_input)
+        cmd = self._get_command(lang_from, lang_to, filename_input)
+        result = subprocess.check_output(cmd, shell=True)
+        os.remove(filename_input)
+        out = []
+        i = 0
+        trans = result.split('\n')
+        for key, value in translations.iteritems():
+            row = {
+                'key': key,
+                'source': value,
+                'target': trans[i].strip()
+            }
+            out.append(row)
+            i += 1
+        return {
+            'translations': out,
+            'debug': ''
+        }
+
+    def get_all(self, strings, lang_from, lang_to):
+        pass
+
+    def get(self, strings, lang_from, lang_to):
+        hash = ''.join(strings)
+        file_in = os.path.join(self.dir_temp, self._get_temp_filename(hash, lang_from, lang_to))
+        file_out = os.path.join(self.dir_temp, self._get_temp_filename(hash + 'out', lang_from, lang_to))
+        self._write_translations_to_file(strings, file_in)
+        cmd = self._get_command(lang_from, lang_to, file_in, file_out)
+        subprocess.check_output(cmd, shell=True)
+        translations = self._read_translations_from_file(file_out)
+        os.remove(file_in)
+        return {
+            'translations': translations,
+            'debug': ''
+        }
+
+    def _get_command(self, lang_from, lang_to, file_input, file_output='', file_debug=''):
+        script = os.path.dirname(os.path.realpath(__file__)) + '/../scripts/tflow.py'
+        cmd = 'python ' + script + ' --source ' + lang_from + ' --target ' + lang_to + ' --decode'
+        cmd = cmd + ' --size ' + str(self.config['size']) + ' --num_layers ' + str(self.config['num_layers'])
+        cmd = cmd + ' --data_dir ' + self.dir_models
+        cmd = cmd + ' < ' + file_input
+        cmd = cmd + ' > ' + file_output if file_output else cmd
+        cmd = cmd + ' 2> ' + file_debug if file_debug else cmd
+        return cmd
+
 
 
 class TranslatorSolr(Translator):
