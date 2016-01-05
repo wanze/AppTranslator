@@ -3,6 +3,7 @@ import getopt
 import sys
 import extractor
 from solr import Solr
+import cgi
 
 """
 Preprocess extracted translations and index them into Solr
@@ -107,6 +108,7 @@ class Translations2Solr:
         for key, value in translations.iteritems():
             if not value:
                 continue
+            value = cgi.escape(value)
             file_temp.write('<doc>\n')
             file_temp.write('<field name="id">' + '_'.join([app_id, key]) + '</field>\n')
             file_temp.write('<field name="app_id">%s</field>\n' % app_id)

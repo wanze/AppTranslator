@@ -69,15 +69,11 @@ class ExtractTranslationsFromXML(object):
 
 class TranslationStringSanitizer(object):
 
-    PLACEHOLDER_TOKEN = 'STRING-PLACEHOLDER-TOKEN'
-
     def __init__(self):
         self.html_stripper = HTMLTagsStripper()
 
     def sanitize(self, value):
         value = value.strip()
-        if len(value) <= 3:
-            return ''
         # Ignore numbers and floats
         if self.is_number(value):
             return ''
@@ -92,10 +88,12 @@ class TranslationStringSanitizer(object):
         s = HTMLTagsStripper()
         s.feed(value)
         value = s.get_data()
-        # Replace %s and %1$s with a placeholder token
-        value = re.sub(r"%(s|[0-9]+\$s)", self.PLACEHOLDER_TOKEN, value)
-        # Encode special chars
-        value = cgi.escape(value)
+        # Replace placeholders in form of '%s' or '%[0-9]$s'
+        value = re.sub('%s|%d|(s|d)?%[0-9]+\$(s|d)?', '', value)
+        if len(value) <= 3:
+            return ''
+        if not re.search('\w', value):
+            return ''
         return value
 
     @staticmethod

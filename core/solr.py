@@ -5,7 +5,7 @@ import urllib
 import subprocess
 import json
 import operator
-import translator
+import utils
 
 class Solr:
 
@@ -102,7 +102,7 @@ class Solr:
         return terms
 
     def get_term_variations(self, lang_from, lang_to, term, max_rows=100):
-        term = translator.Translator.to_utf8(term.lower())
+        term = utils.to_utf8(term.lower())
         params = {
             'q': 'value_lc:"%s %s %s"' % (self.DELIMITER_START, term, self.DELIMITER_END),
             'rows': max_rows

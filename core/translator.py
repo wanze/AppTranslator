@@ -3,7 +3,7 @@ import hashlib
 import os
 from extractor import ExtractTranslationsFromXML
 from solr import Solr
-
+import utils
 
 class Translator(object):
 
@@ -43,13 +43,13 @@ class Translator(object):
 
     @staticmethod
     def _get_temp_filename(string, lang_from, lang_to):
-        return hashlib.md5(''.join([Translator.to_ascii(string), lang_from, lang_to])).hexdigest()
+        return hashlib.md5(''.join([utils.to_ascii(string), lang_from, lang_to])).hexdigest()
 
     @staticmethod
     def _write_translations_to_file(translations, filename):
         f = open(filename, 'w')
         for value in translations:
-            f.write(Translator.to_utf8(value) + '\n')
+            f.write(utils.to_utf8(value) + '\n')
         f.close()
 
     @staticmethod
@@ -59,18 +59,6 @@ class Translator(object):
         translations.pop()
         os.remove(filename)
         return translations
-
-    @staticmethod
-    def to_utf8(string):
-        if isinstance(string, unicode):
-            return string.encode('utf-8')
-        return string
-
-    @staticmethod
-    def to_ascii(string):
-        if isinstance(string, unicode):
-            return string.encode('ascii', 'replace')
-        return string
 
 class TranslatorMoses(Translator):
 
