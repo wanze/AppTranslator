@@ -88,9 +88,9 @@ class TranslationStringSanitizer(object):
         s = HTMLTagsStripper()
         s.feed(value)
         value = s.get_data()
-        # Replace placeholders in form of '%s' or '%[0-9]$s'
+        # Replace placeholders in form of '%s' or '%1$s'
         value = re.sub('%s|%d|(s|d)?%[0-9]+\$(s|d)?', '', value)
-        if len(value) <= 3:
+        if len(value) < 3:
             return ''
         if not re.search('\w', value):
             return ''
