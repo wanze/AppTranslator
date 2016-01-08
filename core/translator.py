@@ -346,7 +346,7 @@ class TranslatorSolr(Translator):
         translations = []
         debug = ''
         for string in strings:
-            t = LongestSubstringMatch(self.to_utf8(string), lang_from, lang_to, self.solr, self.config)
+            t = LongestSubstringMatch(utils.to_utf8(string), lang_from, lang_to, self.solr, self.config)
             try:
                 translations.append(t.get_translation())
             except:
@@ -409,7 +409,7 @@ class LongestSubstringMatch(object):
             params = {
                 'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
             }
-            self.debug += 'Looking for a translation in target language -> app_id=%s, key=%s' % (Translator.to_utf8(result['app_id']), Translator.to_utf8(result['key']))
+            self.debug += 'Looking for a translation in target language -> app_id=%s, key=%s' % (utils.to_utf8(result['app_id']), utils.to_utf8(result['key']))
             # Search for a translation with same app_id and key in target language
             translations = self.solr.query(self.lang_to, params)
             if translations['numFound']:
@@ -419,7 +419,7 @@ class LongestSubstringMatch(object):
                     return t
                 else:
                     variations.append(t)
-                    self.debug += ' -> Found translation "%s"\n' % Translator.to_utf8(t)
+                    self.debug += ' -> Found translation "%s"\n' % utils.to_utf8(t)
             else:
                 self.debug += ' -> no translation available\n'
         if self.config['detailed_debug'] and len(variations):
@@ -523,10 +523,10 @@ if __name__ == "__main__":
             i = 0
             for string in f:
                 result = trans.get([string], source_lang, target_lang)
-                print Translator.to_utf8(result['translations'][0])
+                print utils.to_utf8(result['translations'][0])
                 if i % 100 == 0:
                     sys.stderr.write('Translated %s strings so far...\n' % str(i))
                 i += 1
     else:
         result = trans.get([input], source_lang, target_lang)
-        print Translator.to_utf8(result['translations'][0])
+        print utils.to_utf8(result['translations'][0])
