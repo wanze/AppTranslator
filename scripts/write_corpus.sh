@@ -71,7 +71,7 @@ for folder in $OUTPUT_DIR/parallel/*; do
             #rm "strings.$lang"
         done
         # Cleanup and limit sentences length to 80
-        $MOSES_DIR/scripts/training/clean-corpus-n.perl strings.true "$lang1" "$lang2" strings.clean 1 80
+        #$MOSES_DIR/scripts/training/clean-corpus-n.perl strings.true "$lang1" "$lang2" strings.clean 1 80
         rm "strings.true.$lang1"
         rm "strings.true.$lang2"
     fi

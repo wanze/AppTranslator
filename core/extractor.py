@@ -2,8 +2,6 @@ import os
 import re
 import xml.etree.ElementTree as ElementTree
 from HTMLParser import HTMLParser
-import cgi
-
 
 class Extractor(object):
 
@@ -30,7 +28,7 @@ class Extractor(object):
             if folder_value[0] == '.':
                 continue
             match = re.search('^values-(\w{2})$', folder_value)
-            language = match.group(1) if match else 'en'  # TODO: This is an assumption currently, we need to check if the default language is english!
+            language = match.group(1) if match else 'en'
             folder_trans = os.path.realpath(os.path.join(folder_res, folder_value))
             self.translations[language] = self.get_translations(os.path.join(folder_trans, 'strings.xml'))
         return self.translations
@@ -94,7 +92,7 @@ class TranslationStringSanitizer(object):
             return ''
         if not re.search('\w', value):
             return ''
-        return value
+        return value.strip()
 
     @staticmethod
     def is_number(string):
