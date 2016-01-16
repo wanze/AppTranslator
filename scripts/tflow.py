@@ -13,24 +13,33 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Binary for training translation models and decoding from them.
-
-Running this program without --decode will download the WMT corpus into
-the directory specified as --data_dir and tokenize it in a very basic way,
-and then start training a model saving checkpoints to --train_dir.
-
-Running with --decode starts an interactive loop so you can see how
-the current checkpoint translates English sentences into French.
-
+"""
 See the following papers for more information on neural translation models.
  * http://arxiv.org/abs/1409.3215
  * http://arxiv.org/abs/1409.0473
  * http://arxiv.org/pdf/1412.2007v2.pdf
 
 Modified version of this file: https://raw.githubusercontent.com/tensorflow/tensorflow/master/tensorflow/models/rnn/translate/translate.py
-Modifications:
- * Support generating models of variable languages, not only en to fr
- * Use translations from different corpus
+
+Usage:
+This script is used to generate translation models with tensorflow and decode sentences.
+
+Generating models:
+$ nohup python tflow.py --source en --target fr --data_dir /home/stefan/AppTranslator/data/tensorflow --corpus_dir /home/stefan/AppTranslator/data/corpus &
+
+Decoding:
+$ python tflow.py --decode --source en --target fr --data_dir /home/stefan/AppTranslator/data/tensorflow < test.en > out.txt
+
+Parameters:
+--source                    Source language
+--target                    Target language
+--data_dir                  Output directory, where data and models are written
+--corpus_idr                Corpus directory, containing parallel data
+--size                      Size of network [default=1024]
+--num_layers                Number of layers in the model [default=3]
+--steps_per_checkpoint      How many training steps to do per checkpoint [default=200]
+--decode                    Set this flag to translate an input file, one sentence per line
+
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -127,7 +136,6 @@ def create_model(session, forward_only):
         FLAGS.size, FLAGS.num_layers, FLAGS.max_gradient_norm, FLAGS.batch_size,
         FLAGS.learning_rate, FLAGS.learning_rate_decay_factor,
         forward_only=forward_only)
-    # ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
     model_dir = os.path.join(_get_base_output_dir(), 'model')
     ckpt = tf.train.get_checkpoint_state(model_dir)
     if ckpt and gfile.Exists(ckpt.model_checkpoint_path):
@@ -142,7 +150,7 @@ def create_model(session, forward_only):
 
 
 def _get_base_output_dir():
-    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target)
+    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target, FLAGS.num_layers + '-' + FLAGS.size)
 
 def _get_model_output_dir():
     return os.path.join(_get_base_output_dir(), 'model')
@@ -150,14 +158,11 @@ def _get_model_output_dir():
 def _get_data_output_dir():
     return os.path.join(_get_base_output_dir(), 'data')
 
-def train():
-    """Train a en->fr translation model using WMT data."""
-    # Prepare WMT data.
-    # print("Preparing WMT data in %s" % FLAGS.data_dir)
-    # en_train, fr_train, en_dev, fr_dev, _, _ = data_utils.prepare_wmt_data(
-    #     FLAGS.data_dir, FLAGS.source_vocab_size, FLAGS.target_vocab_size)
+def simple_tokenizer(sentence):
+    """ Our corpus is already tokenized, so this tokenizer just splits at spaces """
+    return sentence.split()
 
-    # Get wmt data to the specified directory.
+def train():
     corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.source + '-' + FLAGS.target)
     if not os.path.isdir(corpus_path):
         corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.target + '-' + FLAGS.source)
@@ -173,8 +178,8 @@ def train():
     # Create vocabularies of the appropriate sizes.
     target_vocab_path = os.path.join(data_dir, "vocab%d.%s" % (FLAGS.target_vocab_size, FLAGS.target))
     source_vocab_path = os.path.join(data_dir, "vocab%d.%s" % (FLAGS.source_vocab_size, FLAGS.source))
-    data_utils.create_vocabulary(target_vocab_path, os.path.join(corpus_path, "strings-train.clean." + FLAGS.target), FLAGS.target_vocab_size)
-    data_utils.create_vocabulary(source_vocab_path, os.path.join(corpus_path, "strings-train.clean." + FLAGS.source), FLAGS.source_vocab_size)
+    data_utils.create_vocabulary(target_vocab_path, os.path.join(corpus_path, "strings-train.clean." + FLAGS.target), FLAGS.target_vocab_size, simple_tokenizer)
+    data_utils.create_vocabulary(source_vocab_path, os.path.join(corpus_path, "strings-train.clean." + FLAGS.source), FLAGS.source_vocab_size, simple_tokenizer)
 
     # Create token ids for the training data.
     target_train_ids_path = os.path.join(train_path + (".ids%d.%s" % (FLAGS.target_vocab_size, FLAGS.target)))
@@ -185,8 +190,8 @@ def train():
     # Create token ids for the development data.
     target_dev_ids_path = os.path.join(dev_path + (".ids%d.%s" % (FLAGS.target_vocab_size, FLAGS.target)))
     source_dev_ids_path = os.path.join(dev_path + (".ids%d.%s" % (FLAGS.source_vocab_size, FLAGS.source)))
-    data_utils.data_to_token_ids(os.path.join(corpus_path, "strings-tune.clean." + FLAGS.target), target_dev_ids_path, target_vocab_path)
-    data_utils.data_to_token_ids(os.path.join(corpus_path, "strings-tune.clean." + FLAGS.source), source_dev_ids_path, source_vocab_path)
+    data_utils.data_to_token_ids(os.path.join(corpus_path, "strings-dev.clean." + FLAGS.target), target_dev_ids_path, target_vocab_path)
+    data_utils.data_to_token_ids(os.path.join(corpus_path, "strings-dev.clean." + FLAGS.source), source_dev_ids_path, source_vocab_path)
 
     with tf.Session() as sess:
         # Create model.
