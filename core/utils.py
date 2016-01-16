@@ -12,8 +12,6 @@ def to_ascii(string):
     return string
 
 def shuffle_files(path1, path2):
-    print path1
-    print path2
     with open(path1) as file1:
         lines1 = file1.readlines()
         n_lines = len(lines1)
