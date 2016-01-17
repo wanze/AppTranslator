@@ -150,7 +150,7 @@ def create_model(session, forward_only):
 
 
 def _get_base_output_dir():
-    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target, FLAGS.num_layers + '-' + FLAGS.size)
+    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target, str(FLAGS.num_layers) + '-' + str(FLAGS.size))
 
 def _get_model_output_dir():
     return os.path.join(_get_base_output_dir(), 'model')

@@ -2,6 +2,7 @@ import os
 import re
 import xml.etree.ElementTree as ElementTree
 from HTMLParser import HTMLParser
+import shutil
 
 class Extractor(object):
 
@@ -45,24 +46,41 @@ class ExtractTranslationsFromXML(object):
         self.xml_file = xml_file
         self.sanitizer = TranslationStringSanitizer()
         self.parser = ElementTree.XMLParser(encoding='utf-8')
+        self.error_fixing_attempt = 0
 
     def extract(self):
-        if not os.path.isfile(self.xml_file):
+        if not os.path.isfile(self.xml_file) or self.error_fixing_attempt >= 10:
             return {}
         try:
             xml = ElementTree.parse(self.xml_file, parser=self.parser)
-        except ElementTree.ParseError:
-            return {}
-        translations = {}
-        for trans in xml.getroot():
-            key = trans.attrib['name']
-            if not trans.text:
-                continue
-            value = self.sanitizer.sanitize(trans.text.encode('utf-8'))  # Clean/remove unwanted strings
-            if not value:
-                continue
-            translations[key] = value
-        return translations
+            translations = {}
+            for trans in xml.getroot():
+                key = trans.attrib['name']
+                if not trans.text:
+                    continue
+                value = self.sanitizer.sanitize(trans.text.encode('utf-8'))  # Clean/remove unwanted strings
+                if not value:
+                    continue
+                translations[key] = value
+            return translations
+        except ElementTree.ParseError as e:
+            # Try to clean the invalid line and re-parse :)
+            line, _ = e.position
+            if self.error_fixing_attempt == 0:
+                # First error correction, save original XML file
+                shutil.copyfile(self.xml_file, self.xml_file + '.orig')
+            with open(self.xml_file, 'r') as input:
+                with open(self.xml_file + '.new', 'w') as output:
+                    l = 1
+                    for translation in input:
+                        if l != line:
+                            output.write(translation)
+                        l += 1
+            os.rename(self.xml_file, self.xml_file + '.error')
+            os.rename(self.xml_file + '.new', self.xml_file)
+            e = ExtractTranslationsFromXML(self.xml_file)
+            e.error_fixing_attempt = self.error_fixing_attempt + 1
+            return e.extract()
 
 
 class TranslationStringSanitizer(object):
