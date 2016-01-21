@@ -56,8 +56,8 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             beam: 5
         },
         tensorflow: {
-            num_layers: 2,
-            size: 256
+            num_layers: 3,
+            size: 1024
         },
         compare: {},
     };
@@ -152,7 +152,7 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             console.log(response);
             $scope.results.translations = []
             var columns = ['Input', 'Output']
-            var decoders = ['Output Moses', 'Output Lamtram', 'Output Solr'];
+            var decoders = ['Output Moses', 'Output Tensorflow', 'Output Solr'];
             if ($scope.input.translationMode == 'string' && $scope.decoder.decoder == 'compare') {
                 columns = ['Input'].concat(decoders)
             } else if ($scope.input.translationMode == 'xml') {
@@ -164,7 +164,7 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
                 }
             }
             $scope.results.columns = columns;
-            var sorting = {'key': 0, 'source': 1, 'target': 2, 'target_moses': 3, 'target_lamtram' : 4, 'target_solr' : 5};
+            var sorting = {'key': 0, 'source': 1, 'target': 2, 'moses': 3, 'tensorflow' : 4, 'solr' : 5};
             for (var i = 0; i < response.data.translations.length; i++) {
                 var translation = response.data.translations[i];
                 if (typeof translation == 'string') {

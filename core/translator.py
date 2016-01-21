@@ -7,6 +7,12 @@ import utils
 
 class Translator(object):
 
+    def get_id(self):
+        """
+        Return a unique ID for this translator
+        """
+        raise NotImplementedError
+
     def get(self, strings, lang_from, lang_to):
         """
         Return the best translation for the given strings
@@ -84,6 +90,9 @@ class TranslatorMoses(Translator):
         self.dir_temp = dir_data + 'temp/moses/'
         if not os.path.isdir(self.dir_temp):
             os.makedirs(self.dir_temp)
+
+    def get_id(self):
+        return 'moses'
 
     def translate_xml(self, xml, lang_from, lang_to):
         e = ExtractTranslationsFromXML(xml)
@@ -185,6 +194,9 @@ class TranslatorLamtram(Translator):
         if not os.path.isdir(self.dir_temp):
             os.makedirs(self.dir_temp)
 
+    def get_id(self):
+        return 'lamtram'
+
     def translate_xml(self, xml, lang_from, lang_to):
         e = ExtractTranslationsFromXML(xml)
         translations = e.extract()
@@ -253,6 +265,9 @@ class TranslatorTensorflow(Translator):
         if not os.path.isdir(self.dir_temp):
             os.makedirs(self.dir_temp)
 
+    def get_id(self):
+        return 'tensorflow'
+
     def translate_xml(self, xml, lang_from, lang_to):
         e = ExtractTranslationsFromXML(xml)
         translations = e.extract()
@@ -318,6 +333,9 @@ class TranslatorSolr(Translator):
         self.config = self.DEFAULT_CONFIG.copy()
         self.config.update(config)
         self.solr = Solr('', url)
+
+    def get_id(self):
+        return 'solr'
 
     def get_all(self, string, lang_from, lang_to):
         pass
@@ -445,7 +463,7 @@ class TranslatorCompare(Translator):
         self.decoder_settings = decoder_settings
         self.solr = TranslatorSolr(config['solr_url'], decoder_settings['solr'])
         self.moses = TranslatorMoses(config['moses'], decoder_settings['moses'])
-        self.lamtram = TranslatorLamtram(config['lamtram'], decoder_settings['lamtram'])
+        # self.lamtram = TranslatorLamtram(config['lamtram'], decoder_settings['lamtram'])
         self.tensorflow = TranslatorTensorflow(decoder_settings['tensorflow'])
 
     def get_all(self, string, lang_from, lang_to):
@@ -457,16 +475,16 @@ class TranslatorCompare(Translator):
         strings = e.extract()
         for key, string in strings.iteritems():
             result_moses = self.moses.get([string], lang_from, lang_to)
-            result_lamtram = self.lamtram.get([string], lang_from, lang_to)
+            # result_lamtram = self.lamtram.get([string], lang_from, lang_to)
             result_solr = self.solr.get([string], lang_from, lang_to)
             result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
             results = {
                 'key': key,
                 'source': string,
-                'target_moses': result_moses['translations'][0],
-                'target_lamtram': result_lamtram['translations'][0],
-                'target_solr': result_solr['translations'][0],
-                'target_tensorflow': result_tensorflow['translations'][0]
+                'moses': result_moses['translations'][0],
+                # 'target_lamtram': result_lamtram['translations'][0],
+                'solr': result_solr['translations'][0],
+                'tensorflow': result_tensorflow['translations'][0]
             }
             translations.append(results)
         return {
@@ -484,10 +502,10 @@ class TranslatorCompare(Translator):
             result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
             results = {
                 'source': string,
-                'target_moses': result_moses['translations'][0],
-                'target_lamtram': result_lamtram['translations'][0],
-                'target_tensorflow': result_tensorflow['translations'][0],
-                'target_solr': result_solr['translations'][0]
+                'moses': result_moses['translations'][0],
+                # 'target_lamtram': result_lamtram['translations'][0],
+                'tensorflow': result_tensorflow['translations'][0],
+                'solr': result_solr['translations'][0]
             }
             translations.append(results)
         return {
