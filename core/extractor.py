@@ -49,7 +49,7 @@ class ExtractTranslationsFromXML(object):
         self.error_fixing_attempt = 0
 
     def extract(self):
-        if not os.path.isfile(self.xml_file) or self.error_fixing_attempt >= 10:
+        if not os.path.isfile(self.xml_file) or self.error_fixing_attempt >= 200:
             return {}
         try:
             xml = ElementTree.parse(self.xml_file, parser=self.parser)

@@ -497,7 +497,7 @@ class TranslatorCompare(Translator):
         translations = []
         for string in strings:
             result_moses = self.moses.get([string], lang_from, lang_to)
-            result_lamtram = self.lamtram.get([string], lang_from, lang_to)
+            # result_lamtram = self.lamtram.get([string], lang_from, lang_to)
             result_solr = self.solr.get([string], lang_from, lang_to)
             result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
             results = {
