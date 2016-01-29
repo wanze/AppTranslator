@@ -3,6 +3,7 @@ import math
 import getopt
 import sys
 import shutil
+import random
 
 """
 Prepares the corpus data to evaluate BLEU score of a translation system. The parallel data input files are split into equal
@@ -40,17 +41,17 @@ Arguments:
 --output_dir        Path to a directory where the output is written
 --languages         List of language pairs from the parallel data that should be prepared, e.g. ['de-en', 'de-fr', 'en-fr']
 --parts  		    Number of parts the input files are divided into
---tune              If true, one part of the data is reserved for tuning and a file strings-tune.clean.<lang> is added to each run directory
+--dev               If true, one part of the data is reserved as dev set and a file strings-dev.clean.<lang> is added to each run directory
 
 """
 class CorpusWriterBleu:
 
-    def __init__(self, dir_corpus, languages, dir_out, parts, tune=True):
+    def __init__(self, dir_corpus, languages, dir_out, parts, dev=True):
         self.dir_corpus = dir_corpus
         self.languages = languages
         self.dir_out = dir_out
         self.parts = parts
-        self.tune = tune
+        self.dev = dev
 
     def write(self):
         for language_pair in self.languages:
@@ -84,20 +85,47 @@ class CorpusWriterBleu:
 
     def _write_language_pair(self, language_pair):
         dir_in = os.path.join(self.dir_corpus, 'parallel', language_pair)
-        dir_out = os.path.join(self.dir_out, language_pair)
+        dir_out = os.path.join(self.dir_out, 'parallel', language_pair)
         if not os.path.isdir(dir_out):
             os.makedirs(dir_out)
-        for lang in language_pair.split('-'):
+        langs = language_pair.split('-')
+        # Copy original files to new location and shuffle all sentences
+        shutil.copy(os.path.join(dir_in, 'strings.clean.' + langs[0]), os.path.join(dir_out, 'strings.clean.' + langs[0]))
+        shutil.copy(os.path.join(dir_in, 'strings.clean.' + langs[1]), os.path.join(dir_out, 'strings.clean.' + langs[1]))
+        # Shuffle sentences in both files
+        self.shuffle_files(os.path.join(dir_out, 'strings.clean.' + langs[0]), os.path.join(dir_out, 'strings.clean.' + langs[1]))
+        for lang in langs:
             # Split the file into multiple parts
-            self._split_file(os.path.join(dir_in, 'strings.clean.' + lang), dir_out)
-            # Merge files again
+            self._split_file(os.path.join(dir_out, 'strings.clean.' + lang), dir_out)
+            # Merge files again according to the number of parts
             self._merge_files(dir_out, lang)
 
+    @staticmethod
+    def shuffle_files(path1, path2):
+        with open(path1) as file1:
+            lines1 = file1.readlines()
+            n_lines = len(lines1)
+            indices = random.sample(range(0, n_lines), n_lines)
+            new_lines = []
+            for i, line in enumerate(lines1):
+                new_lines.insert(indices[i], line)
+            with open(path1 + '.tmp', 'w') as temp1:
+                temp1.writelines(new_lines)
+            with open(path2) as file2:
+                new_lines = []
+                for i, line in enumerate(file2.readlines()):
+                    new_lines.insert(indices[i], line)
+                with open(path2 + '.tmp', 'w') as temp2:
+                    temp2.writelines(new_lines)
+        os.remove(path1)
+        os.remove(path2)
+        os.rename(path1 + '.tmp', path1)
+        os.rename(path2 + '.tmp', path2)
 
     def _merge_files(self, dir_in, lang):
         files = [f for f in os.listdir(dir_in) if os.path.isfile(os.path.join(dir_in, f)) and f.endswith(lang)]
-        # Create a directory for each run, if one part is hold back for tuning, use last part
-        n_runs = self.parts if self.tune else self.parts + 1
+        # Create a directory for each run, if one part is used as development set, use last part
+        n_runs = self.parts if self.dev else self.parts + 1
         for i in range(1, n_runs):
             dir_run = os.path.join(dir_in, 'run-' + str(i))
             if not os.path.isdir(dir_run):
@@ -116,16 +144,16 @@ class CorpusWriterBleu:
                             with open(os.path.join(dir_in, f)) as file_train:
                                 for line in file_train:
                                     outfile.write(line)
-        # Copy the tune file to all run directories
-        if self.tune:
-            file_tune = os.path.join(dir_in, 'strings.clean-' + str(self.parts) + '.' + lang)
+        # Copy the dev file to all run directories
+        if self.dev:
+            file_dev = os.path.join(dir_in, 'strings.clean-' + str(self.parts) + '.' + lang)
             for i in range(1, n_runs):
-                shutil.copy(file_tune, os.path.join(dir_in, 'run-' + str(i), 'strings-tune.clean.' + lang))
+                shutil.copy(file_dev, os.path.join(dir_in, 'run-' + str(i), 'strings-dev.clean.' + lang))
 
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'c:l:o:p:t:', ['dir_corpus=', 'languages=', 'dir_out=', 'parts=', 'tune='])
+        opts, args = getopt.getopt(sys.argv[1:], 'c:l:o:p:t:', ['dir_corpus=', 'languages=', 'dir_out=', 'parts=', 'dev='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -134,7 +162,7 @@ if __name__ == '__main__':
     languages = ['en-fr', 'de-en']
     dir_out = ''
     parts = 6
-    tune = True
+    dev = True
     for opt, arg in opts:
         if opt in ('-c', '--dir_corpus'):
             dir_corpus = arg
@@ -144,8 +172,8 @@ if __name__ == '__main__':
             dir_out = arg
         if opt in ('-p', '--parts'):
             parts = int(arg)
-        if opt in ('-t', '--tune'):
-            tune = arg in ['true', 'True', '1']
+        if opt in ('-t', '--dev'):
+            dev = arg in ['true', 'True', '1']
 
     if not os.path.isdir(dir_corpus):
         print "Corpus directory does not exist!"
@@ -154,5 +182,5 @@ if __name__ == '__main__':
     if dir_out and not os.path.isdir(dir_out):
         os.makedirs(dir_out)
 
-    writer = CorpusWriterBleu(dir_corpus, languages, dir_out, parts, tune)
+    writer = CorpusWriterBleu(dir_corpus, languages, dir_out, parts, dev)
     writer.write()
