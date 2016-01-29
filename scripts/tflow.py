@@ -39,7 +39,7 @@ Parameters:
 --num_layers                Number of layers in the model [default=3]
 --steps_per_checkpoint      How many training steps to do per checkpoint [default=200]
 --decode                    Set this flag to translate an input file, one sentence per line
-
+--replace_unknown           Set to true to replace unknown words with original input [default=True]
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -83,6 +83,7 @@ tf.app.flags.DEFINE_string("source", "en", "Source language")
 tf.app.flags.DEFINE_string("target", "fr", "Target language")
 tf.app.flags.DEFINE_string("corpus_dir", "", "Corpus directory where monolingual and parallel data is stored")
 tf.app.flags.DEFINE_integer("run", -1, "Run")
+tf.app.flags.DEFINE_boolean("replace_unknown", True, "Replace unknown words (not in vocabulary) by original word")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -274,16 +275,18 @@ def decode():
         source_vocab, _ = data_utils.initialize_vocabulary(source_vocab_path)
         _, target_vocab = data_utils.initialize_vocabulary(target_vocab_path)
 
-        # Decode from standard input.
-        # sys.stdout.write("> ")
-        # sys.stdout.flush()
-        # sentence = sys.stdin.readline()
-
-        # while sentence:
         for sentence in sys.stdin:
             sentence = sentence.rstrip('\n')
             # Get token-ids for the input sentence.
-            token_ids = data_utils.sentence_to_token_ids(sentence, source_vocab)
+            token_ids = data_utils.sentence_to_token_ids(sentence, source_vocab, None, False)
+            # Save unknown words in list
+            unknown_words = []
+            if FLAGS.replace_unknown:
+                words = data_utils.basic_tokenizer(sentence)
+                for i, token_id in enumerate(token_ids):
+                    if token_id == data_utils.UNK_ID:
+                        unknown_words.append(words[i])
+
             # Which bucket does it belong to?
             bucket_id = min([b for b in xrange(len(_buckets))
                              if _buckets[b][0] > len(token_ids)])
@@ -298,11 +301,18 @@ def decode():
             # If there is an EOS symbol in outputs, cut them at that point.
             if data_utils.EOS_ID in outputs:
                 outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-            # Print out French sentence corresponding to outputs.
-            print(" ".join([target_vocab[output] for output in outputs]))
-            # print("> ", end="")
-            # sys.stdout.flush()
-            # sentence = sys.stdin.readline()
+            # Print out sentence corresponding to outputs.
+            if not FLAGS.replace_unknown:
+                print(" ".join([target_vocab[output] for output in outputs]))
+            else:
+                # We replace each unknown word in the order they appeared in the input sentence
+                words = []
+                for output in outputs:
+                    if output == data_utils.UNK_ID:
+                        words.append(unknown_words.pop(0))
+                    else:
+                        words.append(target_vocab[output])
+                print(" ".join(words))
 
 
 def self_test():
