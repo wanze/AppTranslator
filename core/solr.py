@@ -115,7 +115,8 @@ class Solr:
             }
             translation = self.query(lang_to, params)
             if translation['numFound']:
-                value = translation['docs'][0]['value']
+                value = translation['docs'][0]['value'].lower()
+                value = value.strip()
                 counts[value] = 1 if value not in counts else counts[value] + 1
         # Sort dict by counts
         counts_sorted = sorted(counts.items(), key=operator.itemgetter(1), reverse=True)

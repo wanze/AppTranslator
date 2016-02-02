@@ -308,7 +308,7 @@ def decode():
                 # We replace each unknown word in the order they appeared in the input sentence
                 words = []
                 for output in outputs:
-                    if output == data_utils.UNK_ID:
+                    if output == data_utils.UNK_ID and len(unknown_words):
                         words.append(unknown_words.pop(0))
                     else:
                         words.append(target_vocab[output])
