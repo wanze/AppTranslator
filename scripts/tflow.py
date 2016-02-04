@@ -279,6 +279,12 @@ def decode():
             sentence = sentence.rstrip('\n')
             # Get token-ids for the input sentence.
             token_ids = data_utils.sentence_to_token_ids(sentence, source_vocab, None, False)
+
+            # Quit early...
+            if not len(token_ids):
+                print('')
+                continue
+
             # Save unknown words in list
             unknown_words = []
             if FLAGS.replace_unknown:
@@ -287,9 +293,13 @@ def decode():
                     if token_id == data_utils.UNK_ID:
                         unknown_words.append(words[i])
 
+            bucket_list = [b for b in xrange(len(_buckets)) if _buckets[b][0] > len(token_ids)]
+            if not len(bucket_list):
+                print('')
+                continue
+
             # Which bucket does it belong to?
-            bucket_id = min([b for b in xrange(len(_buckets))
-                             if _buckets[b][0] > len(token_ids)])
+            bucket_id = min(bucket_list)
             # Get a 1-element batch to feed the sentence to the model.
             encoder_inputs, decoder_inputs, target_weights = model.get_batch(
                 {bucket_id: [(token_ids, [])]}, bucket_id)
@@ -309,8 +319,9 @@ def decode():
                 words = []
                 prev_token_id = -1
                 for output in outputs:
-                    if output == data_utils.UNK_ID and len(unknown_words):
-                        words.append(unknown_words.pop(0))
+                    if output == data_utils.UNK_ID:
+                        if len(unknown_words):
+                            words.append(unknown_words.pop(0))
                     else:
                         o = target_vocab[output]
                         # Hack alert!!
