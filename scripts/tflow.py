@@ -28,7 +28,7 @@ Generating models:
 $ nohup python tflow.py --source en --target fr --data_dir /home/stefan/AppTranslator/data/tensorflow --corpus_dir /home/stefan/AppTranslator/data/corpus &
 
 Decoding:
-$ python tflow.py --decode --source en --target fr --data_dir /home/stefan/AppTranslator/data/tensorflow < test.en > out.txt
+$ python tflow.py --decode true --source en --target fr --data_dir /home/stefan/AppTranslator/data/tensorflow < test.en > out.txt
 
 Parameters:
 --source                    Source language

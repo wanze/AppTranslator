@@ -252,8 +252,8 @@ class TranslatorLamtram(Translator):
 class TranslatorTensorflow(Translator):
 
     DEFAULT_CONFIG = {
-        'num_layers': 2,
-        'size': 256,
+        'num_layers': 3,
+        'size': 1024,
     }
 
     def __init__(self, config={}):
@@ -312,7 +312,7 @@ class TranslatorTensorflow(Translator):
 
     def _get_command(self, lang_from, lang_to, file_input, file_output='', file_debug=''):
         script = os.path.dirname(os.path.realpath(__file__)) + '/../scripts/tflow.py'
-        cmd = 'python ' + script + ' --source ' + lang_from + ' --target ' + lang_to + ' --decode'
+        cmd = 'python ' + script + ' --source ' + lang_from + ' --target ' + lang_to + ' --decode true'
         cmd = cmd + ' --size ' + str(self.config['size']) + ' --num_layers ' + str(self.config['num_layers'])
         cmd = cmd + ' --data_dir ' + self.dir_models
         cmd = cmd + ' < ' + file_input
