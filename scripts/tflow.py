@@ -307,12 +307,19 @@ def decode():
             else:
                 # We replace each unknown word in the order they appeared in the input sentence
                 words = []
+                prev_token_id = -1
                 for output in outputs:
                     if output == data_utils.UNK_ID and len(unknown_words):
                         words.append(unknown_words.pop(0))
                     else:
-                        words.append(target_vocab[output])
-                print(" ".join(words))
+                        o = target_vocab[output]
+                        # Hack alert!!
+                        if prev_token_id == data_utils.UNK_ID and o == ';':
+                            pass
+                        else:
+                            words.append(o)
+                    prev_token_id = output
+                print(" ".join(words).strip())
 
 
 def self_test():
