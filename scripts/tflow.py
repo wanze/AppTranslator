@@ -151,7 +151,8 @@ def create_model(session, forward_only):
 
 
 def _get_base_output_dir():
-    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target, str(FLAGS.num_layers) + '-' + str(FLAGS.size))
+    run = 'run-' + str(FLAGS.run) if FLAGS.run > 0 else ''
+    return os.path.join(FLAGS.data_dir, FLAGS.source + '-' + FLAGS.target, str(FLAGS.num_layers) + '-' + str(FLAGS.size), run)
 
 def _get_model_output_dir():
     return os.path.join(_get_base_output_dir(), 'model')
@@ -164,9 +165,10 @@ def simple_tokenizer(sentence):
     return sentence.split()
 
 def train():
-    corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.source + '-' + FLAGS.target)
+    run = 'run-' + str(FLAGS.run) if FLAGS.run > 0 else ''
+    corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.source + '-' + FLAGS.target, run)
     if not os.path.isdir(corpus_path):
-        corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.target + '-' + FLAGS.source)
+        corpus_path = os.path.join(FLAGS.corpus_dir, 'parallel', FLAGS.target + '-' + FLAGS.source, run)
     data_dir = _get_data_output_dir()
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)

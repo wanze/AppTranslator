@@ -42,16 +42,18 @@ Arguments:
 --languages         List of language pairs from the parallel data that should be prepared, e.g. ['de-en', 'de-fr', 'en-fr']
 --parts  		    Number of parts the input files are divided into
 --dev               If true, one part of the data is reserved as dev set and a file strings-dev.clean.<lang> is added to each run directory
+--dev_filename      If dev is true, optionally specify a filename for the dev file. Defaults to strings-dev.clean.<lang>
 
 """
 class CorpusWriterBleu:
 
-    def __init__(self, dir_corpus, languages, dir_out, parts, dev=True):
+    def __init__(self, dir_corpus, languages, dir_out, parts, dev=True, dev_filename='strings-dev.clean'):
         self.dir_corpus = dir_corpus
         self.languages = languages
         self.dir_out = dir_out
-        self.parts = parts
+        self.parts = parts if not dev else parts + 1
         self.dev = dev
+        self.dev_filename = dev_filename
 
     def write(self):
         for language_pair in self.languages:
@@ -148,12 +150,12 @@ class CorpusWriterBleu:
         if self.dev:
             file_dev = os.path.join(dir_in, 'strings.clean-' + str(self.parts) + '.' + lang)
             for i in range(1, n_runs):
-                shutil.copy(file_dev, os.path.join(dir_in, 'run-' + str(i), 'strings-dev.clean.' + lang))
+                shutil.copy(file_dev, os.path.join(dir_in, 'run-' + str(i), self.dev_filename + '.' + lang))
 
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'c:l:o:p:t:', ['dir_corpus=', 'languages=', 'dir_out=', 'parts=', 'dev='])
+        opts, args = getopt.getopt(sys.argv[1:], 'c:l:o:p:d:f:', ['dir_corpus=', 'languages=', 'dir_out=', 'parts=', 'dev=', 'dev_filename='])
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(2)
@@ -161,8 +163,9 @@ if __name__ == '__main__':
     dir_corpus = os.path.dirname(os.path.realpath(__file__)) + '/../data/corpus'
     languages = ['en-fr', 'de-en']
     dir_out = ''
-    parts = 6
+    parts = 5
     dev = True
+    dev_filename = 'strings-dev.clean'
     for opt, arg in opts:
         if opt in ('-c', '--dir_corpus'):
             dir_corpus = arg
@@ -172,8 +175,10 @@ if __name__ == '__main__':
             dir_out = arg
         if opt in ('-p', '--parts'):
             parts = int(arg)
-        if opt in ('-t', '--dev'):
+        if opt in ('-d', '--dev'):
             dev = arg in ['true', 'True', '1']
+        if opt in ('-f', '--dev_filename'):
+            dev_filename = arg
 
     if not os.path.isdir(dir_corpus):
         print "Corpus directory does not exist!"
@@ -182,5 +187,5 @@ if __name__ == '__main__':
     if dir_out and not os.path.isdir(dir_out):
         os.makedirs(dir_out)
 
-    writer = CorpusWriterBleu(dir_corpus, languages, dir_out, parts, dev)
+    writer = CorpusWriterBleu(dir_corpus, languages, dir_out, parts, dev, dev_filename)
     writer.write()
