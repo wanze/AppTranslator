@@ -463,7 +463,6 @@ class TranslatorCompare(Translator):
         self.decoder_settings = decoder_settings
         self.solr = TranslatorSolr(config['solr_url'], decoder_settings['solr'])
         self.moses = TranslatorMoses(config['moses'], decoder_settings['moses'])
-        # self.lamtram = TranslatorLamtram(config['lamtram'], decoder_settings['lamtram'])
         self.tensorflow = TranslatorTensorflow(decoder_settings['tensorflow'])
 
     def get_all(self, string, lang_from, lang_to):
@@ -473,20 +472,19 @@ class TranslatorCompare(Translator):
         translations = []
         e = ExtractTranslationsFromXML(xml)
         strings = e.extract()
+        result_moses = self.moses.get(strings, lang_from, lang_to)
+        result_solr = self.solr.get(strings, lang_from, lang_to)
+        result_tensorflow = self.tensorflow.get(strings, lang_from, lang_to)
+        i = 0
         for key, string in strings.iteritems():
-            result_moses = self.moses.get([string], lang_from, lang_to)
-            # result_lamtram = self.lamtram.get([string], lang_from, lang_to)
-            result_solr = self.solr.get([string], lang_from, lang_to)
-            result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
-            results = {
+            translations.append({
                 'key': key,
                 'source': string,
-                'moses': result_moses['translations'][0],
-                # 'target_lamtram': result_lamtram['translations'][0],
-                'solr': result_solr['translations'][0],
-                'tensorflow': result_tensorflow['translations'][0]
-            }
-            translations.append(results)
+                'moses': result_moses['translations'][i],
+                'tensorflow': result_tensorflow['translations'][i],
+                'solr': result_solr['translations'][i],
+            })
+            i += 1
         return {
             'debug': '',
             'translations': translations
@@ -494,25 +492,21 @@ class TranslatorCompare(Translator):
 
 
     def get(self, strings, lang_from, lang_to):
+        results_moses = self.moses.get(strings, lang_from, lang_to)
+        results_tensorflow = self.tensorflow.get(strings, lang_from, lang_to)
+        results_solr = self.solr.get(strings, lang_from, lang_to)
         translations = []
-        for string in strings:
-            result_moses = self.moses.get([string], lang_from, lang_to)
-            # result_lamtram = self.lamtram.get([string], lang_from, lang_to)
-            result_solr = self.solr.get([string], lang_from, lang_to)
-            result_tensorflow = self.tensorflow.get([string], lang_from, lang_to)
-            results = {
+        for i, string in strings.iteritems():
+            translations.append({
                 'source': string,
-                'moses': result_moses['translations'][0],
-                # 'target_lamtram': result_lamtram['translations'][0],
-                'tensorflow': result_tensorflow['translations'][0],
-                'solr': result_solr['translations'][0]
-            }
-            translations.append(results)
+                'moses': results_moses['translations'][i],
+                'tensorflow': results_tensorflow['translations'][i],
+                'solr': results_solr['translations'][i],
+            })
         return {
             'debug': '',
             'translations': translations
         }
-
 
 
 import getopt
