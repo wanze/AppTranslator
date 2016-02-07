@@ -99,6 +99,7 @@ class CorpusWriterBleu:
         for lang in langs:
             # Split the file into multiple parts
             self._split_file(os.path.join(dir_out, 'strings.clean.' + lang), dir_out)
+            os.remove(os.path.join(dir_out, 'strings.clean.' + lang))
             # Merge files again according to the number of parts
             self._merge_files(dir_out, lang)
 
@@ -126,6 +127,7 @@ class CorpusWriterBleu:
 
     def _merge_files(self, dir_in, lang):
         files = [f for f in os.listdir(dir_in) if os.path.isfile(os.path.join(dir_in, f)) and f.endswith(lang)]
+        files.sort()
         # Create a directory for each run, if one part is used as development set, use last part
         n_runs = self.parts if self.dev else self.parts + 1
         for i in range(1, n_runs):
