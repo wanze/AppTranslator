@@ -46,10 +46,10 @@ class ExtractTranslationsFromXML(object):
         self.xml_file = xml_file
         self.sanitizer = TranslationStringSanitizer()
         self.parser = ElementTree.XMLParser(encoding='utf-8')
-        self.error_fixing_attempt = 0
+        self.error_recursion_level = 0
 
     def extract(self):
-        if not os.path.isfile(self.xml_file) or self.error_fixing_attempt >= 200:
+        if not os.path.isfile(self.xml_file) or self.error_recursion_level >= 200:
             return {}
         try:
             xml = ElementTree.parse(self.xml_file, parser=self.parser)
@@ -66,7 +66,7 @@ class ExtractTranslationsFromXML(object):
         except ElementTree.ParseError as e:
             # Try to clean the invalid line and re-parse :)
             line, _ = e.position
-            if self.error_fixing_attempt == 0:
+            if self.error_recursion_level == 0:
                 # First error correction, save original XML file
                 shutil.copyfile(self.xml_file, self.xml_file + '.orig')
             with open(self.xml_file, 'r') as input:
@@ -78,9 +78,8 @@ class ExtractTranslationsFromXML(object):
                         l += 1
             os.rename(self.xml_file, self.xml_file + '.error')
             os.rename(self.xml_file + '.new', self.xml_file)
-            e = ExtractTranslationsFromXML(self.xml_file)
-            e.error_fixing_attempt = self.error_fixing_attempt + 1
-            return e.extract()
+            self.error_recursion_level += 1
+            return self.extract()
 
 
 class TranslationStringSanitizer(object):

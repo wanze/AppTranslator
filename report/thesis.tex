@@ -26,28 +26,76 @@ This project aims to extract and parse translations of existing applications to 
 \chapter{Introduction}
 \label{cha:introduction}
 
-Android and iPhone smartphones are available in countries all over the world. If an app is intended to be used internationally, translating it into multiple languages can be important to attract more users. If people understand the app better, they may leave higher ratings. However, translating an app requires additional effort. From the developers perspective, all strings must be isolated in order to replace them with different values for each supported language. Furthermore, translating all text itself is a difficult task which usually requires the work of a professional translator. // TODO 
+Android and iPhone smartphones are available in countries all over the world. If an app is intended to be used internationally, translating it into multiple languages can be important to attract more users. If people understand the app better, they may leave higher ratings. However, translating an app requires additional effort. From the developers perspective, all strings must be isolated in order to replace them with different values for each supported language. Furthermore, translating all text itself is a difficult task which usually requires the work of a professional translator.
 
-This thesis focus on automatic translations of Android apps from English to French and German. The main idea is to collect a lot of existing apps from the Google Playstore\footnote{\url{https://play.google.com/store}} and extract their translations. Are we able to provide high quality translations with the help of statistical machine translation (SMT) systems? In order to produce good translations, SMT system must consist of a big vocabulary. It is therefore assumed that apps belonging to the same categories (e.g. finance, audio, sport etc.) share similar translations. SMT is the dominant approach in automating translations and used by services like Google Translate\footnote{\url{https://translate.google.com}} and Bing Translator\footnote{\url{https://www.bing.com/translator}} (Microsoft). In this thesis, we use different SMT algorithms to generate translations. A prototype web application is built which serves as a playground to translate strings and compare the results. Finally, the results of different translation systems are compared and the translation quality is evaluated with the BLEU metric.
+This thesis focus on automatic translations of Android apps from English to French and German. The main idea is to collect a lot of existing apps from the Google Playstore\footnote{\url{https://play.google.com/store}} and extract their translations. Are we able to provide high quality translations with the help of statistical machine translation (SMT)?
+%In order to produce good translations, SMT system must consist of a big vocabulary. It is therefore assumed that apps belonging to the same categories (e.g. finance, audio, sport etc.) share similar translations.% 
+SMT is the dominant approach in automating translations and used by services like Google Translate\footnote{\url{https://translate.google.com}} and Bing Translator\footnote{\url{https://www.bing.com/translator}} (Microsoft). In this thesis, we use different SMT algorithms and compare their results. A prototype web application is built which serves as a playground to translate strings and apps. Finally, the translation quality is evaluated with the BLEU metric.
 
 \chapter{Problem Analysis}
 \label{cha:problem_analysis}
 
-// TODO
+Statistical Machine Translation (SMT) is based on a large corpus of bilingual data. A translation model is trained to output the best possible translation according to some probabilistic function. Therefore we need to get a sufficient amount of sentences from Android apps in order to train these models.
 
-\section{Android apps and internationalization}
+Android apps can be installed on a mobile device by downloading a .apk file from the Google Playstore. Some reverse engineering is necessary to extract the translations from the binary file. Unfortunately, multilingual apps are not marked as such in the Google PlayStore. This means that we don't know if a app provides any translations prior to downloading and extracting it.
 
-Android uses a key-value based approach to store translations and other resources in XML files\footnote{\url{http://developer.android.com/guide/topics/resources/localization.html}}. For each supported language, one XML file exists, containing the translated values to the given keys. In the source code, a string is no longer hardcoded but referenced by a translation key.
+Challenges:
 
-// TODO
 
-\section{Challenges}
+\begin{itemize}
+\item Quality of existing translations
+\item Where and how to obtain large amount of apps
+\item Hardware to train the translation models
+\item How many data is needed to produce good results?
+\item How can we measure good translations?
+\end{itemize}
 
-- Quality of existing translations?
-- Where and how to obtain large amount of apps
-- Hardware for SMT systems. Training may need a lot of time
-- How many data is needed to produce good results?
-- How can we measure good translations?
+
+
+%\section{Android apps and internationalization}
+
+%Android uses a key-value based approach to store translations and other resources in XML files\footnote{\url{http://developer.android.com/guide/topics/resources/localization.html}}. For each supported language, one XML file exists, containing the translated values to given keys. In the source code, a string is no longer hardcoded but referenced by a translation key.%
+
+%\section{Challenges}%
+
+
+
+\chapter{Related Work}
+%In which we learn what have other done to address similar problems. For example, the work of Star \cite{Star89}
+
+%Overview of SMT
+%Has been done but not specific domain of short sentences mobile
+
+This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called \textbf{Statistical Phrase-Based Translation} and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based} The second, more recent model, uses \textbf{Deep Learning Neural Networks} to perform translations. \cite{smt_deep_learning} SMT translation models are usually trained on a large parallel corpus which is freely available on the web \footnote{\url{http://www.statmt.org/europarl/}}. The BLEU metric is then used to measure the quality of the produced translations.
+There exists a recurring translation task of the ``Workshop on statistical machine translation'', which focuses on translating european language pairs by improving existing systems\footnote{\url{http://www.statmt.org/wmt15/translation-task.html}}.
+
+This thesis compares how both approaches perform in the context of translating short sentences of mobile apps. The models are therefore applied on a much smaller data set than usual.
+
+\section{Phrase-Based Machine Translation}
+
+\subsection{Model}
+
+Given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an english sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on the following probabilistic equation:
+
+\[P(e|f)\]
+
+To find the best english translation, the following equation is used (Bayes rule).
+
+\[e_{best} = argmax_eP(e|f)\]
+\[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
+\[= argmax_e P(e|f)P(e)\]
+
+where \(P(e)\) is called the \textbf{language model} and \(P(f|e)\) is the \textbf{translation model}.
+
+The translation model is further decomposed:
+
+\[p(f_1^I|e_1^I) = \prod_{i=1}^I \phi(f_i^I|e_i^I) d(start_i - end_{i-1} -1)\]
+
+where \(\phi\) is called the \textbf{phrase translation probability} and \(d\) is the \textbf{reordering probability}.
+
+
+
+\section{Deep Learning Neural Networks}
 
 
 \chapter{Data Analysis}
@@ -84,10 +132,7 @@ We collected a total of 423 multilingual apps, offering its content at least for
 \end{figure}
 
 
-
 \section{Top Terms}
-
-
 
 
 \begin{table}[H]
@@ -112,16 +157,16 @@ Share & 541 &  & Installer les services Google Play & 366 &  & Schliessen & 428 
 \label{table:data_analysis_top_terms}
 \end{table}
 
-\chapter{Data extraction, preparation and storage}
+\chapter{Data Extraction, Preparation and Storage}
 
 
-\section{Extract translations}
+\section{Extract Translations}
 
 An android app has the form of a single binary file (suffix .apk). The XML files containing the translations are packed inside the .apk file. We used a software called ``Apktool''\footnote{\url{http://ibotpeaches.github.io/Apktool/}} to reverse engineer existing apps and extract the needed XML files.
 
-\section{Pre-process translations}
+\section{Preprocess Translations}
 
-This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs or placeholders combined with plain numbers. Secondly, the sanitized strings are prepared to be read by an SMT system.
+This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs or string placeholders. Secondly, the sanitized strings are prepared to be read by an SMT system.
 
 \subsection{Sanitizing}
 
@@ -141,57 +186,53 @@ The following rules are used to get rid of unwanted translations or parts of it:
 
 Tokenization is required to separate words from punctuation. Each token is separated by a space character: ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}''
 
-After tokenizsation, we applied Truecasing to our text corpus.\footnote{\url{https://en.wikipedia.org/wiki/Truecasing}} In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by analyzing all data first and then apply the most likely capitalization. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``\texttt{This}'' starting a sentence will then be recognized as ``\texttt{this}'' by an SMT system.
+After tokenizsation, truecasing was applied to our text corpus.\footnote{\url{https://en.wikipedia.org/wiki/Truecasing}} In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing all data and then apply the most likely capitalization. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``\texttt{This}'' starting a sentence will become ``\texttt{this}'', because it is usually written lowercase.
 
 
 \section{Data storage}
 
-All translations are stored in text files. Additionally, each translation is stored in a document with Apache Solr\footnote{\url{http://lucene.apache.org/solr/}}. Solr is an open source text search platform built on top of Apache Lucene\footnote{\url{https://lucene.apache.org/core/}}.
 
-\subsection{Corpus}
+\subsection{Parallel and Monolingual Corpus}
 
-After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. Parallel data of two language pairs contains two text files, one for each language. All sentences must be aligned so that line x of the target language corresponds to line x of the source language. A SMT system uses this parallel data to train the translation model.
-In addition, data of any language is stored monolingual. All sentences are written into one single text file. This is for example used to build language models. // TODO 
+After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. A parallel corpus (often also called bitext) describes sentence aligned text-files of one language pair. All sentences must be aligned so that line x of the target language corresponds to line x of the source language. Any SMT system uses this parallel data to train its translation model, so the parallel corpus can later be reused by multiple systems.
+
+In addition, data of any language is also stored monolingual. All sentences are written into a single text file. This is for example used to build language models, which are an important part of a phrase-based translation model.
 
 \subsection{Apache Solr}
 
-Solr allows to store the translations with additional meta data, such as the translation key and a unique app ID. Due to its way of indexing text data, Solr is very fast when querying translations. Furthermore, built in tools allow us to get nice statistics about our translations, for example the top terms grouped by language.
-// TODO
+In addition to the text files containing all translations, we needed a simple way to store all translations, preferably with additional meta data, to perform data analysis and calculate statistics.
+Apache Solr\footnote{\url{http://lucene.apache.org/solr/}} is used for this purpose. Solr is an open source text search platform built on top of Apache Lucene\footnote{\url{https://lucene.apache.org/core/}}. It allows to store the translations with additional meta data, such as the translation key and a unique app ID. Due to its way of indexing text data, Solr is very fast when querying for translation strings. Furthermore, built in tools allow to get nice statistics, for example the top terms grouped by language.
 
-\subsubsection{Setup and schema}
+\subsubsection{Setup and Schema}
 
-Solr offers so called "Cores" where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml}}. In our setup we created one core per language holding all the translations. The schema is identical for each core and consist of the following fields:
+Solr offers so called \emph{cores} where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml}}. In our setup we created one core per language and one document per translation string. The schema is identical for each core (language) and consist of the following fields:
+
+
 
 \subsubsection{Queries}
 
+\chapter{Translation Process}
 
+\section{Basline System}
 
-\chapter{Statistical machine translation SMT}
+\section{Moses}
 
-\section{Phrase-based}
+\section{Tensorflow}
 
-\subsection{Moses}
+\chapter{Prototype Web Application}
 
-\section{Deep learning}
+\section{Architecture}
 
-\subsection{Tensorflow}
-
-\chapter{Prototype web application}
-
-\subsection{Architecture}
-
-\subsection{Frontend}
+\section{Frontend}
 
 \chapter{Evaluation}
 
-\section{Comparing results}
 
-\section{BLEU score}
+\section{BLEU Score}
+
+\section{T}
 
 
-%\chapter {Related Work}
-%In which we learn what have other done to address similar problems. For example, the work of Star \cite{Star89}
-%
 %\chapter{The Problem}
 %In which we understand what the problem is in detail.
 %
@@ -206,10 +247,13 @@ Solr offers so called "Cores" where each core manages a separate index, schema a
 
 
 
+
+
 %END Doc
 %-------------------------------------------------------
 
 \bibliography{thesis}
 \bibliographystyle{plain}
+
 
 \end{document}

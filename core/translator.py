@@ -496,7 +496,7 @@ class TranslatorCompare(Translator):
         results_tensorflow = self.tensorflow.get(strings, lang_from, lang_to)
         results_solr = self.solr.get(strings, lang_from, lang_to)
         translations = []
-        for i, string in strings.iteritems():
+        for i, string in enumerate(strings):
             translations.append({
                 'source': string,
                 'moses': results_moses['translations'][i],
