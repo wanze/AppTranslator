@@ -122,16 +122,23 @@
  <uniqueKey>id</uniqueKey>
 
  <fieldType name="string" class="solr.StrField"/>
- <fieldType name="text" class="solr.TextField"/>
- <fieldType name="text_lowercase" class="solr.TextField">
+ <fieldType name="text" class="solr.TextField">
   <analyzer type="index">
     <tokenizer class="solr.StandardTokenizerFactory"/>
-    <!--<tokenizer class="solr.KeywordTokenizerFactory"/>-->
     <filter class="solr.LowerCaseFilterFactory"/>
   </analyzer>
   <analyzer type="query">
     <tokenizer class="solr.StandardTokenizerFactory"/>
-    <!--<tokenizer class="solr.KeywordTokenizerFactory"/>-->
+    <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+ </fieldType>
+ <fieldType name="text_lowercase" class="solr.TextField">
+  <analyzer type="index">
+    <tokenizer class="solr.StandardTokenizerFactory"/>
+    <filter class="solr.LowerCaseFilterFactory"/>
+  </analyzer>
+  <analyzer type="query">
+    <tokenizer class="solr.StandardTokenizerFactory"/>
     <filter class="solr.LowerCaseFilterFactory"/>
   </analyzer>
  </fieldType>
