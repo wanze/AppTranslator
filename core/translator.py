@@ -4,9 +4,10 @@ import os
 from extractor import ExtractTranslationsFromXML
 from solr import Solr
 import utils
+import operator
+
 
 class Translator(object):
-
     def get_id(self):
         """
         Return a unique ID for this translator
@@ -66,8 +67,8 @@ class Translator(object):
         os.remove(filename)
         return translations
 
-class TranslatorMoses(Translator):
 
+class TranslatorMoses(Translator):
     DEFAULT_CONFIG = {
         'drop_unknown': 0,
         'search_algorithm': 0,
@@ -178,7 +179,6 @@ class TranslatorMoses(Translator):
 
 
 class TranslatorLamtram(Translator):
-
     DEFAULT_CONFIG = {
         'beam': 5,
         'word_pen': 0,
@@ -242,15 +242,14 @@ class TranslatorLamtram(Translator):
     def _get_command(self, lang_from, lang_to, file_input, file_output='', file_debug=''):
         cmd = self.dir_lamtram + 'src/lamtram/lamtram --operation gen --models_in encdec='
         cmd = cmd + self.dir_models + lang_from + '-' + lang_to + '/transmodel.out'
-        cmd = cmd + ' --beam ' + str(self.config['beam']) + ' --word_pen ' + str(self.config['word_pen']) + ' --src_in ' + file_input
+        cmd = cmd + ' --beam ' + str(self.config['beam']) + ' --word_pen ' + str(
+                self.config['word_pen']) + ' --src_in ' + file_input
         cmd = cmd + ' > ' + file_output if file_output else cmd
         cmd = cmd + ' 2> ' + file_debug if file_debug else cmd
         return cmd
 
 
-
 class TranslatorTensorflow(Translator):
-
     DEFAULT_CONFIG = {
         'num_layers': 3,
         'size': 1024,
@@ -321,11 +320,153 @@ class TranslatorTensorflow(Translator):
         return cmd
 
 
+class SolrBaselineSystem(object):
+    def __init__(self, solr, config):
+        self.cache = {}
+        self.config = config
+        self.solr = solr
+
+    def translate(self, string, source, target):
+        translations = self._get_translations(string, source, target)
+        if len(translations):
+            return translations[0]['value']
+        # No direct translations available, translate by longest substring of sentence
+        words = string.split()
+        if len(words) == 1:
+            # String was a single word and we didn't get a translation before, we can't do any better
+            return string
+        translated_substrings = self._get_translations_substrings(1, words, source, target)
+        print ' '.join(translated_substrings)
+        return ' '.join(translated_substrings)
+
+    def _get_translations_substrings(self, level, words, source, target):
+        length = len(words)
+        if length == 1:
+            # single word -> directly translate
+            results = self._get_translations(words[0], source, target)
+            if len(results):
+                return [results[0]['value']]
+            else:
+                return [words[0]]
+        if length == level:
+            # At this point we must translate word by word
+            translations = []
+            for word in words:
+                results = self._get_translations(word, source, target)
+                if len(results):
+                    translations.append(results[0]['value'])
+                else:
+                    translations.append(word)
+            return translations
+
+        # The window size depends on the level
+        window_size = length - level
+        start = 0
+        end = window_size
+        # Move window from left to right, collect and translate sub strings
+        translations = {}
+        total_counts = {}
+        i = 0
+        found = False
+        while end <= length:
+            translations[i] = []
+            total_counts[i] = 0
+            substrings = []
+            if start > 0:
+                substrings.append(' '.join(words[0:start]))
+            substrings.append(' '.join(words[start:end]))
+            if end < length:
+                substrings.append(' '.join(words[end:length]))
+            print substrings
+            for substring in substrings:
+                results = self._get_translations(substring, source, target)
+                if len(results):
+                    translations[i].append({'translation': results[0]['value'], 'count': results[0]['count'], 'string': substring})
+                    total_counts[i] += results[0]['count']
+                    found = True
+                else:
+                    translations[i].append({'translation': substring, 'count': 0, 'string': substring})
+            start += 1
+            end += 1
+            i += 1
+        # If we didn't find any translation for the sub strings on this level, increase level => reduce substring size by one
+        if not found:
+            return self._get_translations_substrings(level + 1, words, source, target)
+        # Found translations! Continue with the most promising substring translation, which is the one with the highest total count
+        highest = (-1, 0)  # index, count
+        for index, count in total_counts.iteritems():
+            highest = (index, count) if count > highest[1] else highest
+        # Try to translate any sub strings further where we didn't get a translation so far
+        result = []
+        for translation in translations[highest[0]]:
+            if translation['count']:
+                result.append(translation['translation'])
+            else:
+                sub = self._get_translations_substrings(1, translation['string'].split(), source, target)
+                if len(sub):
+                    result.append(' '.join(sub))
+                else:
+                    result.append(translation['string'])
+        return result
+
+
+    def _get_translations(self, string, source, target):
+        # Lookup in cache
+        results = self._get_cache(string, source, target)
+        if len(results):
+            return results
+        # Search in Solr for an exact match of the string in the source language
+        results = self._find_exact(string, source)
+        if not results['numFound']:
+            return []
+        # Collect target translations, sorted by number of total counts
+        candidates = {}
+        for result in results['docs']:
+            params = {
+                'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
+            }
+            translations = self.solr.query(target, params)
+            if not translations['numFound']:
+                continue
+            value = translations['docs'][0]['value'].lower()
+            value = value.strip()
+            candidates[value] = 1 if value not in candidates else candidates[value] + 1
+        # Sort candidates by best translation candidate (having highest count)
+        candidates = sorted(candidates.items(), key=operator.itemgetter(1), reverse=True)
+        translations = []
+        for candidate in candidates:
+            translations.append({
+                'value': candidate[0],
+                'count': candidate[1]
+            })
+        self._store_cache(string, source, target, translations)
+        return translations
+
+    def _store_cache(self, string, source, target, translations):
+        key = source + target
+        if key not in self.cache:
+            self.cache[key] = {}
+        self.cache[key][string] = translations
+
+    def _get_cache(self, string, source, target):
+        key = source + target
+        if key not in self.cache:
+            return []
+        if string in self.cache[key]:
+            return self.cache[key][string]
+        return []
+
+    def _find_exact(self, string, lang):
+        params = {
+            'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, string, Solr.DELIMITER_END),
+            'rows': self.config['rows']
+        }
+        return self.solr.query(lang, params)
+
 
 class TranslatorSolr(Translator):
-
     DEFAULT_CONFIG = {
-        'rows': 20,  # Number of rows returned from search result
+        'rows': 100,  # Number of rows returned from search result
         'detailed_debug': False  # True to include all found translations in debug
     }
 
@@ -333,6 +474,7 @@ class TranslatorSolr(Translator):
         self.config = self.DEFAULT_CONFIG.copy()
         self.config.update(config)
         self.solr = Solr('', url)
+        self.baseline = SolrBaselineSystem(self.solr, self.config)
 
     def get_id(self):
         return 'solr'
@@ -346,115 +488,28 @@ class TranslatorSolr(Translator):
         strings = e.extract()
         debug = ''
         for key, string in strings.iteritems():
-            t = LongestSubstringMatch(string, lang_from, lang_to, self.solr)
+            translation = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
             row = {
                 'key': key,
                 'source': string,
-                'target': t.get_translation()
+                'target': translation
             }
             translations.append(row)
-            debug += t.debug
         return {
             'debug': debug,
             'translations': translations
         }
-
 
     def get(self, strings, lang_from, lang_to):
         translations = []
         debug = ''
         for string in strings:
-            t = LongestSubstringMatch(utils.to_utf8(string), lang_from, lang_to, self.solr, self.config)
-            try:
-                translations.append(t.get_translation())
-            except:
-                translations.append(string)
-            debug += t.debug
+            translation = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
+            translations.append(translation)
         return {
             'debug': debug,
             'translations': translations
         }
-
-
-class LongestSubstringMatch(object):
-
-    def __init__(self, string, lang_from, lang_to, solr, config):
-        self.config = config
-        self.solr = solr
-        self.string = string
-        self.debug = ''
-        self.lang_from = lang_from
-        self.lang_to = lang_to
-
-    def get_translation(self):
-        # Try to find a translation from the given string
-        result = self._translate_substring(self.string)
-        if result:
-            return result
-        # Reduce string from right and try to match substrings
-        tokens = self.string.split()
-        if len(tokens) == 1:
-            return self.string
-        words = [tokens[-1]]
-        result = ''
-        while not result:
-            index_last = len(words)
-            string = ' '.join(tokens[0:-index_last])
-            if string:
-                result = self._translate_substring(string)
-            if result or index_last == len(tokens):
-                # Translate and append all single words
-                result_words = []
-                for word in reversed(words):
-                    w = self._translate_substring(word)
-                    if w:
-                        result_words.append(w)
-                    else:
-                        result_words.append(word)
-                result = result + ' ' + ' '.join(result_words)
-            else:
-                index_last += 1
-                words.append(tokens[-index_last])
-        return result
-
-
-    def _translate_substring(self, string):
-        self.debug += 'Translating "%s"\n' % string
-        results = self._find_exact(string, self.lang_from)
-        self.debug += 'Found a total of %s translations matching the source string\n' % results['numFound']
-        variations = []
-        for result in results['docs']:
-            params = {
-                'q': 'app_id:%s AND key:%s' % (result['app_id'], result['key'])
-            }
-            self.debug += 'Looking for a translation in target language -> app_id=%s, key=%s' % (utils.to_utf8(result['app_id']), utils.to_utf8(result['key']))
-            # Search for a translation with same app_id and key in target language
-            translations = self.solr.query(self.lang_to, params)
-            if translations['numFound']:
-                t = translations['docs'][0]['value']
-                if not self.config['detailed_debug']:
-                    self.debug += '\nFound translation "%s"\n\n' % t
-                    return t
-                else:
-                    variations.append(t)
-                    self.debug += ' -> Found translation "%s"\n' % utils.to_utf8(t)
-            else:
-                self.debug += ' -> no translation available\n'
-        if self.config['detailed_debug'] and len(variations):
-            unique = list(set(variations))
-            self.debug += 'Variations (%s):\n' % str(len(unique))
-            # self.debug += '\t' + '\n\t'.join(unique) + '\n\n'
-            return unique[0]
-        self.debug += 'No translations available for target language\n\n'
-        return ''
-
-
-    def _find_exact(self, string, lang):
-        params = {
-            'q': 'value_lc:"%s %s %s"' % (Solr.DELIMITER_START, string, Solr.DELIMITER_END),
-            'rows': self.config['rows']
-        }
-        return self.solr.query(lang, params)
 
 
 class TranslatorCompare(Translator):
@@ -490,7 +545,6 @@ class TranslatorCompare(Translator):
             'translations': translations
         }
 
-
     def get(self, strings, lang_from, lang_to):
         results_moses = self.moses.get(strings, lang_from, lang_to)
         results_tensorflow = self.tensorflow.get(strings, lang_from, lang_to)
@@ -511,6 +565,7 @@ class TranslatorCompare(Translator):
 
 import getopt
 import sys
+
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'i:t:s:', ['input=', 'target_lang=', 'source_lang='])
