@@ -336,7 +336,7 @@ class SolrBaselineSystem(object):
             # String was a single word and we didn't get a translation before, we can't do any better
             return string
         translated_substrings = self._get_translations_substrings(1, words, source, target)
-        print ' '.join(translated_substrings)
+        # print ' '.join(translated_substrings)
         return ' '.join(translated_substrings)
 
     def _get_translations_substrings(self, level, words, source, target):
@@ -377,7 +377,7 @@ class SolrBaselineSystem(object):
             substrings.append(' '.join(words[start:end]))
             if end < length:
                 substrings.append(' '.join(words[end:length]))
-            print substrings
+            # print substrings
             for substring in substrings:
                 results = self._get_translations(substring, source, target)
                 if len(results):
