@@ -48,16 +48,15 @@ app.controller('DecoderController', function ($scope, $http, Upload, $timeout, $
             weight_w: '-1'
         },
         solr: {
-            rows: 20,
-            detailed_debug: 0
+            rows: 100
         },
         lamtram: {
             word_pen: 0.0,
             beam: 5
         },
         tensorflow: {
-            num_layers: 3,
-            size: 1024
+            num_layers: 2,
+            size: 256
         },
         compare: {},
     };

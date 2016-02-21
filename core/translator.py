@@ -327,29 +327,29 @@ class SolrBaselineSystem(object):
         self.solr = solr
 
     def translate(self, string, source, target):
+        debug = 'Looking for direct match translations for string "%s"' % string
         translations = self._get_translations(string, source, target)
         if len(translations):
-            return translations[0]['value']
+            debug += '\nFound direct translations: ' + str(translations)
+            return translations[0]['value'], debug
         # No direct translations available, translate by longest substring of sentence
         words = string.split()
         if len(words) == 1:
             # String was a single word and we didn't get a translation before, we can't do any better
-            return string
-        translated_substrings = self._get_translations_substrings(1, words, source, target)
+            return string, debug
+        debug += '\nNo direct translations found, starting the substring algorithm...'
+        translated_substrings, info = self._get_translations_substrings(1, words, source, target)
+        debug += info
+        translated_substrings = [utils.to_utf8(word) for word in translated_substrings]
         # print ' '.join(translated_substrings)
-        return ' '.join(translated_substrings)
+        # print translated_substrings
+        # print debug
+        return ' '.join(translated_substrings), debug
 
     def _get_translations_substrings(self, level, words, source, target):
         length = len(words)
-        if length == 1:
-            # single word -> directly translate
-            results = self._get_translations(words[0], source, target)
-            if len(results):
-                return [results[0]['value']]
-            else:
-                return [words[0]]
-        if length == level:
-            # At this point we must translate word by word
+        debug = '\nTranslating sub strings, level=%s, words=%s' % (level, str(words))
+        if length == 1 or length == level:
             translations = []
             for word in words:
                 results = self._get_translations(word, source, target)
@@ -357,7 +357,7 @@ class SolrBaselineSystem(object):
                     translations.append(results[0]['value'])
                 else:
                     translations.append(word)
-            return translations
+            return translations, debug
 
         # The window size depends on the level
         window_size = length - level
@@ -386,12 +386,14 @@ class SolrBaselineSystem(object):
                     found = True
                 else:
                     translations[i].append({'translation': substring, 'count': 0, 'string': substring})
+            debug += '\n' + str(translations[i])
             start += 1
             end += 1
             i += 1
         # If we didn't find any translation for the sub strings on this level, increase level => reduce substring size by one
         if not found:
-            return self._get_translations_substrings(level + 1, words, source, target)
+            results, info = self._get_translations_substrings(level + 1, words, source, target)
+            return results, debug + info
         # Found translations! Continue with the most promising substring translation, which is the one with the highest total count
         highest = (-1, 0)  # index, count
         for index, count in total_counts.iteritems():
@@ -402,13 +404,11 @@ class SolrBaselineSystem(object):
             if translation['count']:
                 result.append(translation['translation'])
             else:
-                sub = self._get_translations_substrings(1, translation['string'].split(), source, target)
-                if len(sub):
-                    result.append(' '.join(sub))
-                else:
-                    result.append(translation['string'])
-        return result
-
+                sub, info = self._get_translations_substrings(1, translation['string'].split(), source, target)
+                debug += info
+                for word in sub:
+                    result.append(word)
+        return result, debug
 
     def _get_translations(self, string, source, target):
         # Lookup in cache
@@ -466,8 +466,7 @@ class SolrBaselineSystem(object):
 
 class TranslatorSolr(Translator):
     DEFAULT_CONFIG = {
-        'rows': 100,  # Number of rows returned from search result
-        'detailed_debug': False  # True to include all found translations in debug
+        'rows': 100,  # Max. number of rows returned from search result
     }
 
     def __init__(self, url='http://localhost:8983', config={}):
@@ -488,13 +487,14 @@ class TranslatorSolr(Translator):
         strings = e.extract()
         debug = ''
         for key, string in strings.iteritems():
-            translation = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
+            translation, info = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
             row = {
                 'key': key,
                 'source': string,
                 'target': translation
             }
             translations.append(row)
+            debug += '\n\n\n' + info if debug else info
         return {
             'debug': debug,
             'translations': translations
@@ -504,8 +504,9 @@ class TranslatorSolr(Translator):
         translations = []
         debug = ''
         for string in strings:
-            translation = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
+            translation, info = self.baseline.translate(utils.to_utf8(string), lang_from, lang_to)
             translations.append(translation)
+            debug += '\n\n\n' + info if debug else info
         return {
             'debug': debug,
             'translations': translations
