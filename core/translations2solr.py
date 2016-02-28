@@ -102,26 +102,31 @@ class Translations2Solr:
         dir_xml = os.path.join(self.dir_xml_out, language)
         if not os.path.isdir(dir_xml):
             os.makedirs(dir_xml)
-        temp_filename = os.path.join(dir_xml, app_id + '.xml.tmp')
-        file_temp = open(temp_filename, 'w+')
-        file_temp.write('<add>\n')
-        for key, value in translations.iteritems():
-            if not value:
-                continue
-            value = cgi.escape(value)
-            file_temp.write('<doc>\n')
-            file_temp.write('<field name="id">' + '_'.join([app_id, key]) + '</field>\n')
-            file_temp.write('<field name="app_id">%s</field>\n' % app_id)
-            file_temp.write('<field name="key">%s</field>\n' % key)
-            file_temp.write('<field name="value">%s</field>\n' % value)
-            file_temp.write('<field name="value_lc">%s %s %s</field>\n' % (Solr.DELIMITER_START, value, Solr.DELIMITER_END))
-            file_temp.write('</doc>\n')
-        file_temp.write('</add>\n')
-        file_temp.close()
-        file_xml = temp_filename.replace('.xml.tmp', '.xml')
-        os.rename(temp_filename, file_xml)
-        return file_xml
+        file_path = os.path.join(dir_xml, app_id + '.xml')
+        writer = SolrXMLWriter(file_path)
+        writer.write(app_id, translations)
 
+
+class SolrXMLWriter(object):
+
+    def __init__(self, xml_file_path):
+        self.xml_file_path = xml_file_path
+
+    def write(self, app_id, translations):
+        with open(self.xml_file_path, 'w') as f:
+            f.write('<add>\n')
+            for key, value in translations.iteritems():
+                if not value:
+                    continue
+                value = cgi.escape(value)
+                f.write('<doc>\n')
+                f.write('<field name="id">' + '_'.join([app_id, key]) + '</field>\n')
+                f.write('<field name="app_id">%s</field>\n' % app_id)
+                f.write('<field name="key">%s</field>\n' % key)
+                f.write('<field name="value">%s</field>\n' % value)
+                f.write('<field name="value_lc">%s %s %s</field>\n' % (Solr.DELIMITER_START, value, Solr.DELIMITER_END))
+                f.write('</doc>\n')
+            f.write('</add>\n')
 
 if __name__ == "__main__":
     try:
