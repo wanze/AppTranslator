@@ -328,6 +328,7 @@ class SolrBaselineSystem(object):
 
     def translate(self, string, source, target):
         debug = 'Looking for direct match translations for string "%s"' % string
+        string = string.strip()
         translations = self._get_translations(string, source, target)
         if len(translations):
             debug += '\nFound direct translations: ' + str(translations)
@@ -341,9 +342,6 @@ class SolrBaselineSystem(object):
         translated_substrings, info = self._get_translations_substrings(1, words, source, target)
         debug += info
         translated_substrings = [utils.to_utf8(word) for word in translated_substrings]
-        # print ' '.join(translated_substrings)
-        # print translated_substrings
-        # print debug
         return ' '.join(translated_substrings), debug
 
     def _get_translations_substrings(self, level, words, source, target):
@@ -590,11 +588,11 @@ if __name__ == "__main__":
         with open(input) as f:
             i = 0
             for string in f:
-                result = trans.get([string], source_lang, target_lang)
+                result = trans.get([string.strip()], source_lang, target_lang)
                 print utils.to_utf8(result['translations'][0])
                 if i % 100 == 0:
                     sys.stderr.write('Translated %s strings so far...\n' % str(i))
                 i += 1
     else:
-        result = trans.get([input], source_lang, target_lang)
+        result = trans.get([input.strip()], source_lang, target_lang)
         print utils.to_utf8(result['translations'][0])
