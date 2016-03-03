@@ -329,6 +329,9 @@ class SolrBaselineSystem(object):
     def translate(self, string, source, target):
         debug = 'Looking for direct match translations for string "%s"' % string
         string = string.strip()
+        if len(string) > int(self.config['max_string_length']):
+            debug += '\nIgnored string because it is too long'
+            return string
         translations = self._get_translations(string, source, target)
         if len(translations):
             debug += '\nFound direct translations: ' + str(translations)
@@ -465,6 +468,7 @@ class SolrBaselineSystem(object):
 class TranslatorSolr(Translator):
     DEFAULT_CONFIG = {
         'rows': 100,  # Max. number of rows returned from search result
+        'max_string_length': 1024  # Max number of chars in the input strings, longer strings are ignored
     }
 
     def __init__(self, url='http://localhost:8983', config={}):
