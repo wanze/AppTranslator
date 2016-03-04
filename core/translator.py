@@ -331,7 +331,7 @@ class SolrBaselineSystem(object):
         string = string.strip()
         if len(string) > int(self.config['max_string_length']):
             debug += '\nIgnored string because it is too long'
-            return string
+            return string, debug
         translations = self._get_translations(string, source, target)
         if len(translations):
             debug += '\nFound direct translations: ' + str(translations)
@@ -447,14 +447,16 @@ class SolrBaselineSystem(object):
         key = source + target
         if key not in self.cache:
             self.cache[key] = {}
-        self.cache[key][string] = translations
+        hash = hashlib.md5(string).hexdigest()
+        self.cache[key][hash] = translations
 
     def _get_cache(self, string, source, target):
         key = source + target
         if key not in self.cache:
             return []
-        if string in self.cache[key]:
-            return self.cache[key][string]
+        hash = hashlib.md5(string).hexdigest()
+        if hash in self.cache[key]:
+            return self.cache[key][hash]
         return []
 
     def _find_exact(self, string, lang):

@@ -79,15 +79,16 @@ How
 
 \section{Statistical Machine Translation}
 
-Statistical Machine Translation (SMT) is based on a large corpus of bilingual data. A translation model is trained to output the best possible translation according to some probabilistic function. Therefore we need to get a sufficient amount of sentences from Android apps in order to train these models.
+Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction – a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.\cite{smt_book_koehn}
 
-% Android apps can be installed on a mobile device by downloading a .apk file from the Google Playstore. Some reverse engineering is necessary to extract the translations from the binary file. Unfortunately, multilingual apps are not marked as such in the Google PlayStore. This means that we don't know if a app provides any translations prior to downloading and extracting it.
-%
+%Statistical Machine Translation (SMT) is based on a large corpus of bilingual data. A translation model is trained to output the best possible translation according to some probabilistic function. In the context of this thesis it means that we learn a translation system from extracted translation of various apps.%
 
+SMT translation models are usually trained on a large parallel corpus which is freely available on the web \footnote{\url{http://www.statmt.org/europarl/}}. The BLEU metric is then used to measure the quality of the produced translations. \cite{bleu_score}
+There exists a recurring translation task of the ``Workshop on statistical machine translation'', which focuses on translating european language pairs by improving existing systems\footnote{\url{http://www.statmt.org/wmt15/translation-task.html}}.
+
+In this thesis, we compare two different SMT algorithm and evaluate how they perform in the context of translating short sentences of mobile apps. The models are therefore applied on a much smaller data set than usual.
 
 \section{Challenges}
-
-Challenges:
 
 
 \begin{itemize}
@@ -114,10 +115,7 @@ Challenges:
 %Overview of SMT
 %Has been done but not specific domain of short sentences mobile
 
-This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called \textbf{Statistical Phrase-Based Translation} and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based} The second, more recent model, uses \textbf{Deep Learning Neural Networks} to perform translations. \cite{smt_deep_learning} SMT translation models are usually trained on a large parallel corpus which is freely available on the web \footnote{\url{http://www.statmt.org/europarl/}}. The BLEU metric is then used to measure the quality of the produced translations.
-There exists a recurring translation task of the ``Workshop on statistical machine translation'', which focuses on translating european language pairs by improving existing systems\footnote{\url{http://www.statmt.org/wmt15/translation-task.html}}.
-
-This thesis compares how both approaches perform in the context of translating short sentences of mobile apps. The models are therefore applied on a much smaller data set than usual.
+This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called \textbf{Statistical Phrase-Based Translation} and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based} The second, more recent model, uses \textbf{Deep Learning Neural Networks} to perform translations. \cite{smt_deep_learning}
 
 \section{Phrase-Based Machine Translation}
 
@@ -158,15 +156,15 @@ where \(\phi\) is called the \textbf{phrase translation probability} and \(d\) i
 
 \section{Apps}
 
-A total of 698 free Android apps were collected from various categories\footnote{Click on Categories to see a list of available categories at:  \url{https://play.google.com/store/apps?hl=en}}, ensuring a good mix of different translations. Most of them were chosen randomly beside the top apps, mostly from Google, that ensure good translation quality of different languages. Figure \ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available english translations. Note that the counts indicate the number of effective translations after eliminating uninteresting data during pre-processing the corpus (see. chapter XY). Most of the apps have similar counts for all the three languages. Surprisingly, some apps provide more translations for german and french than english. Different counts can happen because of:
+A total of 698 free Android apps were collected from various categories\footnote{Click on Categories to see a list of available categories at:  \url{https://play.google.com/store/apps?hl=en}}, ensuring a good mix of different translations. Most of them were chosen randomly beside the top apps, mostly from Google. Figure \ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available english translations. Note that the counts indicate the number of effective translations after eliminating uninteresting data during pre-processing the corpus (see chapter \ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all the three languages. Surprisingly, some apps provide more translations for german and french than english. Different counts can happen because of:
 
 \begin{enumerate}
-\item Not all strings were translated to all languages. Some english words don't need to be translated, e.g. E-Mail.
+\item Not all strings were translated to all languages. Some english words remain the same in the target language and don't need to be translated, e.g. E-Mail.
+\item The XML files containing the translations are out of sync, e.g. the developer forgot to add a french translation.
 \item Some translations were abandoned during pre-processing.
-\item The XML files containing the translations are out of sync.
 \end{enumerate}
 
-34 apps did not isolate their strings in XML files (we assume that they are hardcoded in the programming code). This leaves a effective number of 664 apps where we could extract translations. However, 241 apps were not multilingual and therefore not useful for building translation systems. Unfortunately, apps are not marked as multi-language in the app store, so we only know if there are translations available after downloading and extracting the data.
+34 apps did not isolate their strings in XML files (we assume that they are hardcoded in the programming code). This leaves a effective number of 664 apps where we could extract translations. However, 241 apps among them were not multilingual and therefore not useful for building translation systems. Unfortunately, apps are not marked as multi-language in the app store, so we only know if there are translations available after downloading and extracting the data.
 
 \begin{figure}[H]
     \centering
@@ -178,7 +176,7 @@ A total of 698 free Android apps were collected from various categories\footnote
 
 \section{Languages}
 
-We collected a total of 423 multilingual apps, offering its content at least for two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, where we focus on this thesis, are both in the top 4. The top apps are translated in many languages. In total, 117 different languages were available.
+We collected a total of 423 multilingual apps, offering its content at least for two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, where we focus on this thesis, are both in the top 4. The top apps are translated in many more languages. Overall, 117 different languages were available.
 
 \begin{figure}[H]
     \centering
@@ -214,15 +212,34 @@ Share & 541 &  & Installer les services Google Play & 366 &  & Schliessen & 428 
 \end{table}
 
 \chapter{Data Extraction, Preparation and Storage}
-
+\label{cha:data_extraction_prep_storage}
 
 \section{Extract Translations}
 
-An android app has the form of a single binary file (suffix .apk). The XML files containing the translations are packed inside the .apk file. We used a software called ``Apktool''\footnote{\url{http://ibotpeaches.github.io/Apktool/}} to reverse engineer existing apps and extract the needed XML files.
+An Android app has the form of a single binary file (suffix .apk). The XML files containing the translations are packed inside the .apk file. We used a software called ``Apktool''\footnote{\url{http://ibotpeaches.github.io/Apktool/}} to reverse engineer existing apps and extract the needed XML files.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/data_extraction_xml.png}
+    \caption{For each language, the translations are stored in a XML file}
+    \label{fig:data_extraction_xml}
+\end{figure}
+
+Inside the \texttt{strings.xml} files, translations are stored key-value based. Each string has a unique key which holds the translation value for each language. Here is an example how an English XML file looks like:
+
+\begin{verbatim}
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="close_app">Close Application</string>
+    <string name="back">Back</string>
+    ...
+</resources>
+\end{verbatim}
+
 
 \section{Preprocess Translations}
 
-This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs or string placeholders. Secondly, the sanitized strings are prepared to be read by an SMT system.
+This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs or string placeholders. Secondly, the sanitized strings are tokenized so that they can be used by an SMT system.
 
 \subsection{Sanitizing}
 
@@ -273,6 +290,14 @@ Solr offers so called \emph{cores} where each core manages a separate index, sch
 \item \textbf{value\_lc} Again the translation value, additionally indexed with a special start- and ending delimiter. This allows to search for exact values.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/data_extraction_solr_schema.png}
+    \caption{Translations are stored in a document inside a separate Core per language}
+    \label{fig:data_extraction_solr_schema}
+\end{figure}
+
+The data in the \texttt{value} and \texttt{value\_lc} fields is stored tokenized and lowercased. The Solr Standard Tokenizer\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Tokenizers\#Tokenizers-StandardTokenizer}} splits text into tokens, treating whitespace and punctuation as delimiters. Delimiter characters are discarded.
 
 \subsubsection{Queries}
 
@@ -286,7 +311,17 @@ Solr offers so called \emph{cores} where each core manages a separate index, sch
 
 \chapter{Web Application}
 
+The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application \emph{could} already be used by app developers to translate their XML translation files.
+
+The interface allows to translate either plain strings or a XML translation file from one language to another. Each decoder offers some specific settings where the user can influence the decoder.
+
 \section{Architecture}
+
+% com.ancestry.android.apps.ancestry_your_capitalized
+% com.google.android.apps.plus_collexion_abuse_appeal_rejected
+% com.google.android.apps.plus_collexion_suspension_details
+% --data_binary '{"id":"com.google.android.apps.plus_collexion_abuse_appeal_rejected","value":{"set":"votre"},"value_lc":{"set":"votre"}}'
+
 
 \section{Frontend}
 

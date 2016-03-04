@@ -43,7 +43,8 @@ class Bleu2Solr(object):
         return xml_file
 
     def _index(self, xml_file, lang):
-        core = '-'.join(['run', str(self.run), lang])
+        # Fake a language (e.g. "en-fr-run-1-fr" holds french training data for the first run translating en to fr)
+        core = '-'.join([self.languages[0], self.languages[1], 'run', str(self.run), lang])
         self.solr.index(xml_file, core)
 
 
