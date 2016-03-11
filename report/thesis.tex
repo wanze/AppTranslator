@@ -29,7 +29,7 @@ This project aims to extract and parse translations of existing applications to 
 Android, iPhone and Windows smart phones are available in countries all over the world. If an app is intended to be used internationally, translating it into multiple languages can be important to attract users. Users may only use the app if its text is available in their native language. Offering multiple languages is therefore crucial for paid apps to increase sales. However, translating an app requires additional effort. From a developers perspective, all strings must be isolated in order to replace them with different values for each supported language. Furthermore, translating text itself is a difficult task which usually requires the work of a professional translator.
 
 The main idea of this thesis is to collect a lot of existing apps and extract their translations. Are we able to provide high quality translations with the help of Statistical Machine Translation (SMT)? To reduce the scope of different mobile operating systems and languages, we focus on automatic translations of Android apps from English to French and German. From now on, the term \emph{app} in this thesis refers to a Android application. We have chosen French and German as target languages for the translations because they are natively spoken in Switzerland, which makes understanding the produced results easier. %Also our data analysis showed that these two languages are very popular.% 
-SMT is the dominant approach in automating translations and used by services like \emph{Google Translate}\footnote{\url{https://translate.google.com}} and \emph{Bing Translator}\footnote{\url{https://www.bing.com/translator}} (Microsoft). In this thesis, we use different SMT algorithms to produce translations and compare their results, both manually and automatically. A prototype web application is built which serves as a playground to translate strings and apps.
+SMT is the dominant approach in automating translations and used by services like ``Google Translate''\footnote{\url{https://translate.google.com}} and Microsoft's ``Bing Translator''\footnote{\url{https://www.bing.com/translator}}. In this thesis, we use different SMT algorithms to produce translations and compare their results, both manually and automatically. A prototype web application is built which serves as a playground to translate strings and apps.
 
 \chapter{Problem Analysis}
 \label{cha:problem_analysis}
@@ -44,7 +44,7 @@ This chapter answers the question why it is important to offer multiple language
 
 %https://web.archive.org/web/20150327084808/http://www.distimo.com/publications%
 
-Google encourages developers to localize their apps on their localization checklist. \footnote{Android localization checklist: \url{http://developer.android.com/distribute/tools/localization-checklist.html}}
+Google encourages developers to localize their apps on their localization checklist.\footnote{Android localization checklist: \url{http://developer.android.com/distribute/tools/localization-checklist.html}}
 
 \begin{quote}
 Android and Google Play offer you a worldwide audience for your apps, with an addressable user base that's growing very rapidly in countries such as Japan, Korea, India, Brazil, and Russia. We strongly encourage you to localize as it can maximize your apps’ distribution potential resulting in ratings from users around the world.
@@ -54,12 +54,14 @@ The developer should first identify the countries where the app will be distribu
 
 Since 2013, Google offers an (human-based) app translation service to developers.\footnote{Android Developers Blog post about Googles translation service: \url{http://android-developers.blogspot.ch/2013/11/app-translation-service-now-available.html}} Several developers who participated at the pilot program shared their results after translating their apps:
 
-\begin{quote}
-The developers of Zombie Ragdoll\footnote{Game Zombie Ragdoll in the Google Playstore: \url{https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll}} used this tool to launch their new game simultaneously in 20 languages in August 2013. When they combined app translation with local marketing campaigns, they found that 80\% of their installs came from non-English-language users. Dating app SayHi\footnote{Dating app SayHi! in the Google Playstore: \url{https://play.google.com/store/apps/details?id=com.unearby.sayhi}} Chat expanded into 13 additional languages using the App Translation Service. They saw 120\% install growth in localized markets and improved user reviews of the professionally translated UI. The developer of card game G4A Indian Rummy\footnote{Card game Indian Rummy \url{https://play.google.com/store/apps/details?id=org.games4all.android.games.indianrummy.prod}} found that the App Translation Service was easier to use than their previous translation methods, and saw a 300\% increase with user engagement in localized apps.
-\end{quote}
+\begin{itemize}
+\item The developers of Zombie Ragdoll\footnote{Game Zombie Ragdoll in the Google Playstore: \url{https://play.google.com/store/apps/details?id=com.rvappstudios.zombieragdoll}} used this tool to launch their new game simultaneously in 20 languages in August 2013. When they combined app translation with local marketing campaigns, they found that 80\% of their installs came from non-English-language users.
+\item Dating app SayHi\footnote{Dating app SayHi! in the Google Playstore: \url{https://play.google.com/store/apps/details?id=com.unearby.sayhi}} Chat expanded into 13 additional languages using the App Translation Service. They saw 120\% install growth in localized markets and improved user reviews of the professionally translated UI.
+\item The developer of card game G4A Indian Rummy\footnote{Card game Indian Rummy \url{https://play.google.com/store/apps/details?id=org.games4all.android.games.indianrummy.prod}} found that the App Translation Service was easier to use than their previous translation methods, and saw a 300\% increase with user engagement in localized apps.
+\end{itemize}
 
 
-In 2012, \emph{App Annie} (former called \emph{Distimo})\footnote{\url{https://www.appannie.com}}, published a study\footnote{App Annie's study The impact of app translations: \url{https://web.archive.org/web/20150327084808/http://www.distimo.com/publications}} where they analysed the impact of translations to iPhone apps\footnote{\url{https://gigaom.com/2012/10/01/distimo-app-translation-can-pay-off-especially-in-asia/}}. They found out that the use of native language is still limited in several countries, for example Italy, Russia or Brazil. Native-only apps are mostly used in Asian countries (see Figure \ref{fig:problem_analysis_impact_languages}).
+In 2012, ``App Annie'' \footnote{\url{https://www.appannie.com}} (former called ``Distimo''), published a study where they analysed the impact of translations to iPhone apps.\footnote{App Annie's study The impact of app translations: \url{https://web.archive.org/web/20150327084808/http://www.distimo.com/publications}} They found out that the use of native language is still limited in several countries, for example Italy, Russia or Brazil. Native-only apps are mostly used in Asian countries (see Figure \ref{fig:problem_analysis_impact_languages}).
 The study followed 200 iPhone apps that introduced native language support in a market and observed their growth. Only one week after the local language support was introduced with an app update, downloading increased by 128\% and revenue by 26\%.
 
 %Another case-study by David Janner from make app magazine\footnote{\url{http://makeappmag.com/iphone-app-localization-keywords}} observed the impact of translating one single app.
@@ -68,18 +70,18 @@ The study followed 200 iPhone apps that introduced native language support in a 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/problem_analysis_app_annie.jpg}
-    \caption{Screenshot from the study \emph{The impact of app translations} by App Annie showing the distribution of apps supporting native and other languages for the 12 top languages.}
+    \caption{Screenshot from the study ``The impact of app translations'' by App Annie showing the distribution of apps supporting native and other languages for the 12 top languages.}
     \label{fig:problem_analysis_impact_languages}
 \end{figure}
 
 
 \section{Translation Services}
 
-How 
+
 
 \section{Statistical Machine Translation}
 
-Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction – a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.\cite{smt_book_koehn}
+Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction - a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.\cite{smt_book_koehn}
 
 %Statistical Machine Translation (SMT) is based on a large corpus of bilingual data. A translation model is trained to output the best possible translation according to some probabilistic function. In the context of this thesis it means that we learn a translation system from extracted translation of various apps.%
 
@@ -115,7 +117,7 @@ In this thesis, we compare two different SMT algorithm and evaluate how they per
 %Overview of SMT
 %Has been done but not specific domain of short sentences mobile
 
-This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called \textbf{Statistical Phrase-Based Translation} and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based} The second, more recent model, uses \textbf{Deep Learning Neural Networks} to perform translations. \cite{smt_deep_learning}
+This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called ``Statistical Phrase-Based Translation'' and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based}\cite{smt_book_koehn} The second, more recent model, uses Deep Learning Neural Networks to perform translations. \cite{smt_deep_learning}
 
 \section{Phrase-Based Machine Translation}
 
@@ -131,19 +133,66 @@ To find the best english translation, the following equation is used (Bayes rule
 \[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
 \[= argmax_e P(e|f)P(e)\]
 
-where \(P(e)\) is called the \textbf{language model} and \(P(f|e)\) is the \textbf{translation model}.
+where \(P(e)\) is called the \emph{language model} and \(P(f|e)\) is the \emph{translation model}.
 
 The translation model is further decomposed:
 
 \[p(\bar{f}_1^I|\bar{e}_1^I) = \prod_{i=1}^I \phi(\bar{f}_i^I|\bar{e}_i^I) d(start_i - end_{i-1} -1)\]
 
-where \(\phi\) is called the \textbf{phrase translation probability} and \(d\) is the \textbf{reordering probability}.
+where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}.
+
+The foreign sentence \emph{f} is broken up into \emph{I} phrases \(\bar{f}_i\). Each foreign phrase is translated into an English phrase \(\bar{e}_i\).
+
+Reordering is handled by a \emph{distance based reordering model}. We define \(start_i\) as the position of the first word of the foreign input phrase that translates to the \emph{i}th English phrase, and \(end_i\) as the position of the last word of that foreign phrase. The reordering distance is the number of words skipped when taking foreign words out of sequence (see figure \ref{fig:related_work_phrase_based_reordering}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/related_work_phrase_based_reordering.png}
+    \caption{Distance based reordering}
+    \label{fig:related_work_phrase_based_reordering}
+\end{figure}
+
+\emph{d} is turned into a proper probability distribution by applying an exponentially decaying cost function \(d(x) = \alpha^{|x|}\) with \(\alpha \epsilon [0,1]\). This means that movements of phrases over large distances are more expensive than shorter movements or no movement at all.
+
 
 \subsection{Learning a Phrase Translation Table}
 
-- Word alignment
-- Extraction of phrase pairs
-- Scoring phrase pairs
+Building a phrase translation table involves three stages:
+\begin{enumerate}
+\item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models.\footnote{IBM word alignment models: \url{https://en.wikipedia.org/wiki/IBM_alignment_models}} Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top term from our corpus.
+\item \textbf{Extraciton of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment.
+\item \textbf{Scoring phrase pairs} Assign probabilities to phrase translations.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/related_work_word_alignment.png}
+    \caption{Word alignment between a top term of our parallel Enlgish/French corpus.}
+    \label{fig:related_work_word_alignment}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3 \textwidth]{images/related_work_phrase_alignment.png}
+    \caption{Extract phrase pairs consistent with word alignment.}
+    \label{fig:related_work_phrase_alignment}
+\end{figure}
+
+
+We are able to extract the following phrase pairs from the example sentence:
+\begin{itemize}
+\item Update the Google Play Services / Mettre \a`a jour les services Google Play
+\item Update / Mettre \a`a jour
+\item Update the / Mettre \a`a jour les
+\item Google Play Services / services Google Play
+\item The Google Play Services / les services Google Play
+\item Google Play / Google Play 
+\end{itemize}
+
+The last step is to estimate the phrase translation probabilities (scoring by relative frequency):
+
+\[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i}count(\bar{e},\bar{f}_i)}\]
+
 
 \subsection{Decoding}
 
@@ -280,7 +329,7 @@ Solr is also used as Baseline translation system (see chapter xy).
 
 \subsubsection{Setup and Schema}
 
-Solr offers so called \emph{cores} where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml}}. In our setup we created one core per language and one document per translation string. The schema is identical for each core (language) and consist of the following fields:
+Solr offers so called ``Cores'' where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml}}. In our setup we created one core per language and one document per translation string. The schema is identical for each core (language) and consist of the following fields:
 
 \begin{itemize}
 \item \textbf{id} Unique ID used by Solr to identify a document.
@@ -311,7 +360,7 @@ The data in the \texttt{value} and \texttt{value\_lc} fields is stored tokenized
 
 \chapter{Web Application}
 
-The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application \emph{could} already be used by app developers to translate their XML translation files.
+The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application could already be used by app developers to translate their XML translation files.
 
 The interface allows to translate either plain strings or a XML translation file from one language to another. Each decoder offers some specific settings where the user can influence the decoder.
 
