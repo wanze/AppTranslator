@@ -133,7 +133,7 @@ To find the best english translation, the following equation is used (Bayes rule
 \[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
 \[= argmax_e P(e|f)P(e)\]
 
-where \(P(e)\) is called the \emph{language model} and \(P(f|e)\) is the \emph{translation model}.
+where \(P(e)\) is called the \emph{language model}\footnote{\url{https://en.wikipedia.org/wiki/Language_model}} and \(P(f|e)\) is the \emph{translation model}.
 
 The translation model is further decomposed:
 
@@ -148,7 +148,7 @@ Reordering is handled by a \emph{distance based reordering model}. We define \(s
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/related_work_phrase_based_reordering.png}
-    \caption{Distance based reordering}
+    \caption{Distance based reordering \cite{smt_book_koehn}}
     \label{fig:related_work_phrase_based_reordering}
 \end{figure}
 
@@ -160,20 +160,20 @@ Reordering is handled by a \emph{distance based reordering model}. We define \(s
 Building a phrase translation table involves three stages:
 \begin{enumerate}
 \item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models.\footnote{IBM word alignment models: \url{https://en.wikipedia.org/wiki/IBM_alignment_models}} Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top term from our corpus.
-\item \textbf{Extraciton of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment.
+\item \textbf{Extraciton of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment. A phrase pair (\(\bar{f}\),\(\bar{e}\)) is consistent with an alignment \emph{A}, if all words \(f_1,...,f_n\) in \(\bar{f}\) that have alignment points in \emph{A} have these with words \(e_1,...,e_n\) in \(\bar{e}\) and vice versa.
 \item \textbf{Scoring phrase pairs} Assign probabilities to phrase translations.
 \end{enumerate}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3\textwidth]{images/related_work_word_alignment.png}
+    \includegraphics[width=0.4\textwidth]{images/related_work_word_alignment.png}
     \caption{Word alignment between a top term of our parallel Enlgish/French corpus.}
     \label{fig:related_work_word_alignment}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3 \textwidth]{images/related_work_phrase_alignment.png}
+    \includegraphics[width=0.4 \textwidth]{images/related_work_phrase_alignment.png}
     \caption{Extract phrase pairs consistent with word alignment.}
     \label{fig:related_work_phrase_alignment}
 \end{figure}
@@ -189,14 +189,55 @@ We are able to extract the following phrase pairs from the example sentence:
 \item Google Play / Google Play 
 \end{itemize}
 
-The last step is to estimate the phrase translation probabilities (scoring by relative frequency):
+The last step is to estimate the phrase translation probabilities by the relative frequency:
 
-\[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i}count(\bar{e},\bar{f}_i)}\]
+\[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i }count(\bar{e},\bar{f}_i)}\]
+
+These probabilities are put in the phrase translation table, together with the English and foreign phrase (see Figure \ref{fig:phrase_table_example}).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+Foreign Phrase & \(\phi(\bar{f}|\bar{e})\)  \\ \midrule
+param\a`etres     & 0.9         \\
+r\a'eglages       & 0.36        \\
+configuration  & 0.15        \\ \bottomrule
+\end{tabular}
+\caption{Example of a phrase translation table containing the estimated probabilities for translating the English word ``Setting'' to French.}
+\label{fig:phrase_table_example}
+\end{table}
 
 
 \subsection{Decoding}
 
-- Search problem
+Decoding is the process of finding a translation for a given input sentence. Due to the big size of a phrase translation table, the search method is heuristic based. This means that the search algorithm can't explore the entire search space and therefore there is no guarantee that it will return the best translation.
+Recall the model to compute the translation probability:
+
+\[e_{best} = argmax_{e} \prod_{i=1}^I \phi(\bar{f}_i|\bar{e}_i) d(start_i - end_{i-1} -1) p_{LM}(e)\]
+
+\begin{itemize}
+\item \textbf{Phrase translation} Pick phrase \(\bar{f}_i\) to be translated as phrase \(\bar{e}_i\) by looking up the score from the phrase translation table.
+\item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\), the current phrase starts at \(start_i\). Compute \(d(start_i - end_{i-1} -1)\)
+\item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
+\end{itemize}
+
+The algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms and end point in the search graph (Figure \ref{fig:related_work_hypothesis}). To get the best translation, we pick the completed hypothesis with the highest probability score and backtrack through the search graph. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/related_work_hypothesis.png}
+    \caption{Example: Created hypothesis by translating the German sentence ``er geht ja nicht nach hause'' to English. The squares on top indicate a coverage vector of translated German words (filled black if covered). \cite{smt_book_koehn}}
+    \label{fig:related_work_hypothesis}
+\end{figure}
+
+This process creates an exponential number of hypothesis. To reduce the search space, the following methods are applied:
+
+\begin{itemize}
+\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, e.g. have the same English words in the output. The worse hypothesis is dropped.
+\item \textbf{Pruning} Remove bad hypothesis early. Hypothesis that have translated the same number of input words are put into a stack. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypothesis.
+\end{itemize}
+
 
 \section{Deep Learning Neural Networks}
 
