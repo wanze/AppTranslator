@@ -78,7 +78,6 @@ The study followed 200 iPhone apps that introduced native language support in a 
 \section{Translation Services}
 
 
-
 \section{Statistical Machine Translation}
 
 Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction - a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.\cite{smt_book_koehn}
@@ -120,7 +119,7 @@ In this thesis, we compare two different SMT algorithm and evaluate how they per
 This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called ``Statistical Phrase-Based Translation'' and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based}\cite{smt_book_koehn} The second, more recent model, uses Deep Learning Neural Networks to perform translations. \cite{smt_deep_learning}
 
 \section{Phrase-Based Machine Translation}
-
+\label{sec:phrase_based_mt}
 \subsection{Model}
 
 Given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an english sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on the following probabilistic equation:
@@ -211,7 +210,8 @@ configuration  & 0.15        \\ \bottomrule
 
 \subsection{Decoding}
 
-Decoding is the process of finding a translation for a given input sentence. Due to the big size of a phrase translation table, the search method is heuristic based. This means that the search algorithm can't explore the entire search space and therefore there is no guarantee that it will return the best translation.
+Decoding is the process of finding a translation for a given input sentence. 
+%Due to the big size of a phrase translation table, the search method is heuristic based. This means that the search algorithm can't explore the entire search space and therefore there is no guarantee that it will return the best translation.%
 Recall the model to compute the translation probability:
 
 \[e_{best} = argmax_{e} \prod_{i=1}^I \phi(\bar{f}_i|\bar{e}_i) d(start_i - end_{i-1} -1) p_{LM}(e)\]
@@ -235,7 +235,7 @@ This process creates an exponential number of hypothesis. To reduce the search s
 
 \begin{itemize}
 \item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, e.g. have the same English words in the output. The worse hypothesis is dropped.
-\item \textbf{Pruning} Remove bad hypothesis early. Hypothesis that have translated the same number of input words are put into a stack. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypothesis.
+\item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is a combination of the partial probability score and a future cost estimation of the remaining sentence.
 \end{itemize}
 
 
@@ -359,14 +359,15 @@ After tokenizsation, truecasing was applied to our text corpus.\footnote{\url{ht
 
 After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. A parallel corpus (often also called bitext) describes sentence aligned text-files of one language pair. All sentences must be aligned so that line x of the translation source language corresponds to line x of the target language. The sentences are shuffled before writing to get a random mix of translations of different apps. Most SMT system use this parallel data to train their translation model, so the parallel corpus can be reused multiple times.
 
-In addition, data of any language is also stored monolingual. All sentences of one language are written into a single text file. This is for example used to build language models, which are an important part of a phrase-based translation model (see chapter xy).
+In addition, data of any language is also stored monolingual. All sentences of one language are written into a single text file. This is for example used to build language models, which are an important part of a phrase-based translation model (see chapter \ref{sec:phrase_based_mt}).
 
 \subsection{Apache Solr}
+\label{sec:apache_solr}
 
 We needed a simple way to store all translations, preferably with additional meta data, to perform data analysis and calculate statistics.
 Apache Solr\footnote{\url{http://lucene.apache.org/solr/}} is used for this purpose. Solr is an open source text search platform built on top of Apache Lucene\footnote{\url{https://lucene.apache.org/core/}}. It allows to store the translations with additional meta data, such as the translation key and a unique app ID. Due to its way of indexing text data, Solr is very fast when querying for translation strings. Furthermore, built in tools allow to get nice statistics, for example the top terms grouped by language.
 
-Solr is also used as Baseline translation system (see chapter xy).
+Solr is also used as Baseline translation system, where we translate strings with a simple algorithm directly from the collected data in Solr. (see chapter xy).
 
 \subsubsection{Setup and Schema}
 
@@ -383,7 +384,7 @@ Solr offers so called ``Cores'' where each core manages a separate index, schema
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/data_extraction_solr_schema.png}
-    \caption{Translations are stored in a document inside a separate Core per language}
+    \caption{Translations are stored in a document inside a separate core per language}
     \label{fig:data_extraction_solr_schema}
 \end{figure}
 
@@ -391,9 +392,82 @@ The data in the \texttt{value} and \texttt{value\_lc} fields is stored tokenized
 
 \subsubsection{Queries}
 
+Solr offers a REST based interface to query the database. There is also a built in web application which allows to inspect results.
+Here is an example query where we search for the string ``Log Out'' in the English core\footnote{You must be connected to the LAN of the University of Fribourg in order to access the referenced domain. Also note that the parameters should be fully url-encoded, this was omitted in this report for better readability.}. The maximum amount of results is set to 500 rows and the return type is JSON:
+\\
+\\
+\url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value:"Log\%20Out"&rows=500&wt=json&indent=true}
+\\
+\\
+This query returns a total of 458 results. Note that there are not only exact matches returned, the term ``Log Out'' can occur as substring in a longer sentence (see figure xy). By default, Solr does not offer the possibility to return only exact matches. However, we can simulate this behaviour with the help of our \texttt{value\_lc} field, which indexed the string together with a special start- and end delimiter (\texttt{SOLR\_S} and \texttt{SOLR\_E}):
+\\
+\\
+\url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value_lc:"SOLR_S\%20Log Out\%20SOLR_E"&rows=500&wt=json&indent=true}
+\\
+\\
+This query returns only 396 results. Note that the case of the search term doesn't matter and whitespace and punctuation are ignored. Executing the above query with the term ``log Out .'' returns the same results.
+
+\begin{verbatim}
+"response": {
+    "numFound": 458,
+    "start": 0,
+    "docs": [
+      {
+        "id": "com.flaregames.gargoyles_com_facebook_loginview_log_out_action",
+        "app_id": "com.flaregames.gargoyles",
+        "key": "com_facebook_loginview_log_out_action",
+        "value": "Log Out",
+        "value_lc": "SOLR_S Log Out SOLR_E"
+      },
+      {
+        "id": "com.instagram.android_must_log_out_one_click_login",
+        "app_id": "com.instagram.android",
+        "key": "must_log_out_one_click_login",
+        "value": "You must log out in order to login using this link.",
+        "value_lc": "SOLR_S You must log out in order to login using this link. SOLR_E"
+      },      ...
+      ]
+}
+\end{verbatim}
+
+
 \chapter{Translation Process}
 
+This chapter describes the different translation systems that were used to translate apps.
+
+%The ``Baseline System'' makes direct use of the data stored in Solr and produces translations with a simple algorithm. The second system, ``Moses''\footnote{Moses SMT system: \url{http://www.statmt.org/moses/}}, is a open source phrase-based SMT software. Lastly ``Tensorflow''\footnote{Tensorflow: \url{https://www.tensorflow.org/}} was used to produce translations with the help of deep learning neural networks. Tensorflow is a software library for machine intelligence, recently released as open source by Google.%
+
 \section{Baseline System}
+
+The ``Baseline System'' makes direct use of the data stored in Solr and produces translations with a simple algorithm. Remember how the data is organized in Solr (see section \ref{sec:apache_solr}): Each translation is stored in a document with a fixed schema and each document belongs to one core. To lookup a translation, the following procedure is used:
+
+\begin{enumerate}
+\item Search the string to translate in the source language
+\item Parse the result documents and extract the \texttt{app\_id} and \texttt{key} fields
+\item Lookup translations in the target language by querying the target core with the collected \texttt{app\_id}s and \texttt{key}s.
+\item Count the number of unique translations found. The best translation is the value that was mostly used.
+\end{enumerate}
+
+
+\subsection{Algorithm}
+
+Given a string \(S = [s_1, s_2, ..., s_n]\) with words \(s_i\) in the source language, we want to produce a string \(T = [t_1, t_2, ..., t_n]\) in the target language. The algorithm recursively tries to translate the longest substrings of \(S\) by looking up translations for the substrings in Solr. This process is repeated until there are left only single words \(s_i\) to translate.
+
+\begin{enumerate}
+\item Check if we find any translation for \(S\) directly. If so, return the translation and exit.
+\item Recursively start to translate substrings of \(S\). Let \(l\) be the number of words in \(S\) at any recursion level. We check for translations of any possible substrings \(\bar{S}_i\) of length \(l - 1\). If we find translations, we insert them into \(T\) at the position where the substring started. Note that if we find translations for multiple substrings, we translate the ones having the highest total count.
+\item The above step is repeated until there are left only single words to translate (or in other words, substrings of length 1). If we cannot find a translation at this point, the source word \(s_i\) is inserted in \(T\).
+\end{enumerate}
+
+\subsection{Example}
+
+Let us translate the source string ``There is no internet connection available, check your Wi-Fi settings'' from English to French. 
+
+
+%There is no internet connection available, check your settings.%
+
+
+%
 
 \section{Moses}
 
