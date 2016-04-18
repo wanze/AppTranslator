@@ -451,17 +451,115 @@ The ``Baseline System'' makes direct use of the data stored in Solr and produces
 
 \subsection{Algorithm}
 
-Given a string \(S = [s_1, s_2, ..., s_n]\) with words \(s_i\) in the source language, we want to produce a string \(T = [t_1, t_2, ..., t_n]\) in the target language. The algorithm recursively tries to translate the longest substrings of \(S\) by looking up translations for the substrings in Solr. This process is repeated until there are left only single words \(s_i\) to translate.
+Given a string \(S = [ \; s_1  \; s_2  \; ...  \; s_n \; ]\) with words \(s_i\) in the source language, we want to produce a string \(T = [ \; t_1 \; t_2  \; ... \; t_n \; ]\) in the target language. The algorithm recursively tries to translate the longest substrings of \(S\) by looking up translations for the substrings in Solr. This process is repeated until there are left only single words \(s_i\) to translate.
 
 \begin{enumerate}
 \item Check if we find any translation for \(S\) directly. If so, return the translation and exit.
-\item Recursively start to translate substrings of \(S\). Let \(l\) be the number of words in \(S\) at any recursion level. We check for translations of any possible substrings \(\bar{S}_i\) of length \(l - 1\). If we find translations, we insert them into \(T\) at the position where the substring started. Note that if we find translations for multiple substrings, we translate the ones having the highest total count.
-\item The above step is repeated until there are left only single words to translate (or in other words, substrings of length 1). If we cannot find a translation at this point, the source word \(s_i\) is inserted in \(T\).
+\item Start translating the longest substrings of \(S\). To build the substrings, we move a ``window'' of size \(length(S) - i\) from left to right over \(S\), where \(i\) is the iteration level. Let \(length(S) = 7\); the following two  substrings of length 6 are possible at the first iteration (\(i = 1\)):
+
+\begin{center}
+\( V_1 = [ \; s_1 \; s_2 \; s_3 \; s_4 \; s_5 \; s_6 \; ] \; [ \; s_7 \; ]\)
+
+\( V_2 = [ \; s_1 \; ] \; [ \; s_2 \; s_3 \; s_4 \; s_5 \; s_6 \; s_7 \; ]\)
+\end{center}
+
+Now, we search for translations for all substrings in both variations \(V_1\) and \(V_2\). If there are no translations available, the substring (window) size is reduced by one for the second iteration (\(i = 2\)):
+
+\begin{center}
+
+\(  V_1 = [ \; s_1 \; s_2 \; s_3 \; s_4 \; s_5 \; ] \; [ \; s_6 \; s_7 \; ]\)
+
+\( V_2 = [ \; s_1 \; ] \; [ \; s_2 \; s_3 \; s_4 \; s_5 \; s_6 \; ] \; [ \; s_7 \; ]\)
+
+\( V_3 = [ \; s_1 \; s_2 \; ] \; [ \; s_3 \; s_4 \; s_5 \; s_6 \; s_7 \; ]\)
+
+\end{center}
+
+This process of reducing the substring length is repeated until we can translate a substring of at least one variation \(V_j\).
+
+\item Let's consider what happens if there are translations available. For each variation \(V_j\), we count the number of available translations for their substrings \(\bar{S}_i\). We continue with the variation \(\tilde{V}\) having the highest total count of translations among their substrings:
+
+\[ \tilde{V} = argmax\sum_i count\_translations(\bar{S}_i) \]
+
+If there is a translation available for each substring \(\bar{S}_i\) of \(\tilde{V}\), we can build the output string \(T\) directly by concatenating the substring translations: 
+
+\begin{center}
+\(T = \bar{T}_1 \; \bar{T}_2 \; \bar{T}_3 \; ... \; \bar{T}_n\)
+\end{center}
+
+Otherwise, we build the output string \(T\) incremental: If there is no translation found for substring \(\bar{S}_i\), we set \(S = \bar{S}_i\) and recursively call the algorithm again. If there are left single words to translate and no translation exists, we insert the source word into \(T\) by setting \(t_i = s_i\).
+
 \end{enumerate}
+
+This simple algorithm works well for translating short words or sentences where a direct translation exists in the target language. On the other hand, it suffers from the following problems if translating substrings is necessary:
+
+\begin{itemize}
+\item The sentences or words for the translated substrings are inserted at the same position in \(T\) where they occurred in the source string. This won't produce good results since words often need to be reordered depending on the target language, e.g. in German // TODO Example
+\item Bad translations can have a direct impact on the result. For example, due to an error or uncompleted translation in the XML files, the English word ``the'' could be mapped to a sentence with 20 words.
+\end{itemize} 
+
 
 \subsection{Example}
 
-Let us translate the source string ``There is no internet connection available, check your Wi-Fi settings'' from English to French. 
+Let us translate the source string ``Open the settings to change your username'' from English to French.
+
+\begin{enumerate}
+\item Check for a direct translation: No French translation available.
+\item Start translating the substrings. The upper index indicates the number of translations found:
+
+\begin{center}
+\(V_1\) = [ Open the settings to change your ] \(^0\) [ username ] \(^{28}\)
+
+\(V_2\) = [ Open ] \(^{63}\) [ the settings to change your username ] \(^0\)
+\end{center}
+
+Continue with Variation 2 since the count (63 + 0) is higher than the count from Variation 1 (0 + 28).
+
+\item We set \(T\) = [ ouvrir ] and \(S\) = [ the settings to change your username ] and go recursive. Again, there does not exist a translation for \(S\) directly so the substrings are built:
+
+\begin{center}
+\(V_1\) = [ the settings to change your ] \(^0\) [ username ] \(^{28}\)
+
+\(V_2\) = [ the ] \(^{1}\) [ settings to change your username ] \(^0\)
+\end{center}
+
+\item \(T\) = [ ouvrir ... nom d'utilisateur ] ; \(S\) = [ the settings to change your ]
+
+\begin{center}
+\(V_1\) = [ the settings to change ] \(^0\) [ your ] \(^{2}\)
+
+\(V_2\) = [ the ] \(^{1}\) [ settings to change your ] \(^0\)
+\end{center}
+
+\item \(T\) = [ ouvrir ... votre nom d'utilisateur ] ; \(S\) = [ the settings to change ]
+
+\begin{center}
+\(V_1\) = [ the settings to ] \(^0\) [ change ] \(^{26}\)
+
+\(V_2\) = [ the ] \(^{1}\) [ settings to change ] \(^0\)
+\end{center}
+
+\item \(T\) = [ ouvrir ... modifier votre nom d'utilisateur ] ; \(S\) = [ the settings to ]
+
+\begin{center}
+\(V_1\) = [ the settings ] \(^0\) [ to ] \(^{2}\)
+
+\(V_2\) = [ the ] \(^{1}\) [ settings to ] \(^0\)
+\end{center}
+
+\item \(T\) = [ ouvrir ... vers modifier votre nom d'utilisateur ] ; \(S\) = [ the settings ]
+
+\begin{center}
+\(V_1\) = [ the ] \(^1\) [ settings ] \(^{48}\)
+\end{center}
+
+
+\item \(T\) = [ ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur ]
+
+\end{enumerate}
+
+Finally, we derived the following sentence: ``ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur''
+
 
 
 %There is no internet connection available, check your settings.%

@@ -327,7 +327,7 @@ class SolrBaselineSystem(object):
         self.solr = solr
 
     def translate(self, string, source, target):
-        debug = 'Looking for direct match translations for string "%s"' % string
+        debug = '\n\nLooking for direct match translations for string "%s"' % string
         string = string.strip()
         if len(string) > int(self.config['max_string_length']):
             debug += '\nIgnored string because it is too long'
@@ -405,9 +405,9 @@ class SolrBaselineSystem(object):
             if translation['count']:
                 result.append(translation['translation'])
             else:
-                sub, info = self._get_translations_substrings(1, translation['string'].split(), source, target)
+                sub, info = self.translate(translation['string'], source, target)
                 debug += info
-                for word in sub:
+                for word in sub.split():
                     result.append(word)
         return result, debug
 
