@@ -185,7 +185,11 @@ We are able to extract the following phrase pairs from the example sentence:
 \item Update the / Mettre \a`a jour les
 \item Google Play Services / services Google Play
 \item The Google Play Services / les services Google Play
-\item Google Play / Google Play 
+\item Google Play / Google Play
+\item Google / Google
+\item Play / Play
+\item Services / services
+\item the / les
 \end{itemize}
 
 The last step is to estimate the phrase translation probabilities by the relative frequency:
@@ -209,6 +213,7 @@ configuration  & 0.15        \\ \bottomrule
 
 
 \subsection{Decoding}
+\label{sec:phrase_based_decoding}
 
 Decoding is the process of finding a translation for a given input sentence. 
 %Due to the big size of a phrase translation table, the search method is heuristic based. This means that the search algorithm can't explore the entire search space and therefore there is no guarantee that it will return the best translation.%
@@ -276,7 +281,7 @@ We collected a total of 423 multilingual apps, offering its content at least for
 \end{figure}
 
 
-\section{Top Terms}
+\section{Top Translations}
 
 
 \begin{table}[H]
@@ -297,7 +302,7 @@ Update & 545 &  & Activer les services Google Play & 366 &  & Weiter & 484 \\
 Share & 541 &  & Installer les services Google Play & 366 &  & Schliessen & 428 \\ \bottomrule
 \end{tabular}
 }
-\caption{Top ten terms for english, french and german}
+\caption{Top ten translations for english, french and german}
 \label{table:data_analysis_top_terms}
 \end{table}
 
@@ -317,18 +322,22 @@ An Android app has the form of a single binary file (suffix .apk). The XML files
 
 Inside the \texttt{strings.xml} files, translations are stored key-value based. Each string has a unique key which holds the translation value for each language. Here is an example how an English XML file looks like:
 
-\begin{verbatim}
+\lstset{
+language=XML,
+morekeywords={encoding,resources,string }
+}
+\begin{lstlisting}
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="close_app">Close Application</string>
     <string name="back">Back</string>
     ...
 </resources>
-\end{verbatim}
+\end{lstlisting}
 
 
 \section{Preprocess Translations}
-
+\label{sec:preprocess_translations}
 This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs or string placeholders. Secondly, the sanitized strings are tokenized so that they can be used by an SMT system.
 
 \subsection{Sanitizing}
@@ -407,7 +416,7 @@ This query returns a total of 458 results. Note that there are not only exact ma
 \\
 This query returns only 396 results. Note that the case of the search term doesn't matter and whitespace and punctuation are ignored. Executing the above query with the term ``log Out .'' returns the same results.
 
-\begin{verbatim}
+\begin{lstlisting}
 "response": {
     "numFound": 458,
     "start": 0,
@@ -428,7 +437,7 @@ This query returns only 396 results. Note that the case of the search term doesn
       },      ...
       ]
 }
-\end{verbatim}
+\end{lstlisting}
 
 
 \chapter{Translation Process}
@@ -542,32 +551,137 @@ Continue with Variation 2 since the count (63 + 0) is higher than the count from
 \item \(T\) = [ ouvrir ... modifier votre nom d'utilisateur ] ; \(S\) = [ the settings to ]
 
 \begin{center}
-\(V_1\) = [ the settings ] \(^0\) [ to ] \(^{2}\)
+\(V_1\) = [ the settings ] \(^5\) [ to ] \(^{2}\)
 
 \(V_2\) = [ the ] \(^{1}\) [ settings to ] \(^0\)
 \end{center}
 
-\item \(T\) = [ ouvrir ... vers modifier votre nom d'utilisateur ] ; \(S\) = [ the settings ]
+\item \(T\) = [ ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur ] ; \(S\) = [ ] 
 
-\begin{center}
-\(V_1\) = [ the ] \(^1\) [ settings ] \(^{48}\)
-\end{center}
+%\begin{center}
+%\(V_1\) = [ the ] \(^1\) [ settings ] \(^{48}\)
+%\end{center}
 
 
-\item \(T\) = [ ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur ]
+% \item \(T\) = [ ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur ]
 
 \end{enumerate}
+At the last step, there are translations available for both substrings of \(V_1\) and the algorithm derived the following string: ``ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur''
 
-Finally, we derived the following sentence: ``ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur''
-
-
-
-%There is no internet connection available, check your settings.%
-
-
-%
 
 \section{Moses}
+
+Moses \cite{moses} \footnote{\url{http://www.statmt.org/moses/}} is a open source SMT toolkit. The training process follows closely the phrase-based model described in section \ref{sec:phrase_based_mt}. The source code is available on GitHub \footnote{\url{https://github.com/moses-smt/mosesdecoder}}. This project is very active, there are frequent commits to the master branch by 72 contributors and documentation on their website is excellent.
+
+%\subsection{Model}
+
+
+\subsection{Training}
+
+The training process requires sentence aligned parallel data to build the translation models, and monolingual data for the language models. We can make use of the sanitized and tokenized data as described in section \ref{sec:preprocess_translations}. The training process involves the following steps.
+
+\begin{enumerate}
+\item Build a language model from the monolingual data of the target language. Moses includes the KenLM toolkit \footnote{\url{https://kheafield.com/code/kenlm/}} for this task.
+\item Align words of the parallel sentences. We used a external library MGIZA \footnote{\url{https://github.com/moses-smt/mgiza.git}}, an extension of the popular GIZA++ word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and runs faster on a multi-core machine.
+\item Extract phrases, all phrases are dumped into one big file. The following listing shows some example content of this file. Each line contains: English phrase, French phrase, Alignment points of matching words (English-French).
+
+\begin{lstlisting}[label=list:moses_phrase_extraction]
+! as you can see from ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
+! as you can see ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
+! as you can ||| ! comme vous pouvez le ||| 0-0 1-1 2-2 3-3
+! as you can ||| ! comme vous pouvez ||| 0-0 1-1 2-2 3-3
+! as you ||| ! comme vous ||| 0-0 1-1 2-2
+! as ||| ! comme ||| 0-0 1-1
+\end{lstlisting}
+
+
+\item Score phrases by computing the phrase translation probability \(\phi(\bar{f}|\bar{e})\) and build the phrase table. Here is an example how the content of the phrase table is organized in Moses (Translating from English to French):
+
+\begin{lstlisting}[label=list:moses_phrase_table]
+! your version of Google Play ||| ! votre version de Google Play ||| 1 0.04 1 0.22 
+! your version of Google ||| ! votre version de Google ||| 1 0.04 1 0.24 
+! your version of ||| ! votre version de ||| 1 0.0427528 1 0.245609 
+! your version ||| ! votre version ||| 1 0.635219 1 0.508584 
+! your ||| ! ton ||| 1 0.591003 0.0434783 0.00469507 
+! your ||| ! votre ||| 1 0.794566 0.73913 0.542431
+! your ||| ! your ||| 1 0.896708 0.130435 0.0173818
+! your ||| . vos ||| 0.0416667 0.00483387 0.0434783 0.0112108
+\end{lstlisting}
+
+Each line contains the phrase pairs together with the computed phrase translations scores, in the following order:
+\begin{enumerate}
+\item Inverse phrase translation probability \(\phi(\bar{e}|\bar{f})\)
+\item Inverse lexical weighting \(lex(\bar{e}|\bar{f})\)
+\item Direct phrase translation probability \(\phi(\bar{f}|\bar{e})\)
+\item Direct lexical weighting \(lex(\bar{f}|\bar{e})\)
+\end{enumerate}
+
+%Note that \(\bar{f}\) means ``foreign'' and \(\bar{e}\) stands for ``English''.
+
+The lexical weighting is an additional score to check the reliability of the phrase translation probability \citep{smt_book_koehn}. Rare phrase pairs may cause problems if they are collected from noisy data. If both of the phrases \(\bar{f}\), \(\bar{e}\) only occur once in the training data, then \(\phi(\bar{f}|\bar{e}) = \phi(\bar{e}|\bar{f}) = 1\). This often overestimates how reliable rare phrase pairs are. Lexical weighting decomposes phrase pairs into its word translations, so that we can check how well they match up.
+
+\item Build the reordering table. Different reordering model types can be specified\footnote{\url{http://www.statmt.org/moses/?n=FactoredTraining.BuildReorderingModel}}. By default, a distance-based reordering model is used. This model gives a cost linear to the reordering distance, e.g. skipping over two words costs twice as much as skipping over one word.
+\end{enumerate}
+The output of the training process is the phrase translation table, reordering table and a configuration file ``moses.ini'' containing all necessary configuration for the decoder to translate sentences.
+%Moses includes tools to binarise the pharse and reordering tables. The data is compiled into a format that can be quickly loaded.
+
+\subsection{Tuning}
+
+Tuning refers to the process of finding the optimal weights for the linear translation model of Moses:
+
+\[ p(e|f) = \phi(f|e)^{weight\_tm} LM(e)^{weight\_lm} D(e,f)^{weight\_dm} W(e)^{weight\_wp} \]
+The probability cost that is assigned to a translation is a product of probability costs of four models:
+
+\begin{itemize}
+\item \(\phi(f|e)\) The \textbf{phrase translation table} ensures that the source and target phrases are good translations of each other.
+\item \(LM(e)\) The \textbf{language model} ensures that the output of the target language is fluently.
+\item \(D(e,f)\) The \textbf{distortion model} allows for reordering of the input sentence, but at a cost. The more reordering, the more expensive is the translation.
+\item \(W(e)\) The \textbf{word penalty} ensures that the translations do not get too long or too short.
+\end{itemize}
+There is a weight assigned to each of these components that influences their importance. These weights can be passed to the decoder when translating sentences. The optimal weights depend on the languages and training corpus. However, Moses offers to tune the weights automatically by maximizing the BLEU score \cite{bleu_score} on a small, separate set of parallel sentences (tuning set).
+
+We used 80\% of the available parallel data for training and the remaining 20\% for tuning.
+
+\subsection{Decoding}
+
+The decoder of Moses is controlled by a ``moses.ini'' file. This file stores the path to the phrase translation table and language model and also holds the tuned weights for the translation model. Many more configuration options\footnote{\url{http://www.statmt.org/moses/?n=Moses.DecoderParameters}} can be set in this file or passed as parameters when executing the decoder. Here is an overview how the decoder of Moses works, more detailed information can be found in the background section\footnote{\url{http://www.statmt.org/moses/?n=Moses.Background}}:
+
+\begin{enumerate}
+\item The decoder collects all phrase translations from the phrase table that could be applied on the input strings of words (translation options). The translation options are stored with the following information:
+\begin{itemize}
+\item First source word covered
+\item Last source word covered
+\item Phrase translation in the target language
+\item Phrase translation probability
+\end{itemize}
+\item The output sentence is generated left to right in form of hypotheses. Each hypothesis is represented by:
+\begin{itemize}
+\item A link to the best previous state, so that we later can back track through the graph to find the best translation.
+\item The cost (probability) and covered source words so far. A low cost means high probability.
+\item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
+\end{itemize}
+The decoder uses ``Recombination'' and a ``Beam Search'' (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
+\end{enumerate}
+
+\subsubsection{Example}
+
+Let us execute the decoder by translating the same example string as used in the previous chapter ``Open the settings to change your username'' to French. Here is the command to invoke the decoder:
+
+\begin{lstlisting}[breaklines=true ]
+echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin/moses -f /home/stefan/AppTranslator/data/moses/en-fr/mert-work/moses.ini -verbose 3 &> moses_decoding.out 
+\end{lstlisting}
+We specify the path to the ``moses.ini'' configuration file and set the verbosity level to 2 (middle) to get some nice debug information.
+
+The decoder produces the following output string: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''. Here are some statistics on how the decoder derived the target sentence:
+
+\begin{itemize}
+\item Total translation options: 197
+\item Total hypotheses considered: 42614
+\item Total hypotheses discarded: 31220
+\item Total hypotheses recombined: 8292
+\item Total hypotheses pruned: 2401
+\end{itemize}
+
 
 \section{Tensorflow}
 
