@@ -116,7 +116,7 @@ In this thesis, we compare two different SMT algorithm and evaluate how they per
 %Overview of SMT
 %Has been done but not specific domain of short sentences mobile
 
-This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called ``Statistical Phrase-Based Translation'' and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based}\cite{smt_book_koehn} The second, more recent model, uses Deep Learning Neural Networks to perform translations. \cite{smt_deep_learning}
+This chapter provides an overview of Statistical Machine Translation (SMT). We consider two different models. The first one is called ``Statistical Phrase-Based Translation'' and was introduced in 2003 by Philipp Koehn et al. \cite{smt_phrase_based}\cite{smt_book_koehn} The second, more recent model, uses Deep Learning Neural Networks to perform translations. \cite{smt_deep_learning1} \cite{smt_deep_learning}
 
 \section{Phrase-Based Machine Translation}
 \label{sec:phrase_based_mt}
@@ -191,11 +191,9 @@ We are able to extract the following phrase pairs from the example sentence:
 \item Services / services
 \item the / les
 \end{itemize}
-
 The last step is to estimate the phrase translation probabilities by the relative frequency:
 
 \[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i }count(\bar{e},\bar{f}_i)}\]
-
 These probabilities are put in the phrase translation table, together with the English and foreign phrase (see Figure \ref{fig:phrase_table_example}).
 
 \begin{table}[H]
@@ -226,7 +224,6 @@ Recall the model to compute the translation probability:
 \item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\), the current phrase starts at \(start_i\). Compute \(d(start_i - end_{i-1} -1)\)
 \item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
 \end{itemize}
-
 The algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms and end point in the search graph (Figure \ref{fig:related_work_hypothesis}). To get the best translation, we pick the completed hypothesis with the highest probability score and backtrack through the search graph. 
 
 \begin{figure}[H]
@@ -235,7 +232,6 @@ The algorithm reads the input sentence from left to right and creates a new hypo
     \caption{Example: Created hypothesis by translating the German sentence ``er geht ja nicht nach hause'' to English. The squares on top indicate a coverage vector of translated German words (filled black if covered). \cite{smt_book_koehn}}
     \label{fig:related_work_hypothesis}
 \end{figure}
-
 This process creates an exponential number of hypothesis. To reduce the search space, the following methods are applied:
 
 \begin{itemize}
@@ -246,6 +242,62 @@ This process creates an exponential number of hypothesis. To reduce the search s
 
 \section{Deep Learning Neural Networks}
 
+Translating with neural networks is based on a encoder-decoder architecture. \cite{smt_deep_learning1} \cite{smt_deep_learning} Two recurrent neural networks (RNN)\footnote{\url{https://en.wikipedia.org/wiki/Recurrent_neural_network}} are involved: The first RNN encodes a variable-length sequence into a fixed-length vector representation. The second RNN decodes a given fixed-length vector back into a variable-length sequence.
+We first describe shortly the working of a RNN before explaining the encoder-decoder architecture in more detail. Beside the papers, we also want to mention a blog post\footnote{\url{https://devblogs.nvidia.com/parallelforall/introduction-neural-machine-translation-with-gpus/}} by NVIDIA which offers a very detailed explanation of the model.
+
+
+\subsection{Recurrent Neural Network}
+
+A recurrent neural network is a class of artificial neural network where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by:
+
+\[  h_{t} = f(h_{t-1}, x_t) \]
+where \(f\) is a non-linear activation function. The function described in the paper by Cho et al. \cite{smt_deep_learning1} is motivated by a long short-term memory (LSTM) unit\footnote{\url{https://en.wikipedia.org/wiki/Long_short-term_memory}}, but much simpler to compute and implement.
+
+An RNN can learn a probability distribution over a sequence by being trained to predict the next symbol in a sequence. In this case, the output at each timestep \(t\) is the conditional distribution \( p(x_t | x_{t-1}, ... , x_1) \).
+
+
+\subsection{Encoder}
+
+The encoder RNN reads each word of the source sentence sequentially in the form of a ``One-hot vector''. This binary vector has the size of the vocabulary and zeros everywhere except a \(1\) at the position corresponding to the index of the word in the source vocabulary.
+
+The internal state \(h_t\) changes each time a new word is read:
+
+\[  h_{t} = f(h_{t-1}, x_t) \]
+At the end of processing each word, the hidden state or the RNN is a summary \(c\) of the source sentence (see Figure \ref{fig:related_work_encoder}). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/related_work_encoder.png}
+    \caption{Overview of the encoder RNN: The hidden state \(h_t\) (circle) is computed by taking the previous hidden state and a new word vector \(x_t\). At the end of the sentence, the hidden state is a summary \(c\) of the input sentence, that is passed to the decoder RNN.}
+    \label{fig:related_work_encoder}
+\end{figure}
+It is very interesting how the summary vector \(c\) looks like. Sutskever et al. \cite{smt_deep_learning} projected multiple summary vectors two a two-dimensional space (see Figure \ref{fig:related_work_summary_vector}). Their plot shows that similar sentences are close together in the summary vector space.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/related_work_pca_summary_vector.png}
+    \caption{2D visualization of source sentences in the summary vectors space \cite{smt_deep_learning}. Similar sentences in terms of syntax and semantics are grouped together.}
+    \label{fig:related_work_summary_vector}
+\end{figure}
+
+
+\subsection{Decoder}
+
+The decoder is another RNN which is trained to generate the output sentence by predicting the next word \(y_t\) given the hidden state \(h_t\). Both \(y_t\) and \(h_t\) are conditioned on \(y_{t-1}\) and the summary vector \(c\) given from the encoder RNN. The hidden state of the decoder is computed by
+
+\[  h_t = f(h_{t-1}, y_{t-1}, c) \]
+The conditional distribution of the next target word is
+
+\[ P(y_t|y_{t-1},y_{t-2},...,y_1,c) = g(h_t, y_{t-1}, c) \]
+for given activation functions \(f\) and \(g\). The latter must produce valid probabilities.
+
+\subsection{Training}
+
+The proposed encoder-decoder system is trained by maximizing the log-likelihood\footnote{\url{https://en.wikipedia.org/wiki/Likelihood_function}} of the training corpus. Training requires a parallel corpus \(C\) of source and target sentences \((X^n, Y^n)\). The sentences are represented as sequence of one-hot vectors. We can compute the conditional log-probability of \(Y^n\) given \(X^n\) by \( log P(Y^n|X^n, \theta) \). The log-likelihood of the training corpus is written as:
+
+\[ L(C,\theta) = \frac{1}{N} \sum_{n=1}^N log P(Y^n|X^n, \theta) \]
+where \(N\) is the number of training samples and \(\theta\) is the set of model parameters.
+Maximizing the log-likelihood function can be done by using stochastic gradient descent\footnote{\url{https://en.wikipedia.org/wiki/Stochastic_gradient_descent}}.
 
 \chapter{Data Analysis}
 
@@ -660,6 +712,7 @@ The decoder of Moses is controlled by a ``moses.ini'' file. This file stores the
 \item The cost (probability) and covered source words so far. A low cost means high probability.
 \item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
 \end{itemize}
+
 The decoder uses ``Recombination'' and a ``Beam Search'' (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
 \end{enumerate}
 
@@ -670,20 +723,71 @@ Let us execute the decoder by translating the same example string as used in the
 \begin{lstlisting}[breaklines=true ]
 echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin/moses -f /home/stefan/AppTranslator/data/moses/en-fr/mert-work/moses.ini -verbose 3 &> moses_decoding.out 
 \end{lstlisting}
-We specify the path to the ``moses.ini'' configuration file and set the verbosity level to 2 (middle) to get some nice debug information.
+We specify the path to the ``moses.ini'' configuration file and set the verbosity level to 2 (middle) to get some additional information from the decoder. We used histogram pruning with a stack size of 100 and the optimal model weights after tuning.
 
 The decoder produces the following output string: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''. Here are some statistics on how the decoder derived the target sentence:
 
 \begin{itemize}
-\item Total translation options: 197
+\item Total translation options collected: 197
 \item Total hypotheses considered: 42614
 \item Total hypotheses discarded: 31220
 \item Total hypotheses recombined: 8292
 \item Total hypotheses pruned: 2401
 \end{itemize}
 
+TODO: Create a graphic showing some hyptheses from this example together with stacks, similar to the background section linked above. 
 
 \section{Tensorflow}
+
+Tensorflow\footnote{\url{https://www.tensorflow.org/}} is a software library for machine intelligence, open sourced by Google in November 2015. The source code is available on GitHub\footnote{\url{https://github.com/tensorflow/tensorflow}} and the project is still under development.
+
+Tensorflow includes a library to learn sequence to sequence models with neural networks. The implementation follows the model described in the paper by Sutskever et al., 2014 \cite{smt_deep_learning}
+
+\subsection{Training}
+
+To train the models, we followed the tutorial on sequence-to-sequence models\footnote{Tutorial by Tensorflow on sequence-to-sequence models: \url{https://www.tensorflow.org/versions/r0.8/tutorials/seq2seq/index.html\#sequence-to-sequence-models}}. We could skip the part where Tensorflow prepares the data since our corpus is already tokenized. Training requires the following model parameters to be set:
+
+\begin{itemize}
+\item \textbf{Path to parallel training and development corpus} The training data is used to train the models and the development data is used to evaluate how well the model performs after each training step.
+\item \textbf{Source vocabulary size} Size of the vocabulary of the most common words for the source language. Words that are not part of the vocabulary are replaced with an ``Unknown'' token.
+\item \textbf{Target vocabulary size} Size of the vocabulary for the target language.
+\item \textbf{Size of model layer} How many cells are used in the neural networks.
+\item \textbf{Number of layers} Number of layers used in the neural networks.
+\item \textbf{Steps per checkpoint} How many training steps to do before writing the current state of the network from memory to disk. Once saved on the disk, the model can already be used to decode sentences.
+\item \textbf{Learning Rate}
+\end{itemize}
+
+
+
+%The vocabulary for the source and target language is written to a file, one word per line where the line indicates the numeric index of the word:
+
+%\begin{lstlisting}[numbers=left]
+%you
+%this
+%and
+%Google
+%in
+%is
+%\end{lstlisting}
+%The sentence ``this is Google'' is represented by a numeric vector: \( v = %\begin{bmatrix} 2  \\ 6 \\ 4 \end{bmatrix} \)
+
+
+\subsection{Decoding}
+
+
+
+
+
+\subsection{Example}
+
+
+
+
+
+
+\section{Others}
+
+Say some words about lamtram and phrasal
 
 \chapter{Web Application}
 
