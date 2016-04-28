@@ -715,15 +715,12 @@ The decoder of Moses is controlled by a ``moses.ini'' file. This file stores the
 
 The decoder uses ``Recombination'' and a ``Beam Search'' (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
 \end{enumerate}
-
-\subsubsection{Example}
-
-Let us execute the decoder by translating the same example string as used in the previous chapter ``Open the settings to change your username'' to French. Here is the command to invoke the decoder:
+\textbf{Example} We translate the same example string as used in the previous chapter ``Open the settings to change your username'' to French. Here is the command to invoke the decoder:
 
 \begin{lstlisting}[breaklines=true ]
 echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin/moses -f /home/stefan/AppTranslator/data/moses/en-fr/mert-work/moses.ini -verbose 3 &> moses_decoding.out 
 \end{lstlisting}
-We specify the path to the ``moses.ini'' configuration file and set the verbosity level to 2 (middle) to get some additional information from the decoder. We used histogram pruning with a stack size of 100 and the optimal model weights after tuning.
+We used histogram pruning with a stack size of 100 and the optimal model weights determined after tuning.
 
 The decoder produces the following output string: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''. Here are some statistics on how the decoder derived the target sentence:
 
@@ -741,11 +738,11 @@ TODO: Create a graphic showing some hyptheses from this example together with st
 
 Tensorflow\footnote{\url{https://www.tensorflow.org/}} is a software library for machine intelligence, open sourced by Google in November 2015. The source code is available on GitHub\footnote{\url{https://github.com/tensorflow/tensorflow}} and the project is still under development.
 
-Tensorflow includes a library to learn sequence to sequence models with neural networks. The implementation follows the model described in the paper by Sutskever et al., 2014 \cite{smt_deep_learning}
+Tensorflow includes a library to learn sequence to sequence models with neural networks. The implementation follows the model described in \cite{smt_deep_learning1} \cite{smt_deep_learning}.
 
 \subsection{Training}
 
-To train the models, we followed the tutorial on sequence-to-sequence models\footnote{Tutorial by Tensorflow on sequence-to-sequence models: \url{https://www.tensorflow.org/versions/r0.8/tutorials/seq2seq/index.html\#sequence-to-sequence-models}}. We could skip the part where Tensorflow prepares the data since our corpus is already tokenized. Training requires the following model parameters to be set:
+To train the models, we followed the tutorial on sequence-to-sequence models\footnote{Tutorial by Tensorflow on sequence-to-sequence models: \url{https://www.tensorflow.org/versions/r0.8/tutorials/seq2seq/index.html\#sequence-to-sequence-models}}. We could skip the part where Tensorflow downloads and prepares the sample data since our corpus is already tokenized. Training requires the following model parameters to be set:
 
 \begin{itemize}
 \item \textbf{Path to parallel training and development corpus} The training data is used to train the models and the development data is used to evaluate how well the model performs after each training step.
@@ -778,24 +775,100 @@ To train the models, we followed the tutorial on sequence-to-sequence models\foo
 
 
 
-\subsection{Example}
-
-
-
-
-
-
 \section{Others}
 
 Say some words about lamtram and phrasal
 
 \chapter{Web Application}
 
-The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application could already be used by app developers to translate their XML translation files.
+A simple web application was built to test and compare the different translation systems. It offers a common interface to translate strings with the Baseline system, Moses and Tensorflow. Furthermore, there is the possibility to translate XML files containing translations, so the app \emph{could} be used by developers to translate Android apps.
 
-The interface allows to translate either plain strings or a XML translation file from one language to another. Each decoder offers some specific settings where the user can influence the decoder.
+Additionally, the app offers two functionalities that were useful in terms of data analysing:
+
+\begin{itemize}
+\item \textbf{Term Variations} Given a string, source and target language: The app returns all different translations that were used among apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param`{e}teres'', ``réglages'', ``configuration'', ``settings''. The last one indicates that at least one app did not translate ``settings'' correctly to French.
+\item \textbf{Top Terms} Shows the top 20 translations for a given language.
+\end{itemize}
+Visit the following URL to access the web application: \url{http://diufpc114.unifr.ch}\footnote{You must be connected to the LAN of the university of fribourg in order to access the web application.}
+
+
+%The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application could already be used by app developers to translate their XML translation files.
+
+%The interface allows to translate either plain strings or a XML translation file from one language to another. Each decoder offers some specific settings where the user can influence the decoder.
+
+\section{User Interface}
+
+The user interface is divided into three steps. First of all, one needs to specify the source and target language, translation input and the system that should be used to perform the translations. The input can either be plain strings or a XML translation file (see Figure \ref{fig:web_app_index}). Secondly, there is the possibility to set decoding options depending on the chosen translation system. Lastly, the translation results are displayed together with some debug information.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9 \textwidth]{images/web_application_index.png}
+    \caption{First step: Set source and target languages, translation input and choose the translation system.}
+    \label{fig:web_app_index}
+\end{figure}
+
+
+\subsection{Translation Options}
+
+\textbf{Moses}
+
+\begin{itemize}
+\item \textbf{Drop unknown words} [No] Words not in the vocabulary are either dropped or replaced by the word in the source language.
+\item \textbf{Search algorithm} [Normal Stack] Beside the stack based ``Beam sarch'', Moses implemented ``Cube Pruning''. The latter should perform a bit faster than the default algorithm.
+\item \textbf{Verbose} [2] Verbosity level of the debug output.
+\item \textbf{Stack size} [100] Number of hypotheses kept on each stack while decoding.
+\item \textbf{Tune weights manually} [No] If enabled, the four weights for the translation models can be set manually. Normally, these weights are optimized automatically after tuning.
+\end{itemize}
+\textbf{Baseline System (Solr)}
+
+\begin{itemize}
+\item \textbf{Number of Rows} [100] Number of rows returned by Solr when searching for a translation.
+\end{itemize}
+\textbf{Tensorflow}
+
+\begin{itemize}
+\item \textbf{Number of Layers} [2] Number of layers in the neural networks.
+\item \textbf{Size} [256] Number of Cells in each layer.
+\end{itemize}
+Note that the provided parameters must match a model that was trained with the same values, otherwise Tensorflow will fail to load the model.
 
 \section{Architecture}
+
+Each translation system implements a common interface (see UML in Figure \ref{fig:web_app_uml}). This makes it easy to support additional translation engines at any time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0 \textwidth]{images/web_application_uml.png}
+    \caption{High level overview of the application. Each translation system implements the ``Translator'' interface. The class ``TranslatorCompare'' is special in a way that it gets the translations from all implemented systems so that the results can be compared next to each other.}
+    \label{fig:web_app_uml}
+\end{figure}
+
+The backend offers a REST based interface for the different functionalities. The frontend communicates through Ajax requests with that interface and handles the JSON responses accordingly.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0 \textwidth]{images/web_application_rest.png}
+    \caption{Graphical visualization how the frontend communicates with the backend through a REST interface.}
+    \label{fig:web_app_uml}
+\end{figure}
+
+We decided to implement the business logic with Python\footnote{Python programming language: \url{https://www.python.org/}}. The REST interface is powered by a microframework called ``Flask''\footnote{Flask, a Python microframework:  \url{http://flask.pocoo.org/}}. Flask has a built-in server and offers RESTful request dispatching, among many other features. Table xy shows the possible endpoints together with the expected request data and response. Note that the business logic is completely independent from Flask.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Endpoint                                                           & Request Data                                                                                                                                                                                                                                                                                  & Response                                                                                                                                                                            \\ \midrule
+\begin{tabular}[c]{@{}l@{}}translateStrings \\ (POST)\end{tabular} & \begin{tabular}[c]{@{}l@{}}decoder: The ID of the translation system to use\\ decoder\_settings: Settings for decoding (JSON)\\ strings: Array of strings to translate\\ lang\_from: Source language code (e.g. 'en')\\ lang\_to: Target language code (e.g. 'fr')\end{tabular} & \begin{tabular}[c]{@{}l@{}}translations: List of translations, index matches input strings\\ debug: Debug output from the decoding process\end{tabular}                             \\ \midrule
+\begin{tabular}[c]{@{}l@{}}translateXML\\ (POST)\end{tabular}      & \begin{tabular}[c]{@{}l@{}}decoder: The ID of the translation system to use\\ decoder\_settings: Settings for decoding (JSON)\\ xml\_filename: Hashed filename of the \\ previous uploaded XML file\\ lang\_from: Source language code\\ lang\_to: Target language code\end{tabular}             & \begin{tabular}[c]{@{}l@{}}translations: JSON object with translation key, source string and corresponding translation\\ debug: Debug output from the decoding process\end{tabular} \\ \midrule
+\begin{tabular}[c]{@{}l@{}}getTermVariations\\ (GET)\end{tabular}  & \begin{tabular}[c]{@{}l@{}}source: Source language code\\ target: Target language code\\ term: String in source language\end{tabular}                                                                                                                                                         & Array for each found variation, together with its count                                                                                                                             \\ \midrule
+\begin{tabular}[c]{@{}l@{}}upload\\ (POST)\end{tabular}            & file: Data from uploaded XML translation file                                                                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}success: True oder False\\ filename: A hashed filename of the uploaded XML file\end{tabular}                                                            
+\end{tabular}
+\caption{My caption}
+\label{my-label}
+\end{table}
+
+The frontend uses AngularJS\footnote{\url{https://angularjs.org/}} together with the Semantic UI\footnote{\url{http://semantic-ui.com/}} CSS framework.
 
 % com.ancestry.android.apps.ancestry_your_capitalized
 % com.google.android.apps.plus_collexion_abuse_appeal_rejected
@@ -803,14 +876,147 @@ The interface allows to translate either plain strings or a XML translation file
 % --data_binary '{"id":"com.google.android.apps.plus_collexion_abuse_appeal_rejected","value":{"set":"votre"},"value_lc":{"set":"votre"}}'
 
 
-\section{Frontend}
-
 \chapter{Evaluation}
 
+How can we automatically measure the quality of machine translated text? There exists an algorithm called ``BLEU'' \cite{bleu_score} which is mostly used for this task. The first section describes shortly how BLEU works, the second presents the BLEU scores achieved for the different translation systems.
 
-\section{BLEU Score}
+\section{BLEU (Bilingual Evaluation Understudy)}
 
-\section{T}
+
+
+\section{Setup}
+
+The BLEU scores were computed for the results of translating English to French and German. We used k-fold cross-validation to predict how the models would perform if they were applied to independent data. The parallel corpus was split into 6 equal sized samples. One sample was always reserved as development set for Moses (Tuning) and Tensorflow, the remaining 5 samples were used to evaluate BLEU. For each evaluation run, four samples were merged into training data and a single sample was used as test set (see Figure \ref{fig:evaluation_k_fold}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3 \textwidth]{images/evaluation_k_fold_cross_validation.png}
+    \caption{Graphic showing how the parallel corpus was split  for the different evaluation runs. The white rectangle represents the test data, grey means training data and the black rectangle is the fixed development sample.}
+    \label{fig:evaluation_k_fold}
+\end{figure}
+
+The Baseline System needed a special setup. First of all, the development set is ignored since there is no evaluation or tuning involved in this model. Secondly, we needed to index the training data for each evaluation run separately into Solr. This was achieved by creating new cores in Solr according to the following schema:
+
+\[ source-target-run-k-(source|target) \]
+where \(source\) and \(target\) are the source and target language and \(k\) is the index of the evaluation run (1-5). For example, in the first evaluation run for translating English to French, the French training data is put into the core ``en-fr-run-1-fr''.
+
+\section{BLEU Scores}
+
+\subsection{Moses}
+
+\begin{table}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+EN-FR & BLEU          \\ \midrule
+run-1 & 47.45          \\
+run-2 & 53.19          \\
+run-3 & 49.91          \\
+run-4 & 51.5           \\
+run-5 & 51.74          \\
+\textbf{\o}      & \textbf{50.76} \\
+ \(\sigma\)     & 1.95           \\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+EN-DE & BLEU          \\ \midrule
+run-1 & 41.6          \\
+run-2 & 44.53          \\
+run-3 & 44.12          \\
+run-4 & 46           \\
+run-5 & 43.73          \\
+\textbf{\o}      & \textbf{44.00} \\
+ \(\sigma\)     & 1.42           \\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\end{table}
+
+\subsection{Tensorflow}
+
+\begin{table}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+EN-FR & BLEU\footnote{2 Layers, 256 Units, 40'000 words} &  BLEU\footnote{3 Layers, 512 Units, 40'000 words}     & BLEU\footnote{1 Layers, 128 Units, 40'000 words} & BLEU\footnote{2 Layers, 256 Units, 50'000 words} \\ \midrule
+run-1 			& 19.86  			&   19.36			&	 23.13 			& 20.53     			\\
+run-2 			& 26.7   			&   21.29    		&	25.68			& 22.44	\\
+run-3 			& 25.27  			&   19.57    		&	23.2				& 21.07	\\
+run-4 			& 20.64  			&   20.58    		&	20.48			& 26.86	\\
+run-5 			& 27.43  			&   21.42  			&	22.21			& 28.49	\\
+\textbf{\o}    	& \textbf{23.98} 	&  	\textbf{20.44}	&	\textbf{22.94}	& \textbf{23.88}	\\
+ \(\sigma\)    	& 3.13           	&	0.85				&	1.68				& 3.2	\\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+EN-DE & BLEU\footnote{2 Layers, 256 Units, 40'000 words} &  BLEU\footnote{3 Layers, 512 Units, 40'000 words}     & BLEU\footnote{1 Layers, 128 Units, 40'000 words} & BLEU\footnote{2 Layers, 256 Units, 50'000 words} \\ \midrule
+run-1 			& 18.72  			&   18.58			&	20.02 			& 25.56     			\\
+run-2 			& 23.95   			&   20.34    		&	19.93			& 24.13	\\
+run-3 			& 22.14  			&   19.96    		&	22.04			& 23.62	\\
+run-4 			& 19.66  			&   18.82    		&	19.86			& 26.87	\\
+run-5 			& 17.03  			&   19.71  			&	20				& 24.11	\\
+\textbf{\o}    	& \textbf{20.3} 	&  	\textbf{19.48}	&	\textbf{20.37}	& 	\textbf{24.86}	\\
+ \(\sigma\)    	& 2.46           	&	0.67				&	0.84				& 1.2	\\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\end{table}
+
+\subsection{Baseline System}
+
+\begin{table}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+EN-FR & BLEU          \\ \midrule
+run-1 & 25.08          \\
+run-2 & 29.28          \\
+run-3 & 25.35          \\
+run-4 & 26.2           \\
+run-5 & 25.7          \\
+\textbf{\o}      & \textbf{26.32} \\
+ \(\sigma\)     & 1.53           \\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+EN-DE & BLEU          \\ \midrule
+run-1 & 8.74          \\
+run-2 & 9.57          \\
+run-3 & 9.03          \\
+run-4 & 9.68           \\
+run-5 & 8.98          \\
+\textbf{\o}      & \textbf{9.2} \\
+ \(\sigma\)     & 0.36           \\ \bottomrule
+\end{tabular}
+\label{my-label}
+\end{minipage}
+\end{table}
+
+
+\section{Observations}
+
+\chapter{Conclusion and Future Work}
 
 
 %\chapter{The Problem}
