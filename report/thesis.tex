@@ -878,15 +878,45 @@ The frontend uses AngularJS\footnote{\url{https://angularjs.org/}} together with
 
 \chapter{Evaluation}
 
-How can we automatically measure the quality of machine translated text? There exists an algorithm called ``BLEU'' \cite{bleu_score} which is mostly used for this task. The first section describes shortly how BLEU works, the second presents the BLEU scores achieved for the different translation systems.
+How can we automatically measure the quality of machine translated text? There exists an algorithm called ``BLEU'' \cite{bleu_score} which is mostly used for this task. We first shortly describe how BLEU works, then explain our evaluation setup and finally present the BLEU scores achieved for the different translation systems.
 
 \section{BLEU (Bilingual Evaluation Understudy)}
 
 
+``The closer a machine translation is to a professional human translation, the better it is.`` This is the central idea behind the BLEU algorithm \citep{bleu_score}. BLEU computes a score by comparing machine translated sentences (called ``candiates'') against single or multiple reference translations. The score is averaged over the whole corpus to estimate the overall translation quality. The output of BLEU  is a number between 0 and 1 that indicates the similarity of the candidate and reference translations. The closer a value is to 1, the more similar are the texts. %A value of 1 means that the candidate and reference translations are identical. 
+
+\subsection{Algorithm}
+
+BLEU compares \(n\)-grams of the candidate with \(n\)-grams of the reference translation and counts the number of matches. These matches are position-independent. The more the matches, the better the candidate translation is. \citep{bleu_score}.
+
+The score is based on a modified \(n\)-gram precision. One counts up the maximum number of times a \(n\)-gram occurs in any single reference translation. Next, one clips the total count of each candidate \(n\)-gram by its maximum reference count: \( count_{clip} = min(count, max\_ref\_count) \). The clipped counts for all \(n\)-grams are added up and divided by the total number of candidate words \citep{bleu_score}.
+\\
+\\
+\textbf{Example} Consider this example from \cite{bleu_score} that computes a modified unigram precision:
+
+\begin{itemize}
+\item Candidate: \underline{the} \underline{the} the the the the the
+\item Reference 1: \underline{The} cat is on \underline{the} mat.
+\item Reference 2: There is a cat on the mat.
+\end{itemize}
+The word ``the'' appears twice in the first reference and once in the second reference, it is therefore clipped to:
+\( count_{clip} = min(7, 2) = 2 \). The final modified unigram precision is \( P = \frac{2}{7} \).
+
+To compute the modified precision score \(p_n\) for the entire corpus, we compute the \(n\)-gram matches for each sentence. Next, the clipped \(n\)-gram counts for all candidates are added up and divided by the number of candidate \(n\)-grams in the corpus:
+
+\[  p_n = \frac{\sum_{C\in\{Candidates\}} \sum_{n-gram \in C} count_{clip}(n-gram)}{\sum_{C'\in\{Candidates\}} \sum_{n-gram' \in C'} count(n-gram')}   \]
+In order to prevent very short candidates from receiving a too high  precision score, a ``brevity penalty'' is introduced. The penalty is 1.0 if the candidate's length is the same as any reference translation's length. We call the closest reference sentence length the ``best match length''. The brevity penalty is computed over the entire corpus. First, we compute the reference lengths \(r\) by summing the best match lengths for each candidate sentence in the corpus. We choose the brevity penalty to be a decaying exponential in \(r/c\), where \(c\) is the total length of the candidate translation corpus \cite{bleu_score}.
+
+The final BLEU score is a combination of the brevity penalty \(PB\) and the geometric mean of the modified precision scores \(pn\) of the corpus:
+
+\[  BP = \begin{cases}1 & c > r\\e^{(1-\frac{r}{c})} & c \leq r\end{cases} \]
+
+\[ BLEU = BP \: exp \left(  \sum_{n=1}^N w_n \:  log \: p_n \right) \]
+The baseline in \citep{bleu_score} used \(N = 4 \) and uniform weights  \( w_n = 1/N \). 
 
 \section{Setup}
 
-The BLEU scores were computed for the results of translating English to French and German. We used k-fold cross-validation to predict how the models would perform if they were applied to independent data. The parallel corpus was split into 6 equal sized samples. One sample was always reserved as development set for Moses (Tuning) and Tensorflow, the remaining 5 samples were used to evaluate BLEU. For each evaluation run, four samples were merged into training data and a single sample was used as test set (see Figure \ref{fig:evaluation_k_fold}).
+The BLEU scores were computed in different evaluation runs for the results of translating English to French and German. We used k-fold cross-validation to predict how the different models would perform if they were applied to independent data. The parallel corpus was split into 6 equal sized samples. One sample was always reserved as development set for Moses (Tuning) and Tensorflow, the remaining 5 samples were used to evaluate BLEU. For each evaluation run, four samples were merged into training data and a single sample was used as test set (see Figure \ref{fig:evaluation_k_fold}).
 
 \begin{figure}[H]
     \centering
@@ -901,6 +931,8 @@ The Baseline System needed a special setup. First of all, the development set is
 where \(source\) and \(target\) are the source and target language and \(k\) is the index of the evaluation run (1-5). For example, in the first evaluation run for translating English to French, the French training data is put into the core ``en-fr-run-1-fr''.
 
 \section{BLEU Scores}
+
+The left table shows BLEU scores achieved for translating English to French, the right one for English to German. We used a perl script\footnote{Script to calculate BLEU score: \url{multi-bleu.perl}} included in Moses to compute the scores. As proposed in \citep{bleu_score}, \(n\)-grams up to \(n=4\) are considered in the calculation. Our corpus offers only one reference translation since apps are not translated multiple times into the same language. Note that the BLEU scores are reported as percentages. This format is the output of the script and seems mostly used in machine translation literature.
 
 \subsection{Moses}
 
