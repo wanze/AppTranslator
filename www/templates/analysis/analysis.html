@@ -14,48 +14,48 @@
     <div class="sixteen wide column">
 
         <div class="ui secondary pointing menu">
-            <a class="item active" data-tab="top-terms">Top Terms</a>
-            <a class="item" data-tab="term-variations">Term Variations</a>
+            <!--<a class="item active" data-tab="top-terms">Top Terms</a>-->
+            <a class="item active" data-tab="term-variations">Term Variations</a>
         </div>
 
-        <div class="ui tab active" data-tab="top-terms">
-            <form class="ui form">
-                <div class="two fields">
-                    <div class="field">
-                        <select name="lang" class="ui dropdown" ng-model="top_terms.lang">
-                            <option ng-repeat="language in languages" value="{{language.code}}">{{language.name}}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <button class="ui icon primary button" ng-click="getTopTerms()">Load <i
-                                class="angle right icon"></i></button>
-                    </div>
-                </div>
-                <div class="two fields">
-                    <div class="field">
-                        <table class="ui celled striped fixed table" ng-show="top_terms.terms.length">
-                            <thead>
-                            <tr>
-                                <th>Term</th>
-                                <th>Count</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="term in top_terms.terms">
-                                <td>{{term.value}}</td>
-                                <td>{{term.count}}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="field">
-                        <canvas id="top-terms-chart"></canvas>
-                    </div>
-                </div>
-            </form>
+        <!--<div class="ui tab active" data-tab="top-terms">-->
+            <!--<form class="ui form">-->
+                <!--<div class="two fields">-->
+                    <!--<div class="field">-->
+                        <!--<select name="lang" class="ui dropdown" ng-model="top_terms.lang">-->
+                            <!--<option ng-repeat="language in languages" value="{{language.code}}">{{language.name}}-->
+                            <!--</option>-->
+                        <!--</select>-->
+                    <!--</div>-->
+                    <!--<div class="field">-->
+                        <!--<button class="ui icon primary button" ng-click="getTopTerms()">Load <i-->
+                                <!--class="angle right icon"></i></button>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="two fields">-->
+                    <!--<div class="field">-->
+                        <!--<table class="ui celled striped fixed table" ng-show="top_terms.terms.length">-->
+                            <!--<thead>-->
+                            <!--<tr>-->
+                                <!--<th>Term</th>-->
+                                <!--<th>Count</th>-->
+                            <!--</tr>-->
+                            <!--</thead>-->
+                            <!--<tbody>-->
+                            <!--<tr ng-repeat="term in top_terms.terms">-->
+                                <!--<td>{{term.value}}</td>-->
+                                <!--<td>{{term.count}}</td>-->
+                            <!--</tr>-->
+                            <!--</tbody>-->
+                        <!--</table>-->
+                    <!--</div>-->
+                    <!--<div class="field">-->
+                        <!--<canvas id="top-terms-chart"></canvas>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</form>-->
 
-        </div>
+        <!--</div>-->
 
         <div class="ui tab" data-tab="term-variations">
             <form class="ui form">
