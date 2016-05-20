@@ -20,6 +20,10 @@ This project aims to extract and parse translations of existing applications to 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 \tableofcontents
 
+\listoffigures
+
+\listoftables
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% NEW CHAPTER %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,7 +75,7 @@ The study followed 200 iPhone apps that introduced native language support in a 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/problem_analysis_app_annie.jpg}
-    \caption{Graphic from \citep{website_impact_of_translations_to_mobile_apps} showing the proportion of free downloads and revenue of iPhone apps by language.}
+    \caption[Proportion of free downloads and revenue of iPhone apps by language \cite{website_impact_of_translations_to_mobile_apps}]{Graphic from \citep{website_impact_of_translations_to_mobile_apps} showing the proportion of free downloads and revenue of iPhone apps by language.}
     \label{fig:problem_analysis_impact_languages}
 \end{figure}
 Beside offering a better user experience by translating apps, both examples show that proper localization also directly impacts the number of downloads and revenue. 
@@ -164,14 +168,14 @@ Building a phrase translation table involves three stages:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/related_work_word_alignment.png}
-    \caption{Word alignment between a top sentence of our parallel Enlgish/French corpus.}
+    \caption{Word alignment between a top sentence of the parallel English-French corpus.}
     \label{fig:related_work_word_alignment}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4 \textwidth]{images/related_work_phrase_alignment.png}
-    \caption{Extract phrase pairs consistent with word alignment.}
+    \caption{Extraction of phrase pairs consistent with word alignment}
     \label{fig:related_work_phrase_alignment}
 \end{figure}
 
@@ -203,7 +207,7 @@ param\a`etres     & 0.9         \\
 r\a'eglages       & 0.36        \\
 configuration  & 0.15        \\ \bottomrule
 \end{tabular}
-\caption{Example of a phrase translation table containing the estimated probabilities for translating the English word ``Settings'' to French.}
+\caption[Example of a phrase translation table]{Example of a phrase translation table containing the estimated probabilities for translating the English word ``Settings'' to French.}
 \label{fig:phrase_table_example}
 \end{table}
 
@@ -227,7 +231,7 @@ The algorithm reads the input sentence from left to right and creates a new hypo
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/related_work_hypothesis.png}
-    \caption{Hypothesis expanded by translating the German sentence ``er geht ja nicht nach hause'' to English. The squares on top indicate a coverage vector of translated German words (filled black if covered) \cite{smt_book_koehn}.}
+    \caption[Decoding process \cite{smt_book_koehn}]{Hypothesis expanded by translating the German sentence ``er geht ja nicht nach hause'' to English. The squares on top indicate a coverage vector of translated German words (filled black if covered) \cite{smt_book_koehn}.}
     \label{fig:related_work_hypothesis}
 \end{figure}
 This process creates an exponential number of hypothesis. To reduce the search space, the following methods are applied:
@@ -268,7 +272,7 @@ At the end of processing each word, the hidden state of the RNN is a summary \(c
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/related_work_encoder.png}
-    \caption{Encoder RNN: The final hidden state (marked bold) contains the summary vector.}
+    \caption[Overview of the Encoder RNN]{Encoder RNN: The final hidden state (marked bold) contains the summary vector.}
     \label{fig:related_work_encoder}
 \end{figure}
 It is very interesting how the summary vector \(c\) looks like. In  \cite{smt_deep_learning} they projected multiple summary vectors to the two-dimensional space (see Figure \ref{fig:related_work_summary_vector}). The plot shows that similar sentences are close together in the summary vector space.
@@ -276,7 +280,7 @@ It is very interesting how the summary vector \(c\) looks like. In  \cite{smt_de
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/related_work_pca_summary_vector.png}
-    \caption{Summary vectors from multiple sentences. Similar sentences in terms of syntax and semantics are grouped together \cite{smt_deep_learning}.}
+    \caption[Summary vectors projected to the two-dimensional space \cite{smt_deep_learning}]{Summary vectors from multiple sentences. Similar sentences in terms of syntax and semantics are grouped together \cite{smt_deep_learning}.}
     \label{fig:related_work_summary_vector}
 \end{figure}
 
@@ -337,7 +341,7 @@ We collected a total of 423 multilingual apps, offering its content for at least
 
 This sections covers statistics regarding the extracted sentences per language, including the top sentences, top \(n\)-grams and sentence lengths. Note that the term \emph{sentence} in this section describes single words, sentences or multiple sentences, separated by punctuation.
 
-In total, we collected 114'947 parallel sentences for the English-French language pair and 114'773 for English-German, respectively. The monolingual data holds 18'7642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (see Section \ref{sec:preprocess_translations}).
+In total, we collected 114'947 parallel sentences for the English-French language pair and 114'773 for English-German, respectively. The monolingual data holds 187'642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (see Section \ref{sec:preprocess_translations}).
 
 
 \subsection{Top Sentences}
@@ -483,7 +487,7 @@ An Android app has the form of a single binary file (suffix .apk). The XML files
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{images/data_extraction_xml.png}
-    \caption{For each language, the translations are stored in a XML file}
+    \caption[Storage of translation strings in XML files]{For each language, the translations are stored in a XML file}
     \label{fig:data_extraction_xml}
 \end{figure}
 Inside the \texttt{strings.xml} files, translations are stored key-value based. Each string has a unique key which holds the translation value for each language. Here is an example how an English XML file looks like, followed by its German counterpart:
@@ -572,7 +576,7 @@ Solr offers so called \emph{cores} where each core manages a separate index, sch
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/data_extraction_solr_schema.png}
-    \caption{Translations are stored in a document inside a separate core per language}
+    \caption[Storage of translation data in Solr]{Translations are stored in a document inside a separate core per language}
     \label{fig:data_extraction_solr_schema}
 \end{figure}
 
@@ -975,7 +979,7 @@ The user interface is divided into three steps. First of all, one needs to speci
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9 \textwidth]{images/web_application_index.png}
-    \caption{First step to use the web application: Set source and target languages, translation input and choose the translation system.}
+    \caption[User interface of the web application]{First step to use the web application: Set source and target languages, translation input and choose the translation system.}
     \label{fig:web_app_index}
 \end{figure}
 
@@ -1010,7 +1014,7 @@ Each translation system implements a common interface (see UML in Figure \ref{fi
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0 \textwidth]{images/web_application_uml.png}
-    \caption{High level overview of the application. Each translation system implements the \emph{Translator} interface. The class \emph{TranslatorCompare} is special in a way that it gets the translations from all implemented systems, so that the results can be compared next to each other.}
+    \caption[UML diagram of the web application]{UML diagram: Each translation system implements the \emph{Translator} interface. The class \emph{TranslatorCompare} is special in a way that it gets the translations from all implemented systems, so that the results can be compared next to each other.}
     \label{fig:web_app_uml}
 \end{figure}
 
@@ -1018,8 +1022,8 @@ The backend offers a REST based interface for the different functionalities. The
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0 \textwidth]{images/web_application_rest.png}
-    \caption{The frontend communicates with the backend through a REST interface.}
+    \includegraphics[width=0.5 \textwidth]{images/web_application_rest.png}
+    \caption[REST interface]{The frontend communicates with the backend through a REST interface.}
     \label{fig:web_app_uml}
 \end{figure}
 
@@ -1092,8 +1096,8 @@ The BLEU scores were computed in different evaluation runs for the results of tr
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3 \textwidth]{images/evaluation_k_fold_cross_validation.png}
-    \caption{Splitting the parallel corpus: The white rectangle represents the test data, grey means training data and the black rectangle is the fixed development sample.}
+    \includegraphics[width=0.4 \textwidth]{images/evaluation_k_fold_cross_validation.png}
+    \caption[Evaluate BLEU score in different runs with k-fold cross validation]{Splitting the parallel corpus for multiple evaluation runs: The white rectangle represents the test data, grey means training data and the black rectangle is the fixed development sample.}
     \label{fig:evaluation_k_fold}
 \end{figure}
 
@@ -1220,7 +1224,7 @@ run-5 & 8.98          \\
 
 \section{Observations}
 
-One can see that Moses produces the best translations according to the BLEU metric. The achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process.
+One can see that Moses produces the best translations according to the BLEU metric. The achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process, where the optimal model parameters are determined.
 
 Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words did improve the BLEU score only for translating English to German.
 
@@ -1263,9 +1267,6 @@ Lastly, the prototype web application could be improved as well. After translati
 The complete source code is available on GitHub:
 \\
 \url{https://github.com/wanze/AppTranslator}
-\\
-\\
-Note that the code does not include external libraries like Moses or Tensorflow.
 \end{appendices}
 
 
