@@ -16,6 +16,16 @@ This project aims to extract and parse translations of existing applications to 
 \clearpage
 
 
+
+\chapter*{\centering Acknowledgements}
+\begin{quotation}
+\noindent 
+First and foremost, I would like to thank Roman Prokofyev and
+Professor Philippe Cudr\'{e}-Mauroux, who proposed the project and supervised my work, for their excellent support throughout this thesis. Without their advice and ideas, this thesis would not have been possible.
+\end{quotation}
+\clearpage
+
+
 % C O N T E N T S 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 \tableofcontents
@@ -1116,36 +1126,38 @@ A script\footnote{\url{https://github.com/moses-smt/mosesdecoder/blob/master/scr
 \centering
 \begin{minipage}{0.48\textwidth}
 \centering
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}lrr@{}}
 \toprule
-EN-FR & BLEU          \\ \midrule
-run-1 & 47.45          \\
-run-2 & 53.19          \\
-run-3 & 49.91          \\
-run-4 & 51.5           \\
-run-5 & 51.74          \\
-\textbf{\o}      & \textbf{50.76} \\
- \(\sigma\)     & 1.95           \\ \bottomrule
+EN-FR & BLEU\footnote{Language model using data from the monolingual corpus}  & BLEU\footnote{Language model using training data of each run}        \\ \midrule
+run-1 & 47.45 & 43.11        \\
+run-2 & 53.19 & 47.69        \\
+run-3 & 49.91 & 44.23        \\
+run-4 & 51.5  & 45.37        \\
+run-5 & 51.74 & 46.31        \\
+\textbf{\o}      & \textbf{50.76} & \textbf{45.34} \\
+ \(\sigma\)     & 1.95   & 1.59        \\ \bottomrule
 \end{tabular}
 \label{my-label}
 \end{minipage}
 \hfill
 \begin{minipage}{0.48\textwidth}
 \centering
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}lrr@{}}
 \toprule
-EN-DE & BLEU          \\ \midrule
-run-1 & 41.6          \\
-run-2 & 44.53          \\
-run-3 & 44.12          \\
-run-4 & 46           \\
-run-5 & 43.73          \\
-\textbf{\o}      & \textbf{44.00} \\
- \(\sigma\)     & 1.42           \\ \bottomrule
+EN-DE & BLEU\footnote{Language model using data from the monolingual corpus} & BLEU\footnote{Language model using training data of each run}         \\ \midrule
+run-1 & 41.6 &  36.19       \\
+run-2 & 44.53 & 40.37        \\
+run-3 & 44.12  & 38.69       \\
+run-4 & 46 & 39.09         \\
+run-5 & 43.73 & 39.37        \\
+\textbf{\o}      & \textbf{44.00} & \textbf{38.74}\\
+ \(\sigma\)     & 1.42    & 1.39       \\ \bottomrule
 \end{tabular}
 \label{my-label}
 \end{minipage}
 \end{table}
+
+The first column \emph{a} reports BLEU scores for a trained model where the language model uses all available data from the French/German monolingual corpus. This also includes sentences from the test sample, which might not be desired for a fair comparison. Hence, a second model was trained where the language model solely uses sentences from the French/German training corpus per run, not including sentences from the test sample. These BLEU scores are reported in the second column \emph{b}.
 
 \subsection{Tensorflow}
 
@@ -1224,7 +1236,7 @@ run-5 & 8.98          \\
 
 \section{Observations}
 
-One can see that Moses produces the best translations according to the BLEU metric. The achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process, where the optimal model parameters are determined.
+One can see that Moses produces the best translations according to the BLEU metric. As expected, if the language model component of Moses has less data available, the scores drop about 5 units. Still, the achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process, where the optimal model parameters are determined.
 
 Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words did improve the BLEU score only for translating English to German.
 
