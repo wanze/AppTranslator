@@ -84,7 +84,7 @@ The study followed 200 iPhone apps that introduced native language support in a 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/problem_analysis_app_annie.jpg}
+    \includegraphics[width=0.9\textwidth]{images/problem_analysis_app_annie.jpg}
     \caption[Proportion of free downloads and revenue of iPhone apps by language \cite{website_impact_of_translations_to_mobile_apps}]{Graphic from \citep{website_impact_of_translations_to_mobile_apps} showing the proportion of free downloads and revenue of iPhone apps by language.}
     \label{fig:problem_analysis_impact_languages}
 \end{figure}
@@ -870,7 +870,9 @@ The decoder of Moses is controlled by the \texttt{moses.ini} file. This file sto
 \item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
 \end{itemize}
 
-The decoder uses \emph{Recombination} and a \emph{Beam Search} (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
+The decoder uses \emph{Recombination} and a \emph{Beam Search} (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. 
+
+%The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
 \end{enumerate}
 \textbf{Example} We translate the same example string as used in the previous chapter ``Open the settings to change your username'' to French. Here is the command to invoke the decoder:
 
@@ -951,7 +953,7 @@ The perplexity indicates how well the model of each bucket predicts the samples 
 
 In contrast to Moses, the decoding process in Tensorflow does not offer any options to influence the translation result. One problem is that unknown words not being part of the target language vocabulary are output with an \texttt{UNK} token. Our Baseline System and Moses both replace unknown words with the original word in the source language. Not having this behaviour \emph{can} impact the BLEU score: If the unknown word is the same as in the source language, we get a penalty when comparing unigrams, because the word is not present in the output sentence (see Section \ref{sec:bleu}). To overcome this problem, the decoding process was extended by the following steps:
 \begin{enumerate}
-\item After reading the sentence to translate, we store the words that were converted to \texttt{UNK} tokens in a list.
+\item After reading the input sentence, store the words that were converted to \texttt{UNK} in a list.
 \item Let the decoder produce the output sentence and check if it contains \texttt{UNK} tokens. If so, replace each \texttt{UNK} token with a stored unknown word from input sentence.
 \end{enumerate}
 The correct position of the unknown word in the output sentence is not guaranteed, as one can't map \texttt{UNK} tokens from the input to \texttt{UNK} tokens from the output. However, at least in BLEU, the position of the unigram is neglected.
@@ -1064,7 +1066,7 @@ The frontend uses \emph{AngularJS}\footnote{\url{https://angularjs.org/} (access
 \chapter{Evaluation}
 \label{cha:evaluation}
 
-How can we automatically measure the quality of machine translated text? There exists an algorithm called \emph{BLEU} \cite{bleu_score} which is mostly used for this task. We first shortly describe how BLEU works, then explain our evaluation setup and finally present the BLEU scores achieved for the different translation systems.
+How can we automatically measure the quality of machine translated text? There exists an algorithm called \emph{BLEU} \cite{bleu_score} which is mostly used for this task. We first shortly describe how BLEU works, then explain our evaluation setup and list the BLEU scores achieved for the different translation systems. Finally, we present the results of translating an existing app from English to French and German.
 
 \section{BLEU (Bilingual Evaluation Understudy)}
 \label{sec:bleu}
@@ -1234,13 +1236,90 @@ run-5 & 8.98          \\
 \end{table}
 
 
-\section{Observations}
+\subsection{Observations}
 
 One can see that Moses produces the best translations according to the BLEU metric. As expected, if the language model component of Moses has less data available, the scores drop about 5 units. Still, the achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process, where the optimal model parameters are determined.
 
 Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words did improve the BLEU score only for translating English to German.
 
 The Baseline System produces similar results as Tensorflow for the translations from English to French. However, BLEU score is very low for translations from English to German. The reason is that the grammar of English and German is very different. Most sentences in English follow the \emph{Subject-Verb-Object} (SVO) syntax, which is not the case for German sentences. ``In German, the main verb must be the second element in the independent clause. This often requires an inversion of subject and verb''\footnote{\url{http://esl.fis.edu/grammar/langdiff/german.htm} (accessed: 16 May 2016)}. The Baseline System simply translates substrings without reordering, so \(n\)-grams in the candidate won't match with \(n\)-grams in the reference sentence. While the BLEU score for unigrams is reasonable, bigrams, trigrams and 4-grams do not contribute much to the overall BLEU score. The French grammar also follows the SVO syntax, which explains the better results for the translations from English-French.
+
+
+\section{Translating existing app ``Farplano''}
+\label{sec:translating_farplano}
+
+BLEU represents the quality of translations with a single number, which is useful to quickly and automatically compare translation results. However, it is hard to imagine how the translations of a given BLEU score actually looks like. In this section, we are going to translate the app  \emph{Farplano}\footnote{\url{https://play.google.com/store/apps/details?id=com.schedulr} (accessed 25 May 2016)} from Roman Prokofyev, who supervised this thesis. Farplano displays public transport departures for the stations close to you in Switzerland.
+
+As the app is already translated to French and German, the BLEU score can be computed as well. The following tables show a subset of the produced translations for translating the app from English to French and German. The third column \emph{Truth} shows the reference translation.
+
+\begin{table}[H]
+\centering
+\def\arraystretch{1.25}
+\begin{tabular}{@{}p{4.5cm}p{4.5cm}p{4.5cm}@{}}
+\toprule
+Source                                                                  & Translation                                                                       & Truth                                                                   \\ \midrule
+Voice search                                                            & lors de la voix                                                                   & Recherche vocale                                                        \\
+Manage subscriptions                                                    & G\'{e}rer les abonnements                                                             & G\'{e}rer les inscriptions                                                  \\
+Search                                                                  & recherche                                                                         & Rechercher                                                              \\
+Navigate home                                                           & Navigate d ' accueil                                                              & Revenir \`{a} l'accueil                                                     \\
+Invalid Account                                                         & compte non valide                                                                 & Compte erron\'{e}                                                           \\
+Share with                                                              & partager avec                                                                     & Partager avec                                                           \\
+Show on the map                                                         & afficher sur la carte                                                             & Voir sur la carte                                                       \\
+Set location                                                            & choisir le lieu                                                                   & R\'{e}gler la localisation                                                  \\
+More options                                                            & plus d' options                                                                   & Plus d'options                                                          \\
+Show buses                                                              & montrer les buses                                                                 & Montrer les bus                                                         \\
+Buy ticket SMS                                                          & acheter des SMS de r\'{e}duction                                                      & Acheter billet SMS                                                      \\
+Show trains                                                             & afficher des trains                                                               & Montrer les trains                                                      \\
+min. connection duration                                                & dur\'{e}e de la connexion h min .                                                     & min. dur\'{e}e des correspondances                                          \\
+Updating stationboard                                                   & la mise \`{a} jour stationboard                                                       & r\'{e}actualisation de horaire                                              \\
+Failed to send message                                                  & \'{e}chec de l' envoi du message                                                      & Impossible d'envoyer le message                                         \\
+Update location                                                         & mise \`{a} jour de l ' emplacement                                                    & R\'{e}actualiser de location                                                \\
+Journey to …                                                            & Journey \`{a} …                                                                       & Voyage vers …                                                           \\
+Cannot obtain location                                                  & Cannot obtenir la localisation                                                    & Ne peut pas obtenir une location                                        \\
+Swipe up to start navigation to the current station                     & Glissez vers le haut pour d\'{e}marrer la station au courant                          & Glisser vers le haut pour commencer l'itin\'{e}raire vers l'arret actuel    \\
+If you enjoy using FarPlano, would you mind taking a moment to rate it? & si vous aimez utiliser FarPlano, pourriez-vous prendre un moment pour \'{e}valuer it? & Si tu aimes utiliser FarPlano, peux-tu prendre un moment pour le noter? \\
+Network Error                                                           & erreur réseau                                                                     & Erreur r\'{e}seau                                                           \\
+Location services disabled                                              & les services de localisation d\'{e}sactiv\'{e}s                                           & Services de localisation d\'{e}sactiv\'{e}s                                     \\ \bottomrule
+\end{tabular}
+\caption{Results for translating Farplano from English to French.}
+\label{table_farplano_en_fr}
+\end{table}
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+\begin{table}[H]
+\centering
+\def\arraystretch{1.25}
+\begin{tabular}{@{}p{4.5cm}p{4.5cm}p{4.5cm}@{}}
+\toprule
+Source                                                                  & Translation                                                                                  & Truth                                                                        \\ \midrule
+Voice search                                                            & Voice suchen                                                                                 & Sprachsuche                                                                  \\
+Manage subscriptions                                                    & Abonnements verwalten                                                                        & Abonnemente verwalten                                                        \\
+Search                                                                  & Suche                                                                                        & Suchen                                                                       \\
+Navigate home                                                           & Navigate home                                                                                & Zur Startseite                                                               \\
+Invalid Account                                                         & Konto ung\"{u}ltig                                                                               & Ung\"{u}ltiges Konto                                                             \\
+Share with                                                              & teilen mit                                                                                   & Freigeben für                                                                \\
+Show on the map                                                         & auf der Karte anzeigen                                                                       & Auf der Karte zeigen                                                         \\
+Set location                                                            & Ort :                                                                                        & Standort wählen                                                              \\
+More options                                                            & weitere Optionen                                                                             & Weitere Optionen                                                             \\
+Show buses                                                              & buses anzeigen                                                                               & Bussen anzeigen                                                              \\
+Buy ticket SMS                                                          & SMS Ticket kaufen                                                                            & Billett kaufen SMS                                                           \\
+Show trains                                                             & trains anzeigen                                                                              & Z\"{u}ge anzeigen                                                                \\
+min. connection duration                                                & Dauer min .                                                                                  & min. Verbindungsdauer                                                        \\
+Updating stationboard                                                   & stationboard aktualisieren                                                                   & Fahrpl\"{a}ne aktualisieren                                                      \\
+Failed to send message                                                  & Nachricht senden an fehlgeschlagen                                                           & Nachricht konnte nicht gesendet werden                                       \\
+Update location                                                         & Standort \"{a}ndern                                                                              & Ort aktualisieren                                                            \\
+Journey to …                                                            & Journey zu …                                                                                 & Reise nach …                                                                 \\
+Cannot obtain location                                                  & Standort Cannot erhalten                                                                     & Kann nicht Ort erhalten                                                      \\
+Swipe up to start navigation to the current station                     & die Navigation starten Zieh den aktuellen Sender                                             & \emph{missing}                                                                         \\
+If you enjoy using FarPlano, would you mind taking a moment to rate it? & wenn du gerne verwendest FarPlano, w\"{u}rdest du dir einen Moment Zeit , um uns zu bewerten it? & Sollte Dir FarPlano Spaß machen, macht es Dir etwas aus die App zu bewerten? \\
+Network Error                                                           & es gibt ein Problem mit dem Netzwerk                                                         & Netzwerkfehler                                                               \\
+Location services disabled                                              & Standort ist deaktiviert                                                                     & Standortdienste deaktiviert                                                  \\ \bottomrule
+\end{tabular}
+\caption{Results for translating Farplano from English to German.}
+\label{table_farplano_en_de}
+\end{table}
 
 
 % 114948 total sentences in parallel corpus EN-FR
