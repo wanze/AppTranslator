@@ -357,9 +357,11 @@ In total, we collected 114'947 parallel sentences for the English-French languag
 \subsection{Top Sentences}
 
 \begin{table}[H]
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}llllllll@{}}
+%\centering
+%\resizebox{\textwidth}{!}{%
+%\begin{tabular}{@{}llllllll@{}}
+\def\arraystretch{1.25}
+\begin{tabular}{@{}p{3.4cm}p{0.4cm}p{0.2cm}p{3.4cm}p{0.4cm}p{0.2cm}p{3.4cm}p{0.4cm}@{}}
 \toprule
 EN & Count &  & FR & Count &  & DE & Count \\ \midrule
 Cancel & 1894 &  & Annuler & 1067 &  & Abbrechen & 886 \\
@@ -373,7 +375,7 @@ Log Out & 556 &  & Activer services google Play & 368 &  & Fertig & 548 \\
 Update & 545 &  & Activer les services Google Play & 366 &  & Weiter & 484 \\
 Share & 541 &  & Installer les services Google Play & 366 &  & Schliessen & 428 \\ \bottomrule
 \end{tabular}
-}
+%}
 \caption{Top ten sentences for English, French and German}
 \label{table:data_analysis_top_terms}
 \end{table}
@@ -421,71 +423,73 @@ The lengths were measured on the monolingual corpus after tokenization, which me
     \caption{Length of sentences for English, French and German}
     \label{fig:data_analysis_languages_count}
 \end{figure}
-\subsection{N-Grams}
-
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}llllll@{}}
-\toprule
-EN     & Count & FR     & Count & DE     & Count \\ \midrule
-to     & 28160 & de     & 32818 & Sie    & 14383 \\
-the    & 19306 & \`{a}      & 13094 & nicht  & 8216  \\
-your   & 14238 & la     & 10956 & die    & 7853  \\
-you    & 11144 & le     & 10701 & und    & 7366  \\
-and    & 9962  & les    & 10619 & zu     & 5791  \\
-a      & 9657  & pour   & 8057  & der    & 5783  \\
-in     & 8338  & votre  & 7674  & auf    & 5575  \\
-is     & 8087  & des    & 7090  & ist    & 5447  \\
-this   & 7522  & et     & 7025  & werden & 5337  \\
-of     & 7340  & pas    & 6976  & von    & 5329  \\
- \bottomrule
-\end{tabular}
-\caption{Top unigrams from the monolingual corpus}
-\label{my-label}
-\end{table}
 
 
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}llllll@{}}
-\toprule
-EN            & Count & FR                 & Count & DE                     & Count \\ \midrule
-Google Play   & 3348  & Google Play        & 3366  & Google PlayDienste     & 2639  \\
-Play services & 2807  & de la              & 2915  & Sie die                & 1458  \\
-try again     & 2270  & services Google    & 2905  & Sie es                 & 1183  \\
-to the        & 1705  & \`{a} jour             & 2353  & Sie sich               & 975   \\
-want to       & 1647  & les services       & 1762  & versuchen Sie          & 835   \\
-you want      & 1484  & que vous           & 1593  & kann nicht             & 806   \\
-will be       & 1359  & de votre           & 1373  & konnte nicht           & 795   \\
-Please try    & 1328  & de passe           & 1303  & es erneut              & 714   \\
-of the        & 1325  & Impossible de      & 1284  & auf Ihrem              & 667   \\
-is not        & 1258  & a \'{e}t\'{e}              & 1027  & in der                 & 667   \\
-\bottomrule
-\end{tabular}
-\caption{Top bigrams from the monolingual corpus}
-\label{my-label}
-\end{table}
+%\subsection{N-Grams}
+
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{@{}llllll@{}}
+%\toprule
+%EN     & Count & FR     & Count & DE     & Count \\ \midrule
+%to     & 28160 & de     & 32818 & Sie    & 14383 \\
+%the    & 19306 & \`{a}      & 13094 & nicht  & 8216  \\
+%your   & 14238 & la     & 10956 & die    & 7853  \\
+%you    & 11144 & le     & 10701 & und    & 7366  \\
+%and    & 9962  & les    & 10619 & zu     & 5791  \\
+%a      & 9657  & pour   & 8057  & der    & 5783  \\
+%in     & 8338  & votre  & 7674  & auf    & 5575  \\
+%is     & 8087  & des    & 7090  & ist    & 5447  \\
+%this   & 7522  & et     & 7025  & werden & 5337  \\
+%of     & 7340  & pas    & 6976  & von    & 5329  \\
+% \bottomrule
+%\end{tabular}
+%\caption{Top unigrams from the monolingual corpus}
+%\label{my-label}
+%\end{table}
 
 
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}llllll@{}}
-\toprule
-EN                   & Count & FR                          & Count & DE                               & Count \\ \midrule
-Google Play services & 2805  & services Google Play        & 2889  & versuchen Sie es                 & 804   \\
-you want to          & 1407  & les services Google         & 1714  & Google PlayDienste aktivieren    & 565   \\
-Please try again     & 1187  & mot de passe                & 920   & Sie es erneut                    & 465   \\
-try again later      & 794   & ne fonctionnera pas         & 877   & sind Google PlayDienste          & 452   \\
-Are you sure         & 740   & ne sont pas                 & 832   & Google PlayDienste erforderlich  & 445   \\
-This app wont        & 686   & Cette application ne        & 713   & Bitte versuchen Sie              & 427   \\
-you sure you         & 630   & application ne fonctionnera & 712   & PlayDienste erforderlich die     & 417   \\
-sure you want        & 596   & Mettre \`{a} jour               & 620   & Google PlayDienste installieren  & 396   \\
-and try again        & 579   & mise \`{a} jour                 & 571   & Google PlayDienste aktualisieren & 396   \\
-can not be           & 555   & Google Play qui             & 480   & Sie es sp\"{a}ter                    & 394   \\ \bottomrule
-\end{tabular}
-\caption{Top trigrams from the monolingual corpus}
-\label{my-label}
-\end{table}
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{@{}llllll@{}}
+%\toprule
+%EN            & Count & FR                 & Count & DE                     %& Count \\ \midrule
+%Google Play   & 3348  & Google Play        & 3366  & Google %PlayDienste     & 2639  \\
+%Play services & 2807  & de la              & 2915  & Sie die                %& 1458  \\
+%try again     & 2270  & services Google    & 2905  & Sie es                 %& 1183  \\
+%to the        & 1705  & \`{a} jour             & 2353  & Sie sich               %& 975   \\
+%want to       & 1647  & les services       & 1762  & versuchen Sie          %& 835   \\
+%you want      & 1484  & que vous           & 1593  & kann nicht             %& 806   \\
+%will be       & 1359  & de votre           & 1373  & konnte nicht           %& 795   \\
+%Please try    & 1328  & de passe           & 1303  & es erneut              %& 714   \\
+%of the        & 1325  & Impossible de      & 1284  & auf Ihrem              %& 667   \\
+%is not        & 1258  & a \'{e}t\'{e}              & 1027  & in der                 %& 667   \\
+%\bottomrule
+%\end{tabular}
+%\caption{Top bigrams from the monolingual corpus}
+%\label{my-label}
+%\end{table}
+
+
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{@{}llllll@{}}
+%\toprule
+%EN                   & Count & FR                          & Count & DE                               & %Count \\ \midrule
+%Google Play services & 2805  & services Google Play        & 2889  & versuchen Sie es                 & %804   \\
+%you want to          & 1407  & les services Google         & 1714  & Google PlayDienste aktivieren    & %565   \\
+%Please try again     & 1187  & mot de passe                & 920   & Sie es erneut                    & %%465   \\
+%try again later      & 794   & ne fonctionnera pas         & 877   & sind Google PlayDienste          & %452   \\
+%Are you sure         & 740   & ne sont pas                 & 832   & Google PlayDienste erforderlich  & %445   \\
+%This app wont        & 686   & Cette application ne        & 713   & Bitte versuchen Sie              & %427   \\
+%you sure you         & 630   & application ne fonctionnera & 712   & PlayDienste erforderlich die     & %417   \\
+%sure you want        & 596   & Mettre \`{a} jour               & 620   & Google PlayDienste installieren  %& 396   \\
+%and try again        & 579   & mise \`{a} jour                 & 571   & Google PlayDienste aktualisieren %& 396   \\
+%can not be           & 555   & Google Play qui             & 480   & Sie es sp\"{a}ter                    %& 394   \\ \bottomrule
+%\end{tabular}
+%\caption{Top trigrams from the monolingual corpus}
+%\label{my-label}
+%\end{table}
 
 \chapter{Data Extraction, Preparation and Storage}
 \label{cha:data_extraction_prep_storage}
@@ -502,6 +506,8 @@ An Android app has the form of a single binary file (suffix .apk). The XML files
 \end{figure}
 Inside the \texttt{strings.xml} files, translations are stored key-value based. Each string has a unique key which holds the translation value for each language. Here is an example how an English XML file looks like, followed by its German counterpart:
 
+\begin{minipage}{1.0\textwidth}
+
 \lstset{
 language=XML,
 morekeywords={encoding,resources,string }
@@ -510,7 +516,7 @@ morekeywords={encoding,resources,string }
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="close_app">Close</string>
-    <string name="back">Back</string>
+    <string name="settings">Settings</string>
     ...
 </resources>
 \end{lstlisting}
@@ -523,10 +529,13 @@ morekeywords={encoding,resources,string }
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="close_app">Schliessen</string>
-    <string name="back">Zurück</string>
+    <string name="settings">Einstellungen</string>
     ...
 </resources>
 \end{lstlisting}
+
+\end{minipage}
+
 
 \section{Preprocess Translations}
 \label{sec:preprocess_translations}
@@ -997,7 +1006,7 @@ The user interface is divided into three steps. First of all, one needs to speci
 
 
 \subsection{Translation Options}
-
+\label{subsec:web_application_translation_options}
 \textbf{Moses}
 
 \begin{itemize}
@@ -1242,22 +1251,23 @@ One can see that Moses produces the best translations according to the BLEU metr
 
 Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words did improve the BLEU score only for translating English to German.
 
-The Baseline System produces similar results as Tensorflow for the translations from English to French. However, BLEU score is very low for translations from English to German. The reason is that the grammar of English and German is very different. Most sentences in English follow the \emph{Subject-Verb-Object} (SVO) syntax, which is not the case for German sentences. ``In German, the main verb must be the second element in the independent clause. This often requires an inversion of subject and verb''\footnote{\url{http://esl.fis.edu/grammar/langdiff/german.htm} (accessed: 16 May 2016)}. The Baseline System simply translates substrings without reordering, so \(n\)-grams in the candidate won't match with \(n\)-grams in the reference sentence. While the BLEU score for unigrams is reasonable, bigrams, trigrams and 4-grams do not contribute much to the overall BLEU score. The French grammar also follows the SVO syntax, which explains the better results for the translations from English-French.
+The Baseline System produces similar results as Tensorflow for the translations from English to French. However, BLEU score is very low for translations from English to German. The reason is that the grammar of English and German is very different. Most sentences in English follow the \emph{Subject-Verb-Object} (SVO) syntax, which is not the case for German sentences. ``In German, the main verb must be the second element in the independent clause. This often requires an inversion of subject and verb''\footnote{\url{http://esl.fis.edu/grammar/langdiff/german.htm} (accessed: 16 May 2016)}. The Baseline System simply translates substrings without reordering, so \(n\)-grams in the candidate won't match with \(n\)-grams in the reference sentence. While the BLEU score for unigrams is reasonable, bigrams, trigrams and 4-grams do not contribute much to the overall BLEU score. The French grammar also follows the SVO syntax, which explains the better results for the translations from English to French.
 
 
 \section{Translating existing app ``Farplano''}
 \label{sec:translating_farplano}
 
-BLEU represents the quality of translations with a single number, which is useful to quickly and automatically compare translation results. However, it is hard to imagine how the translations of a given BLEU score actually looks like. In this section, we are going to translate the app  \emph{Farplano}\footnote{\url{https://play.google.com/store/apps/details?id=com.schedulr} (accessed 25 May 2016)} from Roman Prokofyev, who supervised this thesis. Farplano displays public transport departures for the stations close to you in Switzerland.
+BLEU represents the quality of translations with a single number, which is useful to quickly and automatically compare translation results. However, it is hard to imagine how the produced translations belonging to a given BLEU score actually look like. In this section, we are going to translate the app  \emph{Farplano}\footnote{\url{https://play.google.com/store/apps/details?id=com.schedulr} (accessed 25 May 2016)} from Roman Prokofyev, who supervised this thesis. Farplano displays public transport departures for the stations close to you in Switzerland. As the app is already translated to French and German, the BLEU score can be computed as well. We used the web application with Moses and the default translation settings (see Section \ref{subsec:web_application_translation_options}) to produce the translations. Table \ref{table_farplano_en_fr} and \ref{table_farplano_en_de} show the results for translating Farplano from English to French and German. The third column \emph{Reference} shows the existing reference translation from the app.
 
-As the app is already translated to French and German, the BLEU score can be computed as well. The following tables show a subset of the produced translations for translating the app from English to French and German. The third column \emph{Truth} shows the reference translation.
+Overall, the quality of the French translations is better than the German ones, which correlates to the higher BLEU scores achieved for English-French in the previous section. One can see that some words are not translated, because they are missing in the phrase translation table. By default, Moses replaces them with the corresponding word in the source language. Another problem are synonyms: A translation can be correct by using a synonym for a word in the reference sentence and still getting penalized by BLEU, because the word is not part of the reference sentence. The German translation ``Standort \"{a}ndern'' for the English source sentence ``Update location'' is correct but does not correspond to the reference sentence ``Ort aktualisieren''. In the previous example, both translations are possible, and one would choose the sentence that better fits the context of the app. Some translations only differ in terms of honorific. For example, the French reference sentences of Farplano use the grammatical first person while the translations from Moses often use the third person, e.g. ``Si tu aimes utiliser'' versus ``Si vous aimez utiliser''.
+
+The BLEU scores corresponding to the produced translations for Farplano are 22.66 for English-French and 21.23 for English-German. Note that for both target languages some reference sentences were missing. Candidate sentences without reference were skipped, so the BLEU score was computed on the same sentences for both languages (83 out of 109 available sentences).
 
 \begin{table}[H]
-\centering
 \def\arraystretch{1.25}
 \begin{tabular}{@{}p{4.5cm}p{4.5cm}p{4.5cm}@{}}
 \toprule
-Source                                                                  & Translation                                                                       & Truth                                                                   \\ \midrule
+Source                                                                  & Translation                                                                       & Reference                                                                   \\ \midrule
 Voice search                                                            & lors de la voix                                                                   & Recherche vocale                                                        \\
 Manage subscriptions                                                    & G\'{e}rer les abonnements                                                             & G\'{e}rer les inscriptions                                                  \\
 Search                                                                  & recherche                                                                         & Rechercher                                                              \\
@@ -1278,10 +1288,17 @@ Journey to …                                                            & Jour
 Cannot obtain location                                                  & Cannot obtenir la localisation                                                    & Ne peut pas obtenir une location                                        \\
 Swipe up to start navigation to the current station                     & Glissez vers le haut pour d\'{e}marrer la station au courant                          & Glisser vers le haut pour commencer l'itin\'{e}raire vers l'arret actuel    \\
 If you enjoy using FarPlano, would you mind taking a moment to rate it? & si vous aimez utiliser FarPlano, pourriez-vous prendre un moment pour \'{e}valuer it? & Si tu aimes utiliser FarPlano, peux-tu prendre un moment pour le noter? \\
-Network Error                                                           & erreur réseau                                                                     & Erreur r\'{e}seau                                                           \\
-Location services disabled                                              & les services de localisation d\'{e}sactiv\'{e}s                                           & Services de localisation d\'{e}sactiv\'{e}s                                     \\ \bottomrule
+Network Error                                                           & erreur r\'{e}seau                                                                     & Erreur r\'{e}seau                                                           \\
+Location services disabled                                              & les services de localisation d\'{e}sactiv\'{e}s                                           & Services de localisation d\'{e}sactiv\'{e}s                                     \\ 
+Swipe down to listen for next departures & Glissez vers le bas pour \'{e}couter les prochains d\'{e}parts & Glisser vers le bas pour les prochains d'{e}parts \\
+Update & mise \`{a} jour & Mettre \`{a} jour \\
+Add to favorites & ajouter aux favoris & Ajouter aux favoris \\
+Click to purchase a subscription & cliquez pour acheter un abonnement & 	Achetez votre abonnement \\
+This app won't run unless you update the Android Wear app.	& cette application won't que vous n' aurez pas mis \`{a} jour Android Wear app. & Cette application ne fonctionnera pas tant que vous n'aurez pas mis \`{a} jour l'application Android Wear. \\
+
+\bottomrule
 \end{tabular}
-\caption{Results for translating Farplano from English to French.}
+\caption{Results for translating Farplano from English to French with Moses.}
 \label{table_farplano_en_fr}
 \end{table}
 
@@ -1289,17 +1306,16 @@ Location services disabled                                              & les se
 % Please add the following required packages to your document preamble:
 % \usepackage{booktabs}
 \begin{table}[H]
-\centering
 \def\arraystretch{1.25}
 \begin{tabular}{@{}p{4.5cm}p{4.5cm}p{4.5cm}@{}}
 \toprule
-Source                                                                  & Translation                                                                                  & Truth                                                                        \\ \midrule
+Source                                                                  & Translation                                                                                  & Reference                                                                        \\ \midrule
 Voice search                                                            & Voice suchen                                                                                 & Sprachsuche                                                                  \\
 Manage subscriptions                                                    & Abonnements verwalten                                                                        & Abonnemente verwalten                                                        \\
 Search                                                                  & Suche                                                                                        & Suchen                                                                       \\
 Navigate home                                                           & Navigate home                                                                                & Zur Startseite                                                               \\
 Invalid Account                                                         & Konto ung\"{u}ltig                                                                               & Ung\"{u}ltiges Konto                                                             \\
-Share with                                                              & teilen mit                                                                                   & Freigeben für                                                                \\
+Share with                                                              & teilen mit                                                                                   & Freigeben f\"{u}r                                                                \\
 Show on the map                                                         & auf der Karte anzeigen                                                                       & Auf der Karte zeigen                                                         \\
 Set location                                                            & Ort :                                                                                        & Standort wählen                                                              \\
 More options                                                            & weitere Optionen                                                                             & Weitere Optionen                                                             \\
@@ -1313,11 +1329,19 @@ Update location                                                         & Stando
 Journey to …                                                            & Journey zu …                                                                                 & Reise nach …                                                                 \\
 Cannot obtain location                                                  & Standort Cannot erhalten                                                                     & Kann nicht Ort erhalten                                                      \\
 Swipe up to start navigation to the current station                     & die Navigation starten Zieh den aktuellen Sender                                             & \emph{missing}                                                                         \\
-If you enjoy using FarPlano, would you mind taking a moment to rate it? & wenn du gerne verwendest FarPlano, w\"{u}rdest du dir einen Moment Zeit , um uns zu bewerten it? & Sollte Dir FarPlano Spaß machen, macht es Dir etwas aus die App zu bewerten? \\
+If you enjoy using FarPlano, would you mind taking a moment to rate it? & wenn du gerne verwendest FarPlano, w\"{u}rdest du dir einen Moment Zeit , um uns zu bewerten it? & Sollte Dir FarPlano Spass machen, macht es Dir etwas aus die App zu bewerten? \\
 Network Error                                                           & es gibt ein Problem mit dem Netzwerk                                                         & Netzwerkfehler                                                               \\
-Location services disabled                                              & Standort ist deaktiviert                                                                     & Standortdienste deaktiviert                                                  \\ \bottomrule
+Location services disabled                                              & Standort ist deaktiviert                                                                     & Standortdienste deaktiviert                                                  \\ 
+
+Swipe down to listen for next departures & Zieh nach unten , um n\"{a}chste Abfahrten anzuh\"{o}ren . & \emph{missing} \\
+Update & aktualisieren & Aktualisieren \\
+Add to favorites & zu Favoriten hinzuf\"{u}gen & zu Favoriten hinzuf\"{u}gen \\
+Click to purchase a subscription & Klicken zum Kauf eine Lizenz & Zum Kauf eines Abos klicken \\
+This app won't run unless you update the Android Wear app. & diese App won't erst nach der Aktualisierung der Android Wear app. & Diese App funktioniert erst nach der Aktualisierung der Android Wear App. \\
+
+\bottomrule
 \end{tabular}
-\caption{Results for translating Farplano from English to German.}
+\caption{Results for translating Farplano from English to German with Moses.}
 \label{table_farplano_en_de}
 \end{table}
 
@@ -1331,7 +1355,7 @@ Location services disabled                                              & Stando
 \chapter{Conclusion}
 
 The question if it is possible to provide high-quality translations for apps with machine learning can be answered with ``Yes''. Still, one might argue that this answer depends on the definition of \emph{high-quality}. On one hand, we achieved good BLEU scores with a phrase-based system, as shown in Chapter \ref{cha:evaluation}. The achieved BLEU scores for Moses are higher than the scores achieved in \cite{smt_phrase_based, smt_deep_learning} on the \emph{European Parliament parallel corpus} \cite{website_parallel_corpus}, though the context is different, so a direct comparison is not possible. However, it still proofs our initial claim: Based on existing data and the similarity of sentences among different apps, we achieved a reasonable quality for machine translated sentences.  %that the concept of using existing data to translate new apps works. 
-On the other hand, machine translated text is almost never perfect. Bad app translations can do more harm than good, users might get confused if they cannot understand the content. Because of that, machine translated text \emph{should} be reviewed and corrected or completed by humans.
+On the other hand, machine translated text is almost never perfect. Bad app translations can do more harm than good, users might get confused if they cannot understand the content. Because of that, machine translated text should be reviewed and corrected or completed by humans.
 
 Is there a market for a system proposed in this thesis? Maybe, but there is also the question how legal it is from a laws point of view. The \emph{terms of service} from the Google Playstore include the following paragraph: ``You may not sell, rent, lease, redistribute, broadcast, transmit, communicate, modify, sublicense or transfer or assign any Content or your rights to Content to any third party without authorization, including with regard to any downloads of Content that you may obtain through Google Play. Use of any tool or feature provided as an authorized part of Google Play (for example, ``Social Recommendations'') shall not violate this provision so long as you use the tool as specifically permitted and only in the exact manner specified and enabled by Google.'' \footnote{\url{https://play.google.com/intl/en_ch/about/play-terms.html} (Accessed: 16 May 2016)} According to this quotation, authorization would be necessary to use existing content, which might also include the translation data.
 
@@ -1341,9 +1365,9 @@ Is there a market for a system proposed in this thesis? Maybe, but there is also
 
 The current state of the project could be improved in many ways. Currently, all available translations are used to train the SMT models, which also includes wrong or bad translations. We could rate translations based on metadata of the app they are coming from, e.g. number of downloads, average rating, number of ratings ect. In general, the more existing high-quality translations we collect to train the SMT models, the better the quality of our produced translations is.
 
-Another possibility is to analyse what kind of sentences are translated well on which system. With this knowledge in mind, we could choose the optimal system based on the input sentence.
+Another improvement would be to analyse what kind of sentences are translated well on which system. With this knowledge in mind, we could choose the optimal system based on the input sentence.
 
-Lastly, the prototype web application could be improved as well. After translating an XML file, we could offer to download the results as XML file again, among other formats. An interesting option could be to connect the web application with a crowdsourcing service, where the produced translations can be corrected and extended by people from a community.
+Lastly, the prototype web application could be improved as well. After translating an XML file, we could offer to download the results as XML file again, among other formats. An interesting option could be to connect the web application with a crowdsourcing service, where the produced translations can be corrected and extended by people human translators.
 
 
 %END Doc
