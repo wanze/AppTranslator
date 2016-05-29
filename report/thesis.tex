@@ -106,7 +106,7 @@ Translation services that are based solely on machine translations do not seem t
 
 ``Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction - a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.'' \cite{smt_book_koehn}
 
-As SMT is the dominant approach in machine translation, it is consequential to use it for our purpose of translating mobile apps. In machine translation literature, the SMT models are usually trained on a large parallel corpus, for example the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus}. This corpus consists of many sentences for a given language pair, e.g. EN-FR holds over 2 million sentences. Our corpus will hold the extracted sentences from existing apps. We expect to collect less but shorter sentences.
+As SMT is the dominant approach in machine translation, it is consequential to use it for our purpose of translating mobile apps. In machine translation literature, the SMT models are usually trained on a large parallel corpus, for example the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus}. This corpus consists of many sentences for a given language pair, e.g. English-French holds over 2 million sentences. Our corpus will hold the extracted sentences from existing apps. We expect to collect less but shorter sentences.
 
 To automatically evaluate the quality of machine produced text, a metric called \emph{BLEU} \citep{bleu_score} is mostly used. We adapt this procedure and also use BLEU to evaluate our translations in Chapter \ref{cha:evaluation}. %In our context, we train the We use two different SMT algorithm (see Chapter \ref{cha:related_work}) and analyze how they perform in the context of translating short sentences of mobile apps.
 
@@ -154,11 +154,11 @@ The translation model is further decomposed:
 where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}.
 The foreign sentence \emph{f} is broken up into \emph{I} phrases \(\bar{f}_i\). Each foreign phrase is translated into an English phrase \(\bar{e}_i\).
 
-Reordering is handled by a \emph{distance based reordering model}. We define \(start_i\) as the position of the first word of the foreign input phrase that translates to the \emph{i}th English phrase, and \(end_i\) as the position of the last word of that foreign phrase. The reordering distance is the number of words skipped when taking foreign words out of sequence (see figure \ref{fig:related_work_phrase_based_reordering}) \citep{smt_book_koehn}.
+Reordering is handled by a distance based reordering model. We define \(start_i\) as the position of the first word of the foreign input phrase that translates to the \emph{i}th English phrase, and \(end_i\) as the position of the last word of that foreign phrase. The reordering distance is the number of words skipped when taking foreign words out of sequence (see figure \ref{fig:related_work_phrase_based_reordering}) \citep{smt_book_koehn}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\textwidth]{images/related_work_phrase_based_reordering.png}
+    \includegraphics[width=0.5\textwidth]{images/related_work_phrase_based_reordering.png}
     \caption{Distance based reordering \cite{smt_book_koehn}}
     \label{fig:related_work_phrase_based_reordering}
 \end{figure}
@@ -170,27 +170,26 @@ Reordering is handled by a \emph{distance based reordering model}. We define \(s
 
 Building a phrase translation table involves three stages:
 \begin{enumerate}
-\item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models\footnote{\url{https://en.wikipedia.org/wiki/IBM_alignment_models} (accessed 13 May 2016)}. Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top translation from our corpus.
+\item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models\footnote{\url{https://en.wikipedia.org/wiki/IBM_alignment_models} (accessed 13 May 2016)}. Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top sentence from our English-French parallel corpus.
 \item \textbf{Extraciton of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment. A phrase pair (\(\bar{f}\),\(\bar{e}\)) is consistent with an alignment \emph{A}, if all words \(f_1,...,f_n\) in \(\bar{f}\) that have alignment points in \emph{A} have these with words \(e_1,...,e_n\) in \(\bar{e}\) and vice versa \citep{smt_book_koehn}.
 \item \textbf{Scoring phrase pairs} Assign probabilities to phrase translations.
 \end{enumerate}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\textwidth]{images/related_work_word_alignment.png}
-    \caption{Word alignment between a top sentence of the parallel English-French corpus.}
+    \includegraphics[width=0.5\textwidth]{images/related_work_word_alignment.png}
+    \caption{Word alignment between a top sentence of the English-French parallel corpus}
     \label{fig:related_work_word_alignment}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4 \textwidth]{images/related_work_phrase_alignment.png}
+    \includegraphics[width=0.5\textwidth]{images/related_work_phrase_alignment.png}
     \caption{Extraction of phrase pairs consistent with word alignment}
     \label{fig:related_work_phrase_alignment}
 \end{figure}
 
-
-We are able to extract the following phrase pairs from the example sentence (phrases marked with an * match the extractions from Figure \ref{fig:related_work_phrase_alignment}):
+The following phrase pairs can be extracted from the example sentence (phrases marked with an * match the extractions from Figure \ref{fig:related_work_phrase_alignment}):
 \begin{itemize}
 \item Update the Google Play Services / Mettre \a`a jour les services Google Play
 \item Update / Mettre \a`a jour
@@ -206,7 +205,7 @@ We are able to extract the following phrase pairs from the example sentence (phr
 The last step is to estimate the phrase translation probabilities by  relative frequency:
 
 \[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i }count(\bar{e},\bar{f}_i)}\]
-These probabilities are put in the phrase translation table together with the foreign phrases (see Figure \ref{fig:phrase_table_example}).
+These probabilities are put in the phrase translation table together with the foreign phrases (see Table \ref{fig:phrase_table_example}).
 
 \begin{table}[H]
 \centering
@@ -233,10 +232,10 @@ Recall the model to compute the translation probability:
 
 \begin{itemize}
 \item \textbf{Phrase translation} Pick phrase \(\bar{f}_i\) to be translated as phrase \(\bar{e}_i\) by looking up the score from the phrase translation table.
-\item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\), the current phrase starts at \(start_i\). Compute \(d(start_i - end_{i-1} -1)\)
+\item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\) and the current phrase starts at \(start_i\). Compute the reordering probability \(d(start_i - end_{i-1} -1)\)
 \item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
 \end{itemize}
-The algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms an end point in the search graph (Figure \ref{fig:related_work_hypothesis}). To get the best translation, we pick the completed hypothesis with the highest probability score and backtrack through the search graph \citep{smt_book_koehn}. 
+The decoding algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The probability score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms an end point in the search graph (see Figure \ref{fig:related_work_hypothesis}). To get the best translation, one picks the completed hypothesis with the highest probability score and backtracks through the search graph \citep{smt_book_koehn}.
 
 \begin{figure}[H]
     \centering
@@ -247,22 +246,22 @@ The algorithm reads the input sentence from left to right and creates a new hypo
 This process creates an exponential number of hypothesis. To reduce the search space, the following methods are applied:
 
 \begin{itemize}
-\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, e.g. have the same English words in the output. The worse hypothesis is dropped.
+\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped.
 \item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence.
 \end{itemize}
 
 
 \section{Deep Learning Neural Networks}
 \label{sec:related_work_deep_learning}
-Translating with neural networks is based on a encoder-decoder architecture \cite{smt_deep_learning1, smt_deep_learning}. Two \emph{recurrent neural networks} (RNN)\footnote{\url{https://en.wikipedia.org/wiki/Recurrent_neural_network} (accessed: 13 May 2016)} are involved: The first RNN encodes a variable-length sequence into a fixed-length vector representation. The second RNN decodes a given fixed-length vector back into a variable-length sequence.
-We first describe shortly the working of a RNN before explaining the encoder-decoder architecture in more detail. 
+Translating with neural networks is based on an encoder-decoder architecture \cite{smt_deep_learning1, smt_deep_learning}. Two \emph{recurrent neural networks} (RNN)\footnote{\url{https://en.wikipedia.org/wiki/Recurrent_neural_network} (accessed: 13 May 2016)} are involved: The first RNN encodes a variable-length input sentence into a fixed-length vector representation. The second RNN decodes a given fixed-length vector back into a variable-length sentence in the target language.
+The following section briefly describes how RNNs work in general while the following sections explain the encoder-decoder architecture in more detail. 
 
 %Beside the papers, we also want to mention a blog post\footnote{\url{https://devblogs.nvidia.com/parallelforall/introduction-neural-machine-translation-with-gpus/}} by NVIDIA which offers a very detailed explanation of the model.%
 
 
 \subsection{Recurrent Neural Network}
 
-A recurrent neural network is a class of artificial neural network where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by:
+A RNN is a class of artificial neural network where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by:
 
 \[  h_{t} = f(h_{t-1}, x_t) \]
 where \(f\) is a non-linear activation function. The function described in \cite{smt_deep_learning1} is motivated by a \emph{long short-term memory (LSTM)} unit\footnote{\url{https://en.wikipedia.org/wiki/Long_short-term_memory} (accessed 13 May 2016)}, but much simpler to compute and implement.
@@ -281,7 +280,7 @@ At the end of processing each word, the hidden state of the RNN is a summary \(c
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{images/related_work_encoder.png}
+    \includegraphics[width=0.9\textwidth]{images/related_work_encoder.png}
     \caption[Overview of the Encoder RNN]{Encoder RNN: The final hidden state (marked bold) contains the summary vector.}
     \label{fig:related_work_encoder}
 \end{figure}
@@ -303,7 +302,7 @@ The decoder is another RNN which is trained to generate the output sentence by p
 The conditional distribution of the next target word is
 
 \[ P(y_t|y_{t-1},y_{t-2},...,y_1,c) = g(h_t, y_{t-1}, c) \]
-for given activation functions \(f\) and \(g\). The latter must produce valid probabilities.
+for given activation functions \(f\) and \(g\). The latter must produce valid probabilities \cite{smt_deep_learning1}.
 
 \subsection{Training}
 
@@ -318,18 +317,17 @@ Maximizing the log-likelihood function can be done by using \emph{stochastic gra
 
 \section{Apps}
 
-A total of 698 free Android apps were collected from various categories\footnote{Click on Categories to see a list of available categories at:  \url{https://play.google.com/store/apps?hl=en} (accessed: 13 May 2016)}, ensuring a good mix of different translations. Figure \ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available English translations. Note that the counts indicate the number of effective translations after eliminating uninteresting data during pre-processing the corpus (see Chapter \ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all the three languages. Surprisingly, some apps provide more translations for German and French than English. Different counts can happen because of:
+A total of 698 free Android apps were collected from various categories\footnote{Click on Categories to see a list of available categories at:  \url{https://play.google.com/store/apps?hl=en} (accessed: 13 May 2016)}, ensuring a good mix of different sentences. Figure \ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available English translations. Note that the counts indicate the number of effective sentences after eliminating uninteresting data during pre-processing the corpus (see Chapter \ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all three languages. Surprisingly, some apps provide more sentences for German and French than English. Different counts can happen because of:
 
 \begin{enumerate}
 \item Not all strings need to be translated, some English words remain the same in the target language e.g. ``E-Mail''.
-\item Android stores the translations key-value based in one XML file per language. These files could be out of sync, the developer either forgot to add or remove a French/German translation.
-\item Some translations were abandoned during pre-processing.
+\item Android stores the sentences key-value based in one XML file per language. These files can be out of sync, the developer either forgot to add or remove a French/German translation.
 \end{enumerate}
-34 apps did not isolate their strings in XML files, we assume that they are hardcoded in the programming code. This leaves an effective number of 664 apps where we could extract translations. However, 241 apps among them were not multilingual and therefore not useful for building translation systems. Unfortunately, apps are not marked as multi-language in the app store, so we only know if there are isolated translations available after downloading and extracting the data.
+34 apps did not isolate their strings in XML files, we assume that they are hardcoded in the programming code. This leaves an effective number of 664 apps where we could extract translations. However, 241 apps among them were not multilingual. Unfortunately, apps are not marked as multi-language in the app store, so we only know if there are isolated translations available after downloading and extracting the data.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{images/data_analysis_top_apps_en.png}
+    \includegraphics[width=0.9\textwidth]{images/data_analysis_top_apps_en.png}
     \caption{Top apps by the number of English translations}
     \label{fig:data_analysis_top_apps_en}
 \end{figure}
@@ -337,11 +335,11 @@ A total of 698 free Android apps were collected from various categories\footnote
 
 \section{Languages}
 
-We collected a total of 423 multilingual apps, offering its content for at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, where we focus on this thesis, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
+A total of 423 multilingual apps were collected, offering its content for at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, where we focus on this thesis, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{images/data_analysis_languages_count.png}
+    \includegraphics[width=0.9\textwidth]{images/data_analysis_languages_count.png}
     \caption{Number of apps available in the top ten languages.}
     \label{fig:data_analysis_n_langs}
 \end{figure}
@@ -349,9 +347,9 @@ We collected a total of 423 multilingual apps, offering its content for at least
 
 \section{Extracted Sentences}
 
-This sections covers statistics regarding the extracted sentences per language, including the top sentences, top \(n\)-grams and sentence lengths. Note that the term \emph{sentence} in this section describes single words, sentences or multiple sentences, separated by punctuation.
+This sections covers statistics regarding the extracted sentences per language, including the top sentences and sentence lengths. Note that the term \emph{sentence} in this section describes a single word, sentence or multiple sentences, separated by punctuation.
 
-In total, we collected 114'947 parallel sentences for the English-French language pair and 114'773 for English-German, respectively. The monolingual data holds 187'642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (see Section \ref{sec:preprocess_translations}).
+In total, we collected 114'947 parallel sentences for the English-French language pair and 114'773 for English-German, respectively. The monolingual corpus holds 187'642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (see Section \ref{sec:preprocess_translations}).
 
 
 \subsection{Top Sentences}
@@ -361,19 +359,19 @@ In total, we collected 114'947 parallel sentences for the English-French languag
 %\resizebox{\textwidth}{!}{%
 %\begin{tabular}{@{}llllllll@{}}
 \def\arraystretch{1.25}
-\begin{tabular}{@{}p{3.4cm}p{0.4cm}p{0.2cm}p{3.4cm}p{0.4cm}p{0.2cm}p{3.4cm}p{0.4cm}@{}}
+\begin{tabular}{@{}p{3.2cm}p{1cm}p{3.2cm}p{1cm}p{3.2cm}p{1cm}@{}}
 \toprule
-EN & Count &  & FR & Count &  & DE & Count \\ \midrule
-Cancel & 1894 &  & Annuler & 1067 &  & Abbrechen & 886 \\
-Done & 1230 &  & Supprimer & 745 &  & Google Play-Dienste aktivieren & 730 \\
-Settings & 1102 &  & Connexion & 745 &  & Google Play-Dienste installieren & 728 \\
-Search & 884 &  & Mettre \`{a} jour & 486 &  & Anmelden & 664 \\
-Delete & 704 &  & Rechercher & 485 &  & L\"{o}schen & 664 \\
-Enable Google Play services & 692 &  & Param\`{e}tres & 450 &  & Aktualisieren & 652 \\
-Get Google Play services & 690 &  & Mettre \`{a} jour les services Google Play & 370 &  & Einstellungen & 569 \\
-Log Out & 556 &  & Activer services google Play & 368 &  & Fertig & 548 \\
-Update & 545 &  & Activer les services Google Play & 366 &  & Weiter & 484 \\
-Share & 541 &  & Installer les services Google Play & 366 &  & Schliessen & 428 \\ \bottomrule
+EN & Count & FR & Count & DE & Count \\ \midrule
+Cancel & 1894 & Annuler & 1067  & Abbrechen & 886 \\
+Done & 1230  & Supprimer & 745  & Google Play-Dienste aktivieren & 730 \\
+Settings & 1102  & Connexion & 745  & Google Play-Dienste installieren & 728 \\
+Search & 884 & Mettre \`{a} jour & 486 & Anmelden & 664 \\
+Delete & 704 &  Rechercher & 485 & L\"{o}schen & 664 \\
+Enable Google Play services & 692  & Param\`{e}tres & 450  & Aktualisieren & 652 \\
+Get Google Play services & 690 & Mettre \`{a} jour les services Google Play & 370 & Einstellungen & 569 \\
+Log Out & 556 & Activer services google Play & 368 & Fertig & 548 \\
+Update & 545  & Activer les services Google Play & 366 & Weiter & 484 \\
+Share & 541 & Installer les services Google Play & 366 & Schliessen & 428 \\ \bottomrule
 \end{tabular}
 %}
 \caption{Top ten sentences for English, French and German}
@@ -419,7 +417,7 @@ The lengths were measured on the monolingual corpus after tokenization, which me
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{images/data_analysis_sentences_count.png}
+    \includegraphics[width=0.9\textwidth]{images/data_analysis_sentences_count.png}
     \caption{Length of sentences for English, French and German}
     \label{fig:data_analysis_languages_count}
 \end{figure}
@@ -494,9 +492,11 @@ The lengths were measured on the monolingual corpus after tokenization, which me
 \chapter{Data Extraction, Preparation and Storage}
 \label{cha:data_extraction_prep_storage}
 
+This chapter focuses on how to extract and store translation data from existing apps. The resulting parallel corpus holding the English-French and English-German sentences is required to train SMT models, which is described by the following chapter.
+
 \section{Extract Translations}
 
-An Android app has the form of a single binary file (suffix .apk). The XML files containing the translations are packed inside the .apk file. We used a software called \emph{Apktool}\footnote{\url{http://ibotpeaches.github.io/Apktool/} (accessed: 13 May 2016)} to reverse engineer existing apps and extract the needed XML files.
+An Android app has the form of a single binary file (suffix \texttt{.apk}). The translations are stored in XML files and these files which are packed inside the \texttt{apk} binary. A software called \emph{Apktool}\footnote{\url{http://ibotpeaches.github.io/Apktool/} (accessed: 13 May 2016)} was used to reverse engineer existing apps and extract the needed XML files.
 
 \begin{figure}[H]
     \centering
@@ -504,7 +504,7 @@ An Android app has the form of a single binary file (suffix .apk). The XML files
     \caption[Storage of translation strings in XML files]{For each language, the translations are stored in a XML file}
     \label{fig:data_extraction_xml}
 \end{figure}
-Inside the \texttt{strings.xml} files, translations are stored key-value based. Each string has a unique key which holds the translation value for each language. Here is an example how an English XML file looks like, followed by its German counterpart:
+Translations are stored key-value based inside the \texttt{strings.xml} files. Each string has a unique key which holds the translation value. Here is an example how an English XML file looks like, followed by its German counterpart:
 
 \begin{minipage}{1.0\textwidth}
 
@@ -543,7 +543,7 @@ This task involves two parts. First of all, the translations are sanitized from 
 
 \subsection{Sanitizing}
 
-The following rules are used to get rid of unwanted translations or parts of it:
+The following rules are used to get rid of unwanted information:
 
 \begin{itemize}
 \item Trim the string from newlines (\texttt{\textbackslash n}), tabs (\textbackslash t) or carriage returns (\textbackslash r)
@@ -559,7 +559,7 @@ The following rules are used to get rid of unwanted translations or parts of it:
 
 Tokenization is required to separate words from punctuation. Each token is separated by a space character: ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}''
 
-After tokenizsation, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed: 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase.
+After tokenizsation, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed: 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized in the corpus. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase.
 
 
 \section{Data storage}
@@ -570,26 +570,26 @@ After tokenizsation, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wi
 After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. A parallel corpus (often also called bitext) describes sentence aligned text-files of one language pair. All sentences must be aligned so that line \(x\) of the first language corresponds to line \(x\) of the second language. In order to get a random mix of translations from different apps, the sentences are shuffled before they are written to the files. The parallel corpus can be used by any SMT system to train the models. If the model requires a separate development set of parallel sentences, we can split the existing corpus at any percentage, e.g. use 80\% as training data and the remaining 20\% as development set.
 In addition, data of each language is also stored monolingual. All sentences of one language are written into a single text file. This is for example used to build language models, which are an important part of a phrase-based translation model (see Chapter \ref{sec:phrase_based_mt}).
 
-The data analysis (see Chapter \ref{cha:data_analysis}) showed that the monolingual corpus holds more sentences than the parallel corpus for all three languages. The reason is that the XML files are not synchronized perfectly: If an English sentence, identified by the translation key, is missing in French or German, it cannot be part of the parallel corpus.
+The data analysis (see Chapter \ref{cha:data_analysis}) showed that the monolingual corpus holds more sentences than the parallel corpus for all three languages. The reason is that the XML files are not synchronized perfectly: English sentences that are  missing in French or German cannot be part of the parallel corpus.
 
 \subsection{Apache Solr}
 \label{sec:apache_solr}
 
-We needed a simple way to store all translations, preferably with additional meta data, to perform data analysis and calculate statistics.
-\emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed: 13 May 2016)} is used for this purpose. Solr is an open source text search platform built on top of \emph{Apache Lucene}. It allows to store the translations with additional meta data, such as the translation key and a unique app ID. Due to its way of indexing text data, Solr is very fast when querying for translation strings. Furthermore, built in tools allow us to get nice statistics, for example the top translations grouped by language.
+\emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed: 13 May 2016)} is an open source text search platform. In the context of this thesis, Solr was used to store all extracted sentences with additional meta data such as the corresponding translation key or a unique app ID. %Due to its way of indexing text data, Solr is very fast when querying for translation strings. 
+Built in tools allow to perform data analysing, for example to get the top sentences grouped by language.
 
 Solr is also used as \emph{Baseline Translation System}, where we translate strings with a simple algorithm directly from the collected data in Solr (see Chapter \ref{cha:translation_process_baseline}).
 
 \subsubsection{Setup and Schema}
 
-Solr offers so called \emph{cores} where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml} (accessed: 13 May 2016)}. In our setup we created one core per language and one document per translation string. The schema is identical for each core (language) and consists of the following fields:
+Solr offers so called \emph{cores} where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml} (accessed: 13 May 2016)}. Our setup holds one core per language and one document per translation string. The schema is identical for each core (language) and consists of the following fields:
 
 \begin{itemize}
 \item \textbf{id} Unique ID used by Solr to identify a document.
-\item \textbf{app\_id} Each app must have a unique app-ID.
+\item \textbf{app\_id} Unique app ID that allows to map a given translation to the app it is coming from.
 \item \textbf{key} The translation key from the XML file.
 \item \textbf{value} The translation value (word or sentence) corresponding to the above key.
-\item \textbf{value\_lc} Again the translation value, additionally indexed with a special start- and ending delimiter. This allows us to search for exact values of any translation string.
+\item \textbf{value\_lc} Again the translation value, additionally indexed with a special start- and ending delimiter. This allows to search for exact values of any translation string, as described in the next section.
 \end{itemize}
 
 \begin{figure}[H]
@@ -603,14 +603,14 @@ The data in the \texttt{value} and \texttt{value\_lc} fields is stored tokenized
 
 \subsubsection{Queries}
 
-Solr offers a REST based interface to query the database. There is also a built in web application which allows to inspect results.
+Solr offers a REST based interface to query the database. There also exists a built in web application which allows to inspect results.
 Here is an example query where we search for the string ``Log Out'' in the English core\footnote{You must be connected to the LAN of the University of Fribourg in order to access the referenced domain. Also note that the parameters should be fully url-encoded, this was omitted in this report for better readability.}. The maximum amount of results is set to 500 rows and the return type is JSON:
 \\
 \\
 \url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value:"Log\%20Out"&rows=500&wt=json&indent=true}
 \\
 \\
-This query finds a total of 458 results (see Listing \ref{lst:solr_json_response}). There are not only exact matches returned, the term ``Log Out'' can occur as substring in a longer sentence. By default, Solr does not offer the possibility to return only exact matches. However, we can simulate this behaviour with the help of the \texttt{value\_lc} field, which indexed the translation value together with a special start- and end delimiter (\texttt{SOLR\_S} and \texttt{SOLR\_E}):
+This query finds a total of 458 results (see Listing \ref{lst:solr_json_response}). There are not only exact matches returned, the term ``Log Out'' can occur as substring in a longer sentence. By default, Solr does not offer the possibility to return only exact matches. However, this behaviour can be simulated with the help of the \texttt{value\_lc} field, which indexed the translation value together with a special start- and end delimiter (\texttt{SOLR\_S} and \texttt{SOLR\_E}):
 \\
 \\
 \url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value_lc:"SOLR_S\%20Log Out\%20SOLR_E"&rows=500&wt=json&indent=true}
@@ -653,7 +653,7 @@ This chapter describes different translation systems that were used to translate
 \section{Baseline System}
 \label{cha:translation_process_baseline}
 
-The \emph{Baseline System} makes direct use of the data stored in Solr and produces translations with a simple algorithm. Remember how the data is organized in Solr (see section \ref{sec:apache_solr}): Each translation is stored in a document with a fixed schema and each document belongs to one core. To lookup a translation, the following procedure is used:
+The \emph{Baseline System} makes direct use of the data stored in Solr and produces translations with a simple algorithm. Remember how the data is organized in Solr (see Section \ref{sec:apache_solr}): Each translation is stored in a document and each document belongs to one core. To lookup a translation, the following procedure is used:
 
 \begin{enumerate}
 \item Lookup the string to translate in the core of the source language.
@@ -709,20 +709,20 @@ This process of reducing the substring length is repeated until we can translate
 
 \[ \tilde{V} = argmax\sum_i count\_translations(\bar{S}_i) \]
 
-If there is a translation available for each substring \(\bar{S}_i\) of \(\tilde{V}\), we can build the output string \(T\) directly by concatenating the substring translations: 
+If there is a translation available for each substring \(\bar{S}_i\) of \(\tilde{V}\), the output string \(T\) is built by concatenating the substring translations: 
 
 \begin{center}
 \(T = \bar{T}_1 \; \bar{T}_2 \; \bar{T}_3 \; ... \; \bar{T}_n\)
 \end{center}
 
-Otherwise, we build the output string \(T\) incremental: If there is no translation found for substring \(\bar{S}_i\), we set \(S = \bar{S}_i\) and recursively call the algorithm again. If there are left single words to translate and no translation exists, we insert the source word into \(T\) by setting \(t_i = s_i\).
+Otherwise, the output string \(T\) is built incrementally: If there is no translation found for substring \(\bar{S}_i\), we set \(S = \bar{S}_i\) and recursively call the algorithm again. If there are left single words to translate and still no translations exist, the source word is inserted into \(T\) by setting \(t_i = s_i\).
 
 \end{enumerate}
 This simple algorithm works well for translating short words or sentences where a direct translation exists in the target language. On the other hand, it suffers from the following problems if translating substrings is necessary:
 
 \begin{itemize}
 \item The sentences or words for the translated substrings are inserted at the same position in \(T\) where they occurred in the source string. This won't produce good results since words often need to be reordered depending on the target language.
-\item Bad translations can have a direct impact on the result. For example, due to an error or uncompleted translation in the XML files, the English word ``the'' could be mapped to a sentence with many words.
+\item Bad translations directly impact the translation result. For example, due to an error in the XML files, the English word ``the'' could be mapped to a sentence with many words. If the algorithm looks up ``the'', it considers the mapped sentence as valid translation.
 \end{itemize} 
 
 
@@ -789,7 +789,7 @@ At the last step, there are translations available for both substrings of \(V_1\
 
 \section{Moses}
 
-\emph{Moses}\footnote{\url{http://www.statmt.org/moses/} (accessed: 13 May 2016)} \cite{moses} is a open source SMT toolkit. The training process follows closely the phrase-based model described in section \ref{sec:phrase_based_mt}. The source code is available on \emph{GitHub}\footnote{\url{https://github.com/moses-smt/mosesdecoder} (accessed: 13 May 2016)}. This project is very active, there are frequent commits to the master branch by 72 contributors and documentation on their website is excellent.
+\emph{Moses}\footnote{\url{http://www.statmt.org/moses/} (accessed: 13 May 2016)} \cite{moses} is a open source SMT toolkit. The training process follows closely the phrase-based model described in section \ref{sec:phrase_based_mt}. The source code is available on \emph{GitHub}\footnote{\url{https://github.com/moses-smt/mosesdecoder} (accessed: 13 May 2016)}. This project is very active, there are frequent commits to the master branch by over 70 contributors.
 
 
 \subsection{Training}
@@ -798,7 +798,7 @@ The training process requires sentence aligned parallel data to build the transl
 
 \begin{enumerate}
 \item Build a language model from the monolingual data of the target language. Moses includes the \emph{KenLM toolkit}\footnote{\url{https://kheafield.com/code/kenlm/} (accessed 13 May 2016)} for this task.
-\item Align words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed: 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and runs faster on a multi-core machine.
+\item Align words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed: 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
 \item Extract phrases: All phrases are dumped into one big file. The following listing shows some example content of this file. Each line contains: English phrase, French phrase and the alignment points of matching words (English-French).
 
 \begin{lstlisting}[label=list:moses_phrase_extraction]
@@ -874,7 +874,7 @@ The decoder of Moses is controlled by the \texttt{moses.ini} file. This file sto
 \end{itemize}
 \item The output sentence is generated left to right in form of hypotheses. Each hypothesis is represented by:
 \begin{itemize}
-\item A link to the best previous state, so that we later can back track through the graph to find the best translation.
+\item A link to the best previous state, so that the decoder later can back track through the graph to find the best translation.
 \item The cost (probability) and covered source words so far. A low cost means high probability.
 \item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
 \end{itemize}
@@ -907,23 +907,25 @@ The decoder produces the following output string: ``ouvrir les param\`{e}tres po
 Tensorflow includes a library to learn sequence to sequence models with neural networks. The implementation follows the encoder-decoder RNN model described in Section \ref{sec:related_work_deep_learning}.
 
 \subsection{Training}
+\label{subsec:tensorflow_training}
 
-To train the models, we followed the tutorial on sequence-to-sequence models \citep{website_tensorflow_tutorial}. 
-The python script was modified to fit our needs:
+To training process closely follows the tutorial by Tensorflow on sequence-to-sequence models \citep{website_tensorflow_tutorial}. 
+The training script was modified to fit our needs:
 \begin{itemize}
-\item We could skip the part where Tensorflow downloads and prepares the sample data since we want to train the models on our own data.
-\item The Tokenizer was replaced with another function doing nothing because our corpus is already tokenized.
-\item Additional parameters for the training process were added to make the training script more generic. Parameters include the source and target language and the path to the parallel corpus.
+\item Skip the part where Tensorflow downloads and prepares the sample data since the models are trained on our corpus prepared in Chapter \ref{cha:data_extraction_prep_storage}.
+\item Replace the included tokenizer by registering a function that just splits a string at spaces, because our corpus is already tokenized.
+\item Add additional parameters for the training process to make the training script more generic. New parameters include the source and target language and the path to the parallel corpus.
 \end{itemize}
-Training requires the following model parameters to be set. The values in square brackets represent the chosen default values. In our evaluation (see Chapter \ref{cha:evaluation}) we trained models with different values.
+Training requires the following model parameters. The values in square brackets represent the chosen default values. 
+%In the evaluation (see Chapter \ref{cha:evaluation}), different parameters were used  we trained models with different values.
 
 \begin{itemize}
 \item \textbf{Path to training and development corpus} The parallel training data is used to train the models. Development data is required to evaluate how well the model performs after each training step.
-\item \textbf{Source vocabulary size} Size of the vocabulary of the most common words for the source language. Words that are not part of the vocabulary are replaced with an \texttt{UNK} token. [40'000]
+\item \textbf{Source vocabulary size} Size of the vocabulary of the most common words for the source language. Words that are not part of the vocabulary are replaced with a special \texttt{UNK} token. [40'000]
 \item \textbf{Target vocabulary size} Size of the vocabulary for the target language. [40'000]
-\item \textbf{Size of model layer} How many cells are used in the RNNs. [2]
-\item \textbf{Number of layers} Number of layers used in the RNNs. [256]
-\item \textbf{Steps per checkpoint} How many training steps to do before writing the current state of the network from memory to disk. [50]
+\item \textbf{Number of layers} Number of layers in the RNNs. [2]
+\item \textbf{Size of model layer} How many cells are used per layer in the RNNs. [256]
+\item \textbf{Steps per checkpoint} Number of training steps to execute before writing the current state of the network from memory to disk. [50]
 \item \textbf{Learning Rate} The initial learning rate used when evaluating the model after each training step. [0.5]
 \item \textbf{Learning Rate Decay Factor} The learning rate decays by this factor. [0.99]
 \end{itemize}
@@ -943,7 +945,7 @@ global step 71600 learning rate 0.2576 step-time 1.79 perplexity 1.07
 \end{lstlisting}
 One can see the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair is put in a bucket according to the lengths of the source and target sentence. The sentences are then padded to fit the length of the bucket. The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language. Shorter sentences are padded with a special \texttt{PAD} symbol. For example, the English sentence ``I go.'' and corresponding French sentence ``Je vais.'' are put into the bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD PAD "." "go" "I"]} and \texttt{[GO "Je" "vais" "." EOS PAD PAD PAD PAD PAD]} \citep{website_tensorflow_tutorial}. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. We used the default buckets from the tutorial: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}.
 
-The perplexity indicates how well the model of each bucket predicts the samples of the development set. A low perplexity means that the model is good in predicting the development sentences. Again, we used 80\% as training data and 20\% as development data. The (infinite) training loop was stopped after the perplexities didn't improve any more.
+The perplexity indicates how well the model of each bucket predicts the samples of the development set. A low perplexity means that the model is good in predicting the development sentences. Again, as with Moses, we used 80\% as training data and 20\% as development data. The (infinite) training loop was stopped after the perplexities didn't improve any more.
 
 %The vocabulary for the source and target language is written to a file, one word per line where the line indicates the numeric index of the word:
 
@@ -982,9 +984,9 @@ To be consistent with the examples of the Baseline System and Moses, here is the
 
 \chapter{Web Application}
 
-A simple web application was built to test and compare the different translation systems. It offers a common interface to translate strings with the Baseline System, Moses and Tensorflow. Furthermore, there is the possibility to translate XML files containing translations, so the web application \emph{could} be used by developers to translate apps.
+A simple web application was built to test and compare the different translation systems. It offers a common interface to translate strings with the Baseline System, Moses and Tensorflow. Furthermore, there is the possibility to translate Android XML files containing sentences, so the web application could be used to translate apps.
 
-Additionally, the web application offers a functionality in terms of data analysing, called \emph{Term Variations}. Given a string, source and target language, it returns all different translations from Solr that were used among all apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param\`{e}teres'', ``r\'{e}glages'', ``configuration'', ``settings''. The last one indicates that at least one app did not translate ``settings'' correctly to French.
+Additionally, the web application offers a functionality in terms of data analysing, called \emph{Term Variations}. Given a string, source and target language, it returns all different translations from Solr that were used among all apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param\`{e}teres'', ``r\'{e}glages'', ``configuration'', ``settings''. %The last one indicates that at least one app did not translate ``settings'' correctly to French.
 
 Visit the following URL to access the web application: \url{http://diufpc114.unifr.ch}\footnote{You must be connected to the LAN of the university of fribourg in order to access the web application.}
 
@@ -995,11 +997,11 @@ Visit the following URL to access the web application: \url{http://diufpc114.uni
 
 \section{User Interface}
 
-The user interface is divided into three steps. First of all, one needs to specify the source and target language, translation input and the system that should be used to perform the translations. The input can either be plain strings or a XML translation file (see Figure \ref{fig:web_app_index}). Secondly, there is the possibility to set decoding options depending on the chosen translation system. Lastly, the translation results are displayed together with some debug information.
+The user interface to perform a translation is divided into three steps. First of all, one needs to specify the source and target language, translation input and the system that produces the translations. The input can either be plain strings or an Android XML translation file (see Figure \ref{fig:web_app_index}). Secondly, there is the possibility to set decoding options depending on the chosen translation system. The available options are described in the following section. Lastly, the results are displayed together with some debug information.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9 \textwidth]{images/web_application_index.png}
+    \includegraphics[width=1.0\textwidth]{images/web_application_index.png}
     \caption[User interface of the web application]{First step to use the web application: Set source and target languages, translation input and choose the translation system.}
     \label{fig:web_app_index}
 \end{figure}
@@ -1010,10 +1012,10 @@ The user interface is divided into three steps. First of all, one needs to speci
 \textbf{Moses}
 
 \begin{itemize}
-\item \textbf{Drop unknown words} Words not in the vocabulary are either dropped or replaced by the word in the source language. [No]
+\item \textbf{Drop unknown words} Words not in the vocabulary are either dropped or replaced by the corresponding word in the source language. [No]
 \item \textbf{Verbose} Verbosity level of the debug output. [2]
-\item \textbf{Stack size} Number of hypotheses kept on each stack while decoding. [100]
-\item \textbf{Tune weights manually} If enabled, the four weights for the translation model can be set manually (see Section \ref{subsec:moses_tuning}). Normally, the optimal weights from the tuning process are used. [No]
+\item \textbf{Stack size} Number of hypotheses kept in each stack while decoding. [100]
+\item \textbf{Tune weights manually} If enabled, the four weights for the translation model can be set manually (see Section \ref{subsec:moses_tuning}). Normally, the optimal weights determined by the tuning process are used. [No]
 \end{itemize}
 \textbf{Baseline System (Solr)}
 
@@ -1030,7 +1032,7 @@ Note that the provided parameters must match a model that was trained with the s
 
 \section{Architecture}
 
-Each translation system implements a common interface (see UML in Figure \ref{fig:web_app_uml}). This makes it easy to support additional translation engines at any time.
+Each translation system implements a common interface (see Figure \ref{fig:web_app_uml}) which guarantees the extensibility to support additional translation engines at any time.
 
 \begin{figure}[H]
     \centering
@@ -1048,10 +1050,11 @@ The backend offers a REST based interface for the different functionalities. The
     \label{fig:web_app_uml}
 \end{figure}
 
-The business logic is implemented in \emph{Python}, the REST interface is powered by a microframework called \emph{Flask}\footnote{\url{http://flask.pocoo.org/} (accessed: 16 May 2016)}. Flask has a built-in server and offers \emph{RESTful request dispatching}, among many other features. Table \ref{table_rest_endpoints} shows the possible endpoints of the REST interface together with the expected request data.
+The business logic is implemented in \emph{Python}, the REST interface is powered by a microframework called \emph{Flask}\footnote{\url{http://flask.pocoo.org/} (accessed: 16 May 2016)}. Flask has a built-in server and offers \emph{RESTful request dispatching}, among many other features. Table \ref{table_rest_endpoints} shows the possible endpoints of the REST interface together with the expected request data. The frontend uses \emph{AngularJS}\footnote{\url{https://angularjs.org/} (accessed: 16 May 2016)} together with the \emph{Semantic UI}\footnote{\url{http://semantic-ui.com/} (accessed: 16 May 2016)} CSS framework.
 
 \begin{table}[H]
 \centering
+\def\arraystretch{1.25}
 \begin{tabular}{@{}ll@{}}
 \toprule
 Endpoint                                                           & Request Data                                                                                                                                                                                                                                                                                  \\ \midrule
@@ -1063,8 +1066,6 @@ Endpoint                                                           & Request Dat
 \caption{REST endpoints}
 \label{table_rest_endpoints}
 \end{table}
-
-The frontend uses \emph{AngularJS}\footnote{\url{https://angularjs.org/} (accessed: 16 May 2016)} together with the \emph{Semantic UI}\footnote{\url{http://semantic-ui.com/} (accessed: 16 May 2016)} CSS framework.
 
 % com.ancestry.android.apps.ancestry_your_capitalized
 % com.google.android.apps.plus_collexion_abuse_appeal_rejected
@@ -1125,11 +1126,11 @@ The BLEU scores were computed in different evaluation runs for the results of tr
 The Baseline System needed a special setup. First of all, the development set is ignored since there is no evaluation or tuning involved in this model. Secondly, we needed to index the training data for each evaluation run separately into Solr. This was achieved by creating new cores in Solr according to the following schema:
 
 \[ source-target-run-k-(source|target) \]
-where \(source\) and \(target\) are the source and target language and \(k\) is the index of the evaluation run (1-5). For example, in the first evaluation run for translating English to French, the French training data is put into the core \texttt{en-fr-run-1-fr}.
+where \(source\) and \(target\) are the source and target language and \(k\) is the index of the evaluation run (1-5). For example, in the first evaluation run for translating English to French, the French data is put into the core \texttt{en-fr-run-1-fr}.
 
 \section{BLEU Scores}
 
-A script\footnote{\url{https://github.com/moses-smt/mosesdecoder/blob/master/scripts/generic/multi-bleu.perl} (accessed: 16 May 2016)} included in Moses was used to compute the scores. As proposed in \citep{bleu_score}, \(n\)-grams up to \(n=4\) are considered in the calculation. Our corpus offers only one reference translation per sentence since apps are not translated multiple times into the same language. Note that the BLEU scores are reported as percentages, this format seems mostly used in machine translation literature. The left table shows BLEU scores achieved for translating English to French, the right one for English to German. The BLEU scores are reported for each evaluation run together with the average \(\o\) and standard deviation \(\sigma\).
+A script\footnote{\url{https://github.com/moses-smt/mosesdecoder/blob/master/scripts/generic/multi-bleu.perl} (accessed: 16 May 2016)} included in Moses was used to compute the BLEU scores. As proposed in \citep{bleu_score}, \(n\)-grams up to \(n=4\) are considered in the calculation. Our corpus offers only one reference translation per sentence since apps are not translated multiple times into the same language. Note that the BLEU scores are reported as percentages, this format seems mostly used in machine translation literature. The left table shows BLEU scores achieved for translating English to French, the right one for English to German. The BLEU scores are reported for each evaluation run together with the average \(\o\) and standard deviation \(\sigma\).
 
 \subsection{Moses}
 
@@ -1168,7 +1169,7 @@ run-5 & 43.73 & 39.37        \\
 \end{minipage}
 \end{table}
 
-The first column \emph{a} reports BLEU scores for a trained model where the language model uses all available data from the French/German monolingual corpus. This also includes sentences from the test sample, which might not be desired for a fair comparison. Hence, a second model was trained where the language model solely uses sentences from the French/German training corpus per run, not including sentences from the test sample. These BLEU scores are reported in the second column \emph{b}.
+The first column \emph{a} reports BLEU scores for a model where the language model component of Moses uses all available data from the French/German monolingual corpus. This also includes sentences from the test sample, which might not be desired for a fair comparison to the other systems. Hence, a second model was trained where the language model solely uses sentences from the French/German training corpus per run, not including sentences from the test sample. These BLEU scores are reported in the second column \emph{b}.
 
 \subsection{Tensorflow}
 
@@ -1206,6 +1207,8 @@ run-5 			& 17.03  			&   19.71  			&	20				& 24.11	\\
 \label{my-label}
 \end{minipage}
 \end{table}
+
+Each column \emph{a-d} corresponds to a model that was trained with different parameters (see Section \ref{subsec:tensorflow_training}). Altered parameters include the number of layers and units in the RNNs and the size of the source and target vocabulary.
 
 \subsection{Baseline System}
 
@@ -1249,7 +1252,7 @@ run-5 & 8.98          \\
 
 One can see that Moses produces the best translations according to the BLEU metric. As expected, if the language model component of Moses has less data available, the scores drop about 5 units. Still, the achieved BLEU scores are doubled compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that our corpus is too small. In machine translation literature, the translation models are usually trained on much more data. The parallel corpus English-French from the \emph{European Parliament Proceedings Parallel Corpus} \cite{website_parallel_corpus} contains over 2 million sentences, which means \texttildelow 105 times more sentences than our corpus holds. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks of a tuning process, where the optimal model parameters are determined.
 
-Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words did improve the BLEU score only for translating English to German.
+Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. We achieved the best results with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words for the source and target language did improve the BLEU score only for translating English to German.
 
 The Baseline System produces similar results as Tensorflow for the translations from English to French. However, BLEU score is very low for translations from English to German. The reason is that the grammar of English and German is very different. Most sentences in English follow the \emph{Subject-Verb-Object} (SVO) syntax, which is not the case for German sentences. ``In German, the main verb must be the second element in the independent clause. This often requires an inversion of subject and verb''\footnote{\url{http://esl.fis.edu/grammar/langdiff/german.htm} (accessed: 16 May 2016)}. The Baseline System simply translates substrings without reordering, so \(n\)-grams in the candidate won't match with \(n\)-grams in the reference sentence. While the BLEU score for unigrams is reasonable, bigrams, trigrams and 4-grams do not contribute much to the overall BLEU score. The French grammar also follows the SVO syntax, which explains the better results for the translations from English to French.
 
