@@ -17,7 +17,7 @@
 \usepackage{bold-extra}
 \usepackage{geometry}
 \usepackage{varioref}
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{textcomp}
 \usepackage{listings}
 \usepackage[normalem]{ulem} %emphasize still italic
@@ -73,7 +73,6 @@
 % ============================================================================
 % Put edit comments in a really ugly standout display
 
-\usepackage{xcolor}
 \usepackage[normalem]{ulem}
 \newcommand{\ra}{$\rightarrow$}
 
@@ -111,7 +110,6 @@
 \newcommand{\needlines}[1]{\Needspace{#1\baselineskip}}
 
 % source code
-\usepackage{xcolor}
 \usepackage{textcomp}
 \usepackage{listings}
 \definecolor{source}{gray}{0.9}
@@ -200,6 +198,8 @@
 \newcommand{\thesisasst}{Roman Prokofyev}
 \newcommand{\thesissubtitle}{}
 \newcommand{\thesisdate}{May 2016}
+
+\newcommand{\rp}[1]{\textcolor{Magenta}{RP: #1}}
 
 
 
