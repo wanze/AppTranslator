@@ -133,16 +133,17 @@ To automatically evaluate the quality of machine produced text, a metric called 
 %Overview of SMT
 %Has been done but not specific domain of short sentences mobile
 
-This chapter explains the theory of two popular models in SMT . The first one is called \emph{Statistical Phrase-Based Translation} and was introduced in 2003 \cite{smt_phrase_based}. The second, more recent model, uses \emph{Deep Learning Neural Networks} to perform translations \cite{smt_deep_learning1, smt_deep_learning}.
+This chapter gives an overview of the two most popular approaches in SMT: \emph{Statistical Phrase-Based Translation}~\cite{smt_phrase_based} and \emph{Deep Learning Neural Networks}~\cite{smt_deep_learning1, smt_deep_learning}.
 
 \section{Phrase-Based Machine Translation}
 \label{sec:phrase_based_mt}
 \subsection{Model}
 
-Given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an english sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on conditional probability:
+\rp{This approach was introduced in 2003, ... give an overview of the idea before diving into formulas}.
+More formally, given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an English sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on conditional probability:
 
 \[P(e|f)\]
-To find the best english translation \(e_{best}\), the following equation is used (Bayes rule).
+To find the best English translation \(e_{best}\), the following equation is used (Bayes rule):
 
 \[e_{best} = argmax_eP(e|f)\]
 \[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
