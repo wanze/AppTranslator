@@ -143,7 +143,7 @@ This chapter gives an overview of the two most popular approaches in SMT: \emph{
 More formally, given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an English sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on conditional probability:
 
 \[P(e|f)\]
-To find the best English translation \(e_{best}\), the following equation is used (Bayes rule):
+To find the best English translation \(e_{best}\), the following equation based on the Bayes rule is used:
 
 \[e_{best} = argmax_eP(e|f)\]
 \[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
@@ -154,7 +154,7 @@ where \(P(e)\) is called the \emph{language model}\footnote{\url{https://en.wiki
 The translation model is further decomposed:
 
 \[p(\bar{f}_1^I|\bar{e}_1^I) = \prod_{i=1}^I \phi(\bar{f}_i^I|\bar{e}_i^I) d(start_i - end_{i-1} -1)\]
-where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}.
+where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}. \rp{maybe you can introduce why do we need re-ordering.}
 The foreign sentence \emph{f} is broken up into \emph{I} phrases \(\bar{f}_i\). Each foreign phrase is translated into an English phrase \(\bar{e}_i\).
 
 Reordering is handled by a distance based reordering model. We define \(start_i\) as the position of the first word of the foreign input phrase that translates to the \emph{i}th English phrase, and \(end_i\) as the position of the last word of that foreign phrase. The reordering distance is the number of words skipped when taking foreign words out of sequence (see figure \ref{fig:related_work_phrase_based_reordering}) \citep{smt_book_koehn}.
@@ -171,10 +171,11 @@ Reordering is handled by a distance based reordering model. We define \(start_i\
 
 \subsection{Learning a Phrase Translation Table}
 
+\rp{I think the translation table concept was not introduced before, then you need to introduce it briefly.}
 Building a phrase translation table involves three stages:
 \begin{enumerate}
 \item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models\footnote{\url{https://en.wikipedia.org/wiki/IBM_alignment_models} (accessed 13 May 2016)}. Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top sentence from our English-French parallel corpus.
-\item \textbf{Extraciton of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment. A phrase pair (\(\bar{f}\),\(\bar{e}\)) is consistent with an alignment \emph{A}, if all words \(f_1,...,f_n\) in \(\bar{f}\) that have alignment points in \emph{A} have these with words \(e_1,...,e_n\) in \(\bar{e}\) and vice versa \citep{smt_book_koehn}.
+\item \textbf{Extraction of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment. A phrase pair (\(\bar{f}\),\(\bar{e}\)) is consistent with an alignment \emph{A}, if all words \(f_1,...,f_n\) in \(\bar{f}\) that have alignment points in \emph{A} have these with words \(e_1,...,e_n\) in \(\bar{e}\) and vice versa \citep{smt_book_koehn}.
 \item \textbf{Scoring phrase pairs} Assign probabilities to phrase translations.
 \end{enumerate}
 
@@ -192,7 +193,7 @@ Building a phrase translation table involves three stages:
     \label{fig:related_work_phrase_alignment}
 \end{figure}
 
-The following phrase pairs can be extracted from the example sentence (phrases marked with an * match the extractions from Figure \ref{fig:related_work_phrase_alignment}):
+The following phrase pairs can be extracted from the example sentence (phrases marked with an * match the extractions from Figure~\ref{fig:related_work_phrase_alignment}):
 \begin{itemize}
 \item Update the Google Play Services / Mettre \a`a jour les services Google Play
 \item Update / Mettre \a`a jour
@@ -205,7 +206,7 @@ The following phrase pairs can be extracted from the example sentence (phrases m
 \item Services / services
 \item the / les
 \end{itemize}
-The last step is to estimate the phrase translation probabilities by  relative frequency:
+The last step is to estimate \rp{compute?} the phrase translation probabilities by \rp{based on?} relative frequency:
 
 \[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i }count(\bar{e},\bar{f}_i)}\]
 These probabilities are put in the phrase translation table together with the foreign phrases (see Table \ref{fig:phrase_table_example}).
@@ -236,7 +237,7 @@ Recall the model to compute the translation probability:
 \begin{itemize}
 \item \textbf{Phrase translation} Pick phrase \(\bar{f}_i\) to be translated as phrase \(\bar{e}_i\) by looking up the score from the phrase translation table.
 \item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\) and the current phrase starts at \(start_i\). Compute the reordering probability \(d(start_i - end_{i-1} -1)\)
-\item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
+\item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added \rp{added where?} word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
 \end{itemize}
 The decoding algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The probability score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms an end point in the search graph (see Figure \ref{fig:related_work_hypothesis}). To get the best translation, one chooses the completed hypothesis with the highest probability score and backtracks through the search graph \citep{smt_book_koehn}.
 
@@ -246,10 +247,10 @@ The decoding algorithm reads the input sentence from left to right and creates a
     \caption[Decoding process \cite{smt_book_koehn}]{Hypothesis expanded by translating the German sentence ``er geht ja nicht nach Hause'' to English. The squares on top indicate a coverage vector of translated German words (filled black if covered) \cite{smt_book_koehn}.}
     \label{fig:related_work_hypothesis}
 \end{figure}
-This process creates an exponential number of hypothesis. To reduce the search space, the following methods are applied:
+This process creates an exponential number of hypothesis. To reduce the search space, the following methods are typically applied:
 
 \begin{itemize}
-\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped.
+\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped \rp{I'm not sure I understand the method here, could you expand?}.
 \item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence.
 \end{itemize}
 
@@ -257,14 +258,14 @@ This process creates an exponential number of hypothesis. To reduce the search s
 \section{Deep Learning Neural Networks}
 \label{sec:related_work_deep_learning}
 Translating with neural networks is based on an encoder-decoder architecture \cite{smt_deep_learning1, smt_deep_learning}. Two \emph{recurrent neural networks} (RNN)\footnote{\url{https://en.wikipedia.org/wiki/Recurrent_neural_network} (accessed 13 May 2016)} are involved: The first RNN encodes a variable-length input sentence into a fixed-length vector representation. The second RNN decodes a given fixed-length vector back into a variable-length sentence in the target language.
-The following section briefly describes how RNNs work in general while the following sections explain the encoder-decoder architecture in more detail. 
+The following section briefly describes how RNNs work in general while the following sections explain the encoder-decoder architecture in more detail.
 
 %Beside the papers, we also want to mention a blog post\footnote{\url{https://devblogs.nvidia.com/parallelforall/introduction-neural-machine-translation-with-gpus/}} by NVIDIA which offers a very detailed explanation of the model.%
 
 
 \subsection{Recurrent Neural Network}
 
-A RNN is a class of artificial neural network where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by:
+A RNN is a class of artificial neural networks where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by \rp{the following function?}:
 
 \[  h_{t} = f(h_{t-1}, x_t) \]
 where \(f\) is a non-linear activation function. The function described in \cite{smt_deep_learning1} is motivated by a \emph{long short-term memory (LSTM)} unit\footnote{\url{https://en.wikipedia.org/wiki/Long_short-term_memory} (accessed 13 May 2016)}, but much simpler to compute and implement.
@@ -274,12 +275,12 @@ A RNN can learn a probability distribution over a sequence by being trained to p
 
 \subsection{Encoder}
 
-The encoder RNN reads each word of the source sentence sequentially in the form of a \emph{One-hot vector}. This binary vector has the size of the vocabulary and zeros everywhere except a \(1\) at the position corresponding to the index of the word in the source vocabulary.
+The encoder RNN reads each word of the source sentence sequentially in a form of a \emph{one-hot vector}. This binary vector has the size of the vocabulary and zeros everywhere except a \(1\) at the position corresponding to the index of the word in the source vocabulary.
 
 The internal state \(h_t\) changes each time a new word is read:
 
 \[  h_{t} = f(h_{t-1}, x_t) \]
-At the end of processing each word, the hidden state of the RNN is a summary \(c\) of the source sentence (see Figure \ref{fig:related_work_encoder}). 
+After processing each word, the hidden state of the RNN is a summary \(c\) of the source sentence (see Figure \ref{fig:related_work_encoder}). 
 
 \begin{figure}[H]
     \centering
@@ -287,7 +288,7 @@ At the end of processing each word, the hidden state of the RNN is a summary \(c
     \caption[Overview of the Encoder RNN]{Encoder RNN: The final hidden state (marked bold) contains the summary vector.}
     \label{fig:related_work_encoder}
 \end{figure}
-It is very interesting how the summary vector \(c\) looks like. In  \cite{smt_deep_learning} they projected multiple summary vectors to the two-dimensional space (see Figure \ref{fig:related_work_summary_vector}). The plot shows that similar sentences are close together in the summary vector space.
+It is very interesting how the summary vector \(c\) looks like. In~\cite{smt_deep_learning}, the authors project multiple summary vectors into the two-dimensional space (see Figure \ref{fig:related_work_summary_vector}). The plot shows that similar sentences are close together in the summary vector space.
 
 \begin{figure}[H]
     \centering
