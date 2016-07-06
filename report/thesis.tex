@@ -581,21 +581,22 @@ The data analysis (Chapter~\ref{cha:data_analysis}) showed that the monolingual 
 \subsection{Apache Solr}
 \label{sec:apache_solr}
 
+\rp{describe first what we are trying to achieve here, like, we need to store data in a scalable way, with a possibility to perform this and that, and access this and that. We chose Apache Solr for such purposes.}
 \emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed 13 May 2016)} is an open source text search platform. In the context of this thesis, Solr was used to store all extracted sentences with additional meta data such as the corresponding translation key or a unique app ID. %Due to its way of indexing text data, Solr is very fast when querying for translation strings. 
-Built in tools allow to perform data analysing, for example to get the top sentences grouped by language.
+Built in tools allow to perform data analysis, for example to get the top sentences grouped by language.
 
-Solr is also used as \emph{Baseline Translation System}, where we translate strings with a simple algorithm directly from the collected data in Solr (see Chapter \ref{cha:translation_process_baseline}).
+Solr is also used as \emph{Baseline Translation System}, where we translate strings with a simple algorithm directly from the collected data in Solr (Chapter~\ref{cha:translation_process_baseline}).
 
 \subsubsection{Setup and Schema}
 
-Solr offers so called \emph{cores} where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml} (accessed 13 May 2016)}. Our setup holds one core per language and one document per translation string. The schema is identical for each core (language) and consists of the following fields:
+Data in Solr is stored in so-called \emph{cores}, where each core manages a separate index, schema and configuration\footnote{\url{https://cwiki.apache.org/confluence/display/solr/Solr+Cores+and+solr.xml} (accessed 13 May 2016)}. Our setup holds one core per language and one document per translation string. The schema is identical for each core (language) and consists of the following fields:
 
 \begin{itemize}
-\item \textbf{id} Unique ID used by Solr to identify a document.
-\item \textbf{app\_id} Unique app ID that allows to map a given translation to the app it is coming from.
-\item \textbf{key} The translation key from the XML file.
-\item \textbf{value} The translation value (word or sentence) corresponding to the above key.
-\item \textbf{value\_lc} Again the translation value, additionally indexed with a special start- and ending delimiter. This allows to search for exact values of any translation string, as described in the next section.
+\item \textbf{id} A unique ID used by Solr to identify a document.
+\item \textbf{app\_id} A unique app ID that allows to map a given translation to the app it is coming from.
+\item \textbf{key} A translation key from the XML file.
+\item \textbf{value} A translation value (word or sentence) corresponding to the above key.
+\item \textbf{value\_lc} Again the translation value, additionally indexed with a special start- and end- character. This allows to search for exact values of any translation string, as described in the next section.
 \end{itemize}
 
 \begin{figure}[H]
@@ -610,19 +611,19 @@ The data in the \texttt{value} and \texttt{value\_lc} fields is stored tokenized
 \subsubsection{Queries}
 
 Solr offers a REST based interface to query the database. There also exists a built-in web application which allows to inspect results.
-Here is an example query for the string ``Log Out'' in the English core\footnote{You must be connected to the LAN of the University of Fribourg in order to access the referenced domain. Also note that the parameters should be fully url-encoded, this was omitted in this report for better readability.}. The maximum amount of results is set to 500 rows and the return type is JSON:
+Here is an example query for the string ``Log Out'' from the English core. The maximum amount of results is set to 500 rows and the return type is JSON:
 \\
 \\
-\url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value:"Log\%20Out"&rows=500&wt=json&indent=true}
+\url{http://SOLR_URL/solr/en/select?q=value:"Log\%20Out"&rows=500&wt=json&indent=true}
 \\
 \\
-This query finds a total of 458 results (see Listing \ref{lst:solr_json_response}). There are not only exact matches returned, the term ``Log Out'' can occur as substring in a longer sentence. By default, Solr does not offer the possibility to return only exact matches. However, this behaviour can be simulated with the help of the \texttt{value\_lc} field, which indexed the translation value together with a special start- and end delimiter (\texttt{SOLR\_S} and \texttt{SOLR\_E}):
+This query finds a total of 458 results (see Listing \ref{lst:solr_json_response}). As can be seen, not only exact matches are returned, the term ``Log Out'' can occur as substring in a longer sentence. By default, Solr does not offer the possibility to return only exact matches. However, this behavior can be simulated with the help of the \texttt{value\_lc} field, which indexed the translation value together with a special start- and end character (\texttt{SOLR\_S} and \texttt{SOLR\_E}):
 \\
 \\
-\url{http://diufpc114.unifr.ch:8983/solr/en/select?q=value_lc:"SOLR_S\%20Log Out\%20SOLR_E"&rows=500&wt=json&indent=true}
+\url{http://SOLR_URL/solr/en/select?q=value_lc:"SOLR_S\%20Log Out\%20SOLR_E"&rows=500&wt=json&indent=true}
 \\
 \\
-This query returns only 396 results, representing exact matches. Note that the case of the search term does not matter and whitespace and punctuation are ignored. Executing the above query with the term ``log Out .'' produces the same results. This procedure is especially useful when looking up translations, since proper case or punctuation need no consideration.
+This query returns only 396 results, representing exact matches. Note that the casing of the search terms does not matter and whitespaces and punctuation signs are ignored. Executing the above query with the term ``log Out .'' produces the same results. This procedure is especially useful when looking up translations, since proper case or punctuation needs no consideration.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption=JSON response from Solr, label=lst:solr_json_response]
