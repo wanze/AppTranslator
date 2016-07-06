@@ -265,7 +265,7 @@ The following section briefly describes how RNNs work in general while the follo
 
 \subsection{Recurrent Neural Network}
 
-A RNN is a class of artificial neural networks where connections between units form a directed cycle. It consists of a hidden state \(h\) and an optional output \(y\) which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by \rp{the following function?}:
+A RNN is a class of artificial neural networks where connections between units form a directed cycle. A RNN consists of a hidden state \(h\) and an optional output \(y\), which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by \rp{the following function?}:
 
 \[  h_{t} = f(h_{t-1}, x_t) \]
 where \(f\) is a non-linear activation function. The function described in \cite{smt_deep_learning1} is motivated by a \emph{long short-term memory (LSTM)} unit\footnote{\url{https://en.wikipedia.org/wiki/Long_short-term_memory} (accessed 13 May 2016)}, but much simpler to compute and implement.
@@ -275,7 +275,7 @@ A RNN can learn a probability distribution over a sequence by being trained to p
 
 \subsection{Encoder}
 
-The encoder RNN reads each word of the source sentence sequentially in a form of a \emph{one-hot vector}. This binary vector has the size of the vocabulary and zeros everywhere except a \(1\) at the position corresponding to the index of the word in the source vocabulary.
+The encoder is a RNN that reads each word of the source sentence sequentially in a form of a \emph{one-hot vector}. This binary vector has the size of the vocabulary and zeros everywhere except a \(1\) at the position corresponding to the index of the word in the source vocabulary.
 
 The internal state \(h_t\) changes each time a new word is read:
 
@@ -300,7 +300,7 @@ It is very interesting how the summary vector \(c\) looks like. In~\cite{smt_dee
 
 \subsection{Decoder}
 
-The decoder is another RNN which is trained to generate the output sentence by predicting the next word \(y_t\) given the hidden state \(h_t\). Both \(y_t\) and \(h_t\) are conditioned on \(y_{t-1}\) and the summary vector \(c\) given from the encoder RNN. The hidden state of the decoder is computed by
+The decoder is another RNN which is trained to generate the output sentence by predicting the next word \(y_t\) given the hidden state \(h_t\). Both \(y_t\) and \(h_t\) are conditioned on \(y_{t-1}\) and the summary vector \(c\) given from the encoder. The hidden state of the decoder is computed by
 
 \[  h_t = f(h_{t-1}, y_{t-1}, c) \]
 The conditional distribution of the next target word is
