@@ -540,13 +540,15 @@ morekeywords={encoding,resources,string }
 \end{minipage}
 
 
-\section{Preprocess Translations}
+\section{Translation Pre-processing}
 \label{sec:preprocess_translations}
-This task involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags. Some strings are omitted at this stage because they do not provide any meaningful value to the translation process, for example URLs. Secondly, the sanitized strings are tokenized so that they can be used to train a SMT system.
+\rp{maybe tell again why do we need pre-processing here in detail.}
+The task of translation pre-processing involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags, URLs, etc.
+Second, the sanitized strings are tokenized so that they can be used to train a SMT system.
 
 \subsection{Sanitizing}
 
-The following rules are used to get rid of unwanted information:
+The following rules are used to remove unwanted information:
 
 \begin{itemize}
 \item Trim the string from newlines (\texttt{\textbackslash n}), tabs (\textbackslash t) or carriage returns (\textbackslash r)
