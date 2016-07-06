@@ -352,7 +352,7 @@ A total of 423 multilingual apps were collected, offering its content in at leas
 
 This section covers statistics regarding the extracted sentences per language, including the top sentences and sentence lengths. Note that the term \emph{sentence} in this section describes a single word, sentence or multiple sentences, separated by punctuation.
 
-Overall, a total of 114'947 parallel sentences were collected for the English-French language pair and 114'773 for English-German, respectively. The monolingual corpus holds 187'642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (see Section \ref{sec:preprocess_translations}).
+Overall, a total of 114'947 parallel sentences were collected for the English-French language pair and 114'773 for the English-German one. The monolingual corpus holds 187'642 English sentences, 126'883 French sentences and 126'975 German sentences. Again, the counts are measured after pre-processing the extracted data (Section~\ref{sec:preprocess_translations}).
 
 
 \subsection{Top Sentences}
@@ -415,7 +415,7 @@ As illustrated in Table \ref{table:data_analysis_top_terms}, all three languages
 \subsection{Sentence Lengths}
 
 As expected, most sentences are very short and consist of less than five words for all languages. %The longest sentence from the English corpus has 9632 words. 
-The lengths were measured in the monolingual corpus after tokenization, which means that punctuation is also included in the counts.
+The lengths were measured in the monolingual corpus after tokenization, and punctuation is also included in the counts.
 
 
 \begin{figure}[H]
@@ -495,11 +495,11 @@ The lengths were measured in the monolingual corpus after tokenization, which me
 \chapter{Data Extraction, Preparation and Storage}
 \label{cha:data_extraction_prep_storage}
 
-This chapter focuses on how to extract and store translation data from existing apps. The resulting parallel corpus holding the English-French and English-German sentences is required to train SMT models.
+This chapter describes the process to extract and store translation data from existing apps. The resulting parallel corpus holding the English-French and English-German sentences is required to train SMT models.
 
 \section{Extract Translations}
 
-An Android app has the form of a single binary file (suffix \texttt{.apk}). The translations are stored in XML files and these files which are packed inside the \texttt{apk} binary. A software called \emph{Apktool}\footnote{\url{http://ibotpeaches.github.io/Apktool/} (accessed 13 May 2016)} was used to reverse engineer existing apps and extract the needed XML files.
+An Android app represents a single archive file (suffix \texttt{.apk}). The translations are stored in XML files and these files are packed inside the \texttt{apk} binary. A specific software such as \emph{Apktool}\footnote{\url{http://ibotpeaches.github.io/Apktool/} (accessed 13 May 2016)} can be used to extract the XML files from an APK file.
 
 \begin{figure}[H]
     \centering
@@ -507,7 +507,7 @@ An Android app has the form of a single binary file (suffix \texttt{.apk}). The 
     \caption[Storage of translation strings in XML files]{For each language, the translations are stored in a XML file}
     \label{fig:data_extraction_xml}
 \end{figure}
-Translations are stored key-value based inside the \texttt{strings.xml} files. Each string has a unique key which holds the translation value. Here is an example how an English XML file looks like, followed by its German counterpart:
+Translations are stored in a key-value format inside the \texttt{strings.xml} files. Each string has a unique key which holds the translation value. Below is an example of an English XML file, followed by its German counterpart:
 
 \begin{minipage}{1.0\textwidth}
 
