@@ -320,11 +320,11 @@ where \(N\) is the number of training samples and \(\theta\) is the set of model
 
 \section{Apps}
 
-A total of 698 free Android apps were collected from various categories\footnote{Click on Categories to see a list of available categories at:  \url{https://play.google.com/store/apps?hl=en} (accessed 13 May 2016)}, ensuring a good mix of different sentences. Figure \ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available English translations. Note that the counts indicate the number of effective sentences after eliminating uninteresting data during pre-processing the corpus (see Chapter \ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all three languages. Surprisingly, some apps provide more sentences for German and French than English. Different counts can happen because of:
+For the purposes of this work, a total of 698 free Android apps were collected from various categories, ensuring a good mix of different sentences. Figure~\ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available English translations. Note that the counts indicate the number of effective sentences after eliminating non-relevant ones through the pre-processing step (see Chapter~\ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all three languages. Surprisingly, some apps provide more sentences for German and French than English. Different counts can happen because of:
 
 \begin{enumerate}
 \item Not all strings need to be translated, some English words remain the same in the target language e.g. ``E-Mail''.
-\item Android stores the sentences key-value based in one XML file per language. These files can be out of sync, the developer either forgot to add or remove a French/German translation.
+\item Android application keeps sentences in key-value format in a single XML file per language. These files can be out of sync, the developer could either forgot to add or to remove a translation.
 \end{enumerate}
 34 apps did not isolate their strings in XML files, it is assumed that they are hardcoded in the programming code. This leaves an effective number of 664 apps where translations could be extracted. However, 241 apps among them were not multilingual. Unfortunately, apps are not marked as multi-language in the app store, so we only know whether there are isolated translations available after having downloaded and extracted the data.
 
@@ -338,7 +338,7 @@ A total of 698 free Android apps were collected from various categories\footnote
 
 \section{Languages}
 
-A total of 423 multilingual apps were collected, offering its content for at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, the two languages that were the main focus of this thesis, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
+A total of 423 multilingual apps were collected, offering its content in at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, the two languages that were the main focus of this thesis, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
 
 \begin{figure}[H]
     \centering
