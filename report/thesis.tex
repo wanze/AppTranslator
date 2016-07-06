@@ -548,23 +548,24 @@ Second, the sanitized strings are tokenized so that they can be used to train a 
 
 \subsection{Sanitizing}
 
-The following rules are used to remove unwanted information:
+The following steps are used to remove unwanted information:
 
 \begin{itemize}
-\item Trim the string from newlines (\texttt{\textbackslash n}), tabs (\textbackslash t) or carriage returns (\textbackslash r)
-\item Strip any HTML tags
-\item Omit strings that are URLs (starting with http or www)
-\item Remove strings placeholders like \texttt{\%s} or \texttt{\%1\$s}
-\item Ignore words with less than 3 characters
-\item Finally, the resulting string is trimmed again from spaces and must contain at least one alphanumerical character
+\item Trimming newlines (\texttt{\textbackslash n}), tabs (\textbackslash t) and carriage returns (\textbackslash r);
+\item Stripping HTML tags;
+\item Removing URLs (starting with http:// or www.);
+\item Removing string placeholders, such as \texttt{\%s} and \texttt{\%1\$s};
+\item Ignoring words that are less than 3 characters;
+\item Finally, the resulting string is trimmed again from spaces and must contain at least one alphanumerical character.
 \end{itemize}
 
 
 \subsection{Tokenization and Truecasing}
 
-Tokenization is required to separate words from punctuation. Each token is separated by a space character: ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}''
+\rp{write why do we need tokenization and truecasing, it is important to always tell why do this and that.}
+Tokenization is required to separate words from punctuation. Each token then is separated by a space character, e.g, ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}''
 
-After tokenizsation, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized in the corpus. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase.
+After tokenization, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized in the corpus. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase.
 
 
 \section{Data storage}
