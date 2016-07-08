@@ -797,17 +797,16 @@ At the last step, there are translations available for both substrings of the va
 
 \section{Moses}
 
-\emph{Moses}\footnote{\url{http://www.statmt.org/moses/} (accessed 13 May 2016)} \cite{moses} is a open source SMT toolkit. The training process closely follows the phrase-based model described in section \ref{sec:phrase_based_mt}. The source code is available on \emph{GitHub}\footnote{\url{https://github.com/moses-smt/mosesdecoder} (accessed 13 May 2016)}. This project is very active, there are frequent commits to the master branch by over 70 contributors.
-
+\emph{Moses}\footnote{\url{http://www.statmt.org/moses/} (accessed 13 May 2016)} \cite{moses} is a open source SMT toolkit. The training process closely follows the phrase-based model described in Section~\ref{sec:phrase_based_mt}. The source code is available on \emph{GitHub}\footnote{\url{https://github.com/moses-smt/mosesdecoder} (accessed 13 May 2016)}. The project is very active, and there are frequent updates in the main branch by over 70 contributors.
 
 \subsection{Training}
 
-The training process requires sentence aligned parallel data to build the translation models, and monolingual data for the language models. We can make use of the sanitized and tokenized data as described in section \ref{sec:preprocess_translations}. The training process involves the following steps:
+The training process requires sentence aligned parallel data to build the translation models, and monolingual data for the language models. We can make use of the sanitized and tokenized data as described in Section~\ref{sec:preprocess_translations}. The training process involves the following steps:
 
 \begin{enumerate}
-\item Build a language model from the monolingual data of the target language. Moses includes the \emph{KenLM toolkit}\footnote{\url{https://kheafield.com/code/kenlm/} (accessed 13 May 2016)} for this task.
-\item Align words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
-\item Extract phrases: All phrases are put into one big file. The following listing shows some example content of this file. Each line contains: English phrase, French phrase and the alignment points of matching words (English-French).
+\item Building a language model from the monolingual data of the target language. Moses includes the \emph{KenLM toolkit}\footnote{\url{https://kheafield.com/code/kenlm/} (accessed 13 May 2016)} for this task.
+\item Aligning words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
+\item Extract phrases: All phrases are put into a single file. The following listing shows some sample content of this file. Each line of this file contains: an English phrase, a French phrase and the alignment points of matching words (English-French).
 
 \begin{lstlisting}[label=list:moses_phrase_extraction]
 ! as you can see from ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
@@ -819,7 +818,7 @@ The training process requires sentence aligned parallel data to build the transl
 \end{lstlisting}
 
 
-\item Score phrases by computing the phrase translation probability \(\phi(\bar{f}|\bar{e})\) and build the phrase table. Here is an example how the content of the phrase table is organized in Moses for English-French:
+\item Scoring phrases by computing the phrase translation probability \(\phi(\bar{f}|\bar{e})\) and building a phrase table. Here is an example how the content of the phrase table is organized in Moses for the English-French language pair:
 
 \begin{lstlisting}[label=list:moses_phrase_table]
 ! your version of Google Play ||| ! votre version de Google Play ||| 1 0.04 1 0.22 
