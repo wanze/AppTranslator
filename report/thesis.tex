@@ -653,22 +653,22 @@ This query returns only 396 results, representing exact matches. Note that the c
 \chapter{Translation Process}
 \label{cha:translation_process}
 
-This chapter describes different translation systems that were used to translate apps. First, a simple \emph{Baseline System} is introduced, that translates sentences based on the available data in Solr. The next section focuses on \emph{Moses}, a phrase-based SMT system. Lastly, \emph{Tensorflow} was used to provide translations with deep neural networks. The latter two implement closely the models introduced in Chapter \ref{cha:related_work}.
+This chapter describes different translation systems that were used to translate the apps. First, a simple \emph{Baseline System} is introduced, that translates sentences based on the available data in Solr. The next section focuses on \emph{Moses}, a phrase-based SMT system. Lastly, \emph{Tensorflow} was used to provide translations with deep neural networks. The latter two implement closely the models introduced in Chapter~\ref{cha:related_work}.
 
 %The ``Baseline System'' makes direct use of the data stored in Solr and produces translations with a simple algorithm. The second system, ``Moses''\footnote{Moses SMT system: \url{http://www.statmt.org/moses/}}, is a open source phrase-based SMT software. Lastly ``Tensorflow''\footnote{Tensorflow: \url{https://www.tensorflow.org/}} was used to produce translations with the help of deep learning neural networks. Tensorflow is a software library for machine intelligence, recently released as open source by Google.%
 
 \section{Baseline System}
 \label{cha:translation_process_baseline}
 
-The \emph{Baseline System} makes direct use of the data stored in Solr and produces translations with a simple algorithm. Remember how the data is organized in Solr (see Section \ref{sec:apache_solr}): Each translation is stored in a document and each document belongs to one core. To look up a translation, the following procedure is used:
+The \emph{Baseline System} makes direct use of the data stored in Solr and produces translations with a simple algorithm. Recall how the data is organized in Solr (Section \ref{sec:apache_solr}): Each translation is stored in a document and each document belongs to a one core. To look up a translation, the following procedure is used:
 
 \begin{enumerate}
 \item Look up the string to translate in the core of the source language.
-\item Parse the result documents and extract the \texttt{app\_id} and \texttt{key} fields.
+\item Parse the resulting documents and extract the \texttt{app\_id} and \texttt{key} fields.
 \item Find translations in the target language by querying the target core with the collected \texttt{app\_id}s and \texttt{key}s.
 \item Count the number of unique translations found. The best translation is the value that was used most often.
 \end{enumerate}
-Figure \ref{baseline_system_table_available_translations} shows an example for the available translations for the English word ``Settings''. The best translation according to the highest count among all apps is ``param\`{e}tres''.
+Figure \ref{baseline_system_table_available_translations} shows some translations for the English word ``Settings''. The best translation according to the highest count among all apps is ``param\`{e}tres''.
 
 \begin{table}[H]
 \centering
@@ -698,7 +698,7 @@ Given a string \(S = [ \; s_1  \; s_2  \; ...  \; s_n \; ]\) with words \(s_i\) 
 \( V_2 = [ \; s_1 \; ] \; [ \; s_2 \; s_3 \; s_4 \; s_5 \; s_6 \; s_7 \; ]\)
 \end{center}
 
-Now, we search for translations for all substrings in both variations \(V_1\) and \(V_2\). If there are no translations available, the substring (window) size is reduced by one for the second iteration (\(i = 2\)):
+Now, we search for translations for all substrings in both variations \(V_1\) and \(V_2\). If no translations are found, the substring (window) size is reduced by one for the second iteration (\(i = 2\)):
 
 \begin{center}
 
@@ -710,9 +710,9 @@ Now, we search for translations for all substrings in both variations \(V_1\) an
 
 \end{center}
 
-This process of reducing the substring length is repeated until we can translate a substring of at least one variation \(V_j\).
+The process of reducing the substring length is repeated until we can translate a substring of at least one variation \(V_j\).
 
-\item Consider what happens if there are translations available. For each variation \(V_j\), we count the number of available translations for their substrings \(\bar{S}_i\). We continue with the variation \(\tilde{V}\) having the highest total count of translations among their substrings:
+\item Let us consider what happens if there are translations found for \rp{variation X?, please finish.}. For each variation \(V_j\), we count the number of available translations for their substrings \(\bar{S}_i\). We continue with the variation \(\tilde{V}\) having the highest total count of translations among their substrings:
 
 \[ \tilde{V} = argmax\sum_i count\_translations(\bar{S}_i) \]
 
@@ -722,20 +722,21 @@ If there is a translation available for each substring \(\bar{S}_i\) of \(\tilde
 \(T = \bar{T}_1 \; \bar{T}_2 \; \bar{T}_3 \; ... \; \bar{T}_n\)
 \end{center}
 
-Otherwise, the output string \(T\) is built incrementally: If there is no translation found for substring \(\bar{S}_i\), we set \(S = \bar{S}_i\) and recursively call the algorithm again. If there are left single words to translate and still no translations exist, the source word is inserted into \(T\) by setting \(t_i = s_i\).
+Otherwise, the output string \(T\) is built incrementally: If no translation is found for substring \(\bar{S}_i\), we set \(S = \bar{S}_i\) and recursively call the algorithm again. If single words are left to translate and still no translations exist, the source word is inserted into \(T\) by setting \(t_i = s_i\).
 
 \end{enumerate}
-This simple algorithm works well for translating short words or sentences where a direct translation exists in the target language. However, if translating substrings is necessary, the following problems occur:
+This simple algorithm works well for translating short words or sentences where a direct translation exists in the target language.
+However, if substring translation \rp{The simple algorithm is also able to translate substrings, please specify} is necessary, the following problems can occur:
 
 \begin{itemize}
-\item The sentences or words for the translated substrings are inserted at the same position in \(T\) where they occurred in the source string. This will not produce good results since words often need to be reordered depending on the target language.
-\item Poor exiting app translations directly impact the translation result. For example, due to an error in the XML files, the English word ``the'' could be mapped to a sentence with many words. If the algorithm looks up ``the'', it considers the mapped sentence as valid translation.
+\item Sentences or words for translated substrings are inserted at the same position in \(T\) where they occurred in the source string. This will not produce good results since words often need to be reordered depending on the target language.
+\item Poor app translation quality directly impacts the translation results. For example, due to an error in the XML files, the English word ``the'' could be mapped to a sentence with many words. If the algorithm looks up ``the'', it considers the mapped sentence as valid translation.
 \end{itemize} 
 
 
 \subsection{Example}
 
-Let us translate the source string ``Open the settings to change your username'' from English to French.
+Let us translate a string ``Open the settings to change your username'' from English to French.
 
 \begin{enumerate}
 \item Check for a direct translation: No French translation available.
@@ -791,7 +792,7 @@ Continue with Variation 2 since the count (63 + 0) is higher than the count from
 % \item \(T\) = [ ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur ]
 
 \end{enumerate}
-At the last step, there are translations available for both substrings of \(V_1\) and the algorithm derived the following string: ``ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur''
+At the last step, there are translations available for both substrings of the variation \(V_1\) and the algorithm returns the following string: ``ouvrir les param\`{e}tres vers modifier votre nom d'utilisateur''
 
 
 \section{Moses}
