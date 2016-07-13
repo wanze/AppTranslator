@@ -46,7 +46,9 @@ Android, iPhone and Windows smart phones are available in countries all over the
 
 The main idea of this thesis is to collect translation data of existing apps and use them to translate new ones. Apps belonging to the same category share similar words or sentences. Also, sentences in mobile apps are typically short and thus easier to translate than longer, more complex sentences in books or news. Based on these facts, it is argued that a Statistical Machine Translation (SMT) model could be used to automatically generate high-quality translations for mobile apps. 
 
-To reduce the scope of different mobile operating systems and languages, focus shall be put on automatic translations of Android apps from English to French and German. Hereinafter, the term \emph{app} in this thesis refers to an Android application. French and German are chosen as target languages for the translations because they are natively spoken in Switzerland, which makes understanding the produced results easier.
+%To reduce the scope of different mobile operating systems and languages, focus shall be put on automatic translations of Android apps from English to French and German. Hereinafter, the term \emph{app} in this thesis refers to an Android application. French and German are chosen as target languages for the translations because they are natively spoken in Switzerland, which makes understanding the produced results easier.
+
+To reduce the scope of different mobile operating systems, focus shall be put on automatic translations of Android apps. Hereinafter, the term \emph{app} in this thesis refers to an Android application.
 
 SMT is the dominant approach in automating translations and used by services such as \emph{Google Translate}\footnote{\url{https://translate.google.com} (accessed 16 May 2016)} and Microsoft's \emph{Bing Translator}\footnote{\url{https://www.bing.com/translator} (accessed 16 May 2016)}. In this thesis, different SMT models shall be used and their results results shall be compared for translating mobile apps, both manually and automatically. A prototype web application shall be built, offering a common interface to translate strings or apps using the implemented translation systems.
 
@@ -96,7 +98,7 @@ Besides offering a better user experience by translating apps, both examples sho
 
 Most of the existing services employ human translators in order to guarantee translation quality, including Google's app translation service~\citep{website_google_translation_service}. The developer can choose from third-party vendors who are entitles by Google to offer high-quality translations. According to Google, the costs range from \$75 to \$150 depending on the app size.
 
-Crowdsourcing platforms allow people to perform various tasks, including text translation. This approach can be used in combination with machine translation: Initial translations are produced with machine translation, which are then improved or corrected by human translators. Facebook also used crowdsourcing to translate their website: ``In March 2008, through crowdsourcing, the entire site was translated into French within 24 hours by allegedly over 4,000 native French speakers.''\rp{remove citation and use your own words to express the message.}\footnote{\url{https://en.wikipedia.org/wiki/Crowdsourcing_as_Human-Machine_Translation} (accessed 12 May 2016)}. A few examples of crowdsourcing translation platforms are \emph{Translation Cloud}\footnote{\url{http://www.translationcloud.net/} (accessed 13 May 2016)} and \emph{Gengo}\footnote{\url{http://gengo.com/} (accessed 13 May 2016)}. Using these platforms, people who are fluent in at least two languages can earn money by translating or correcting texts. To avoid cheaters, an initial language proficiency test must be passed.
+Crowdsourcing platforms allow people to perform various tasks, including text translation. This approach can be used in combination with machine translation: Initial translations are produced with machine translation, which are then improved or corrected by human translators. Facebook used crowdsourcing to translate their website into French by allegedly over 4'000 native French speakers\footnote{\url{https://en.wikipedia.org/wiki/Crowdsourcing_as_Human-Machine_Translation} (accessed 12 May 2016)}. A few examples of crowdsourcing translation platforms are \emph{Translation Cloud}\footnote{\url{http://www.translationcloud.net/} (accessed 13 May 2016)} and \emph{Gengo}\footnote{\url{http://gengo.com/} (accessed 13 May 2016)}. Using these platforms, people who are fluent in at least two languages can earn money by translating or correcting texts. To avoid cheaters, an initial language proficiency test must be passed.
 
 Translation services that are based solely on machine translations do not seem to exist. However, developers could use existing translation APIs to produce translations. Popular providers of such services are Microsoft\footnote{\url{http://datamarket.azure.com/dataset/bing/microsofttranslator} (accessed 12 May 2016)} and Google\footnote{\url{https://cloud.google.com/translate/docs/} (accessed 12 May 2016)}. Microsoft's translation service offers a free plan which is limited to 2 million characters per month. Paid plans also exist, where the amount of characters is increased, 32 million characters cost \$300 per month. The translation API from Google does not offer any free plan but the pricing model is different: One pays \$20 per 1 million characters of text.
 
@@ -108,9 +110,10 @@ Translation services that are based solely on machine translations do not seem t
 
 ``Machine translation has a long history, but over the last decade or two, its evolution has taken on a new direction - a direction that is mirrored in other subfields of natural language processing. This new direction is grounded in the premise that language is so rich and complex that it could never be fully analyzed and distilled into a set of rules, which are then encoded into a computer program. Instead, the new direction is to develop a machine that discovers the rules of translation automatically from a large corpus of translated text, by pairing the input and output of the translation process, and learning from the statistics over the data.'' \cite{smt_book_koehn}
 
-As SMT is the dominant approach in machine translation, it is consequential to use it for the purpose of translating mobile apps. Typically, the SMT models are trained on large parallel corpora\rp{citation?}, for example the \emph{European Parliament Proceedings Parallel Corpus}~\cite{website_parallel_corpus}. These corpora consist of numerous sentences for a given language pair, e.g., English-French corpus holds over 2 million sentences. Our corpus will hold the extracted sentences from existing apps. We expect to collect less but shorter sentences\rp{expand these 2 sentences, if you talk more about corpus creation later, give a reference to a specific chapter, otherwise it's too short and unclear what we do.}.
+%As SMT is the dominant approach in machine translation, it is consequential to use it for the purpose of translating mobile apps. 
+%Typically, the SMT models are trained on large parallel corpora\rp{citation?}, for example the \emph{European Parliament Proceedings Parallel Corpus}~\cite{website_parallel_corpus}. These corpora consist of numerous sentences for a given language pair, e.g., English-French corpus holds over 2 million sentences. Our corpus will hold the extracted sentences from existing apps. We expect to collect less but shorter sentences\rp{expand these 2 sentences, if you talk more about corpus creation later, give a reference to a specific chapter, otherwise it's too short and unclear what we do.}.
 
-To automatically evaluate the quality of machine produced text, a metric called \emph{BLEU} \citep{bleu_score} is mostly used\rp{citations}. We adapt this procedure and also use BLEU to evaluate our translations in Chapter~\ref{cha:evaluation}. %In our context, we train the We use two different SMT algorithm (see Chapter \ref{cha:related_work}) and analyze how they perform in the context of translating short sentences of mobile apps.
+As SMT is the dominant approach in machine translation, it is consequential to use it for the purpose of translating mobile apps. The following Chapter~\ref{cha:related_work} gives an overview of two popular approaches in SMT. Chapter~\ref{cha:translation_process} describes systems applying the introduced models in practise. To automatically evaluate the quality of machine produced text, a metric called \emph{BLEU} \citep{bleu_score} is mostly used \citep{smt_phrase_based, smt_deep_learning, smt_deep_learning1}. We adapt this procedure and also use BLEU to evaluate our translations in Chapter~\ref{cha:evaluation}. %In our context, we train the We use two different SMT algorithm (see Chapter \ref{cha:related_work}) and analyze how they perform in the context of translating short sentences of mobile apps.
 
 %There exists a recurring translation task of the \emph{Workshop on %statistical machine translation}, which focuses on translating %European language pairs by improving existing systems%\footnote{\url{http://www.statmt.org/wmt15/translation-task.html}}.
 
@@ -137,9 +140,14 @@ This chapter gives an overview of the two most popular approaches in SMT: \emph{
 
 \section{Phrase-Based Machine Translation}
 \label{sec:phrase_based_mt}
+
+Before phrase-based models were introduced, machine translation was based on the translation of single words. However, using words as the smallest unit for translation has limitations. Often one word in the source language translates to multiple words in the target language, or vice versa. Phrase-based translation overcomes this problem by translating whole sequences of words of different lengths. These sequences are called phrases. The sentence to translate is first segmented into multiple phrases. Each phrase is then translated separately into a phrase in the target language. Phrases are looked up in a \emph{phrase translation table}. %containing all candidate phrases for a translation%.
+Finally, phrases may be reordered. Reordering is necessary due to grammatical differences in the source and target language where the position of the subject, verb or object in a sentence differs  \citep{smt_book_koehn}.
+
+The following sections describe the phrase-based model in more detail.
+
 \subsection{Model}
 
-\rp{This approach was introduced in 2003, ... give an overview of the idea before diving into formulas}.
 More formally, given the task to translate a sentence from a foreign language \(f = f_1, f_2, f_3..., f_m\) into an English sentence \(e = e_1, e_2, e_3 ..., e_n\), the translation model is based on conditional probability:
 
 \[P(e|f)\]
@@ -154,7 +162,7 @@ where \(P(e)\) is called the \emph{language model}\footnote{\url{https://en.wiki
 The translation model is further decomposed:
 
 \[p(\bar{f}_1^I|\bar{e}_1^I) = \prod_{i=1}^I \phi(\bar{f}_i^I|\bar{e}_i^I) d(start_i - end_{i-1} -1)\]
-where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}. \rp{maybe you can introduce why do we need re-ordering.}
+where \(\phi\) is called the \emph{phrase translation probability} and \(d\) is the \emph{reordering probability}. %\rp{maybe you can introduce why do we need re-ordering.}
 The foreign sentence \emph{f} is broken up into \emph{I} phrases \(\bar{f}_i\). Each foreign phrase is translated into an English phrase \(\bar{e}_i\).
 
 Reordering is handled by a distance based reordering model. We define \(start_i\) as the position of the first word of the foreign input phrase that translates to the \emph{i}th English phrase, and \(end_i\) as the position of the last word of that foreign phrase. The reordering distance is the number of words skipped when taking foreign words out of sequence (see figure \ref{fig:related_work_phrase_based_reordering}) \citep{smt_book_koehn}.
@@ -171,8 +179,9 @@ Reordering is handled by a distance based reordering model. We define \(start_i\
 
 \subsection{Learning a Phrase Translation Table}
 
-\rp{I think the translation table concept was not introduced before, then you need to introduce it briefly.}
-Building a phrase translation table involves three stages:
+%\rp{I think the translation table concept was not introduced before, then you need to introduce it briefly.}
+
+Given a phrase to translate from the input sentence, the phrase translation table contains all possible phrase translations, together with a probability score (see Table \ref{fig:phrase_table_example}). The higher the score, the more often the phrase was used to translate the input phrase in the parallel corpus. However, the phrase having the highest probability score must not be the best translation. The reordering model and language model also contribute to the final score. Building a phrase translation table involves three stages:
 \begin{enumerate}
 \item \textbf{Word alignment} The words of each sentence from the parallel corpus of the foreign and English language must be aligned in order to extract phrase pairs. The alignment is typically done by using one of the IBM models\footnote{\url{https://en.wikipedia.org/wiki/IBM_alignment_models} (accessed 13 May 2016)}. Figure \ref{fig:related_work_word_alignment} shows an example of word alignment for a top sentence from our English-French parallel corpus.
 \item \textbf{Extraction of phrase pairs} Extract all phrase pairs of parallel sentences that are consistent with word alignment. A phrase pair (\(\bar{f}\),\(\bar{e}\)) is consistent with an alignment \emph{A}, if all words \(f_1,...,f_n\) in \(\bar{f}\) that have alignment points in \emph{A} have these with words \(e_1,...,e_n\) in \(\bar{e}\) and vice versa \citep{smt_book_koehn}.
@@ -206,7 +215,7 @@ The following phrase pairs can be extracted from the example sentence (phrases m
 \item Services / services
 \item the / les
 \end{itemize}
-The last step is to estimate \rp{compute?} the phrase translation probabilities by \rp{based on?} relative frequency:
+The last step is to compute the phrase translation probabilities based on relative frequency:
 
 \[\phi(\bar{f}|\bar{e}) = \frac{count(\bar{e},\bar{f})}{\sum_{\bar{f}_i }count(\bar{e},\bar{f}_i)}\]
 These probabilities are put in the phrase translation table together with the foreign phrases (see Table \ref{fig:phrase_table_example}).
@@ -220,7 +229,7 @@ param\a`etres     & 0.9         \\
 r\a'eglages       & 0.36        \\
 configuration  & 0.15        \\ \bottomrule
 \end{tabular}
-\caption[Example of a phrase translation table]{Example of a phrase translation table containing the estimated probabilities for translating the English word ``Settings'' to French.}
+\caption[Example of a phrase translation table]{Example of a phrase translation table containing the computed probabilities for translating the English word ``Settings'' to French.}
 \label{fig:phrase_table_example}
 \end{table}
 
@@ -237,7 +246,9 @@ Recall the model to compute the translation probability:
 \begin{itemize}
 \item \textbf{Phrase translation} Pick phrase \(\bar{f}_i\) to be translated as phrase \(\bar{e}_i\) by looking up the score from the phrase translation table.
 \item \textbf{Reordering} The previous phrase ended in \(end_{i-1}\) and the current phrase starts at \(start_i\). Compute the reordering probability \(d(start_i - end_{i-1} -1)\)
-\item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added \rp{added where?} word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
+\item \textbf{Language model} A \emph{n}-gram model needs to keep track of the last \(n - 1\) words that were added to the derived sentence. The score is computed for every added word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
+
+%\item \textbf{Language model} For a \emph{n}-gram model, we need to keep track of the last \(n - 1\) words. The score is computed for every added \rp{added where?} word \(w_i\): \(p_{LM}(w_i|w_i - (n-1), ..., w_{i-1})\)
 \end{itemize}
 The decoding algorithm reads the input sentence from left to right and creates a new hypothesis by picking any phrase translation at a time. The probability score is computed incrementally for each partial hypothesis. This is repeated recursively until all hypotheses have been expanded. A hypothesis covering all input words cannot be expanded further and forms an end point in the search graph (see Figure \ref{fig:related_work_hypothesis}). To get the best translation, one chooses the completed hypothesis with the highest probability score and backtracks through the search graph \citep{smt_book_koehn}.
 
@@ -250,9 +261,17 @@ The decoding algorithm reads the input sentence from left to right and creates a
 This process creates an exponential number of hypothesis. To reduce the search space, the following methods are typically applied:
 
 \begin{itemize}
-\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped \rp{I'm not sure I understand the method here, could you expand?}.
+%\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped \rp{I'm not sure I understand the method here, could you expand?}.
+\item \textbf{Recombination} Matching hypothesis both having the same English words in the output can be reached by different paths. In the heuristic search they can be recombined and the worse hypothesis is dropped (see Figure~\ref{fig:related_work_hypothesis_recombination}).
 \item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/related_work_recombination.png}
+    \caption[Decoding process: Apply Recombination of hypotheses \cite{smt_book_koehn}]{Example of possible Recombination: The output ``it is'' can be reached with two different paths. The score of the translation option using a single phrase is worse, so this hypothesis is dropped  \cite{smt_book_koehn}.}
+    \label{fig:related_work_hypothesis_recombination}
+\end{figure}
 
 
 \section{Deep Learning Neural Networks}
@@ -265,7 +284,7 @@ The following section briefly describes how RNNs work in general while the follo
 
 \subsection{Recurrent Neural Network}
 
-A RNN is a class of artificial neural networks where connections between units form a directed cycle. A RNN consists of a hidden state \(h\) and an optional output \(y\), which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by \rp{the following function?}:
+A RNN is a class of artificial neural networks where connections between units form a directed cycle. A RNN consists of a hidden state \(h\) and an optional output \(y\), which operates on a variable-length sequence \( x = (x_1, ..., x_n)\). At each time step \(t\), the hidden state \(h_{t}\) is updated by the following function:
 
 \[  h_{t} = f(h_{t-1}, x_t) \]
 where \(f\) is a non-linear activation function. The function described in \cite{smt_deep_learning1} is motivated by a \emph{long short-term memory (LSTM)} unit\footnote{\url{https://en.wikipedia.org/wiki/Long_short-term_memory} (accessed 13 May 2016)}, but much simpler to compute and implement.
@@ -318,6 +337,8 @@ where \(N\) is the number of training samples and \(\theta\) is the set of model
 \chapter{Data Analysis}
 \label{cha:data_analysis}
 
+This chapter presents statistics regarding the collected apps and extracted translation data. Section~\ref{sec:data_analysis_languages} shows the most popular languages that were used to translate the collected apps. As German and French are both in the top four, the focus of this thesis is put on translations from English to French and German. Beside having a good amount of data available to train a SMT system later, French and German are natively spoken in Switzerland, which makes understanding the produced results easier.
+
 \section{Apps}
 
 For the purposes of this work, a total of 698 free Android apps were collected from various categories, ensuring a good mix of different sentences. Figure~\ref{fig:data_analysis_top_apps_en} shows the top ten apps according to the number of available English translations. Note that the counts indicate the number of effective sentences after eliminating non-relevant ones through the pre-processing step (see Chapter~\ref{cha:data_extraction_prep_storage}). Most of the apps have similar counts for all three languages. Surprisingly, some apps provide more sentences for German and French than English. Different counts can happen because of:
@@ -337,8 +358,12 @@ For the purposes of this work, a total of 698 free Android apps were collected f
 
 
 \section{Languages}
+\label{sec:data_analysis_languages}
 
-A total of 423 multilingual apps were collected, offering its content in at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, the two languages that were the main focus of this thesis \rp{I think you never mentioned why French or German, because the thesis in not actually language specific, and you need to also state it somewhere, but just write that we used these languages as ones of the most popular for translations, so they are the main focus as a consequence of being in top four, not vice versa.}, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
+A total of 423 multilingual apps were collected, offering its content in at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. The top apps are translated in many more languages. Overall, 117 different languages were available.
+
+%A total of 423 multilingual apps were collected, offering its content in at least two languages. Figure \ref{fig:data_analysis_n_langs} shows the number of apps for the ten most used languages. French and German, the two languages that were the main focus of this thesis 
+%\rp{I think you never mentioned why French or German, because the thesis in not actually language specific, and you need to also state it somewhere, but just write that we used these languages as ones of the most popular for translations, so they are the main focus as a consequence of being in top four, not vice versa.}, are both in the top four. The top apps are translated in many more languages. Overall, 117 different languages were available.
 
 \begin{figure}[H]
     \centering
@@ -542,9 +567,9 @@ morekeywords={encoding,resources,string }
 
 \section{Translation Pre-processing}
 \label{sec:preprocess_translations}
-\rp{maybe tell again why do we need pre-processing here in detail.}
-The task of translation pre-processing involves two parts. First of all, the translations are sanitized from unwanted information such as HTML tags, URLs, etc.
-Second, the sanitized strings are tokenized so that they can be used to train a SMT system.
+%\rp{maybe tell again why do we need pre-processing here in detail.}
+
+Pre-processing the translations is needed because the strings in the XML files are not only stored as plain text. A lot of apps use HTML to format text. For the purpose of translating, any HTML tags must be removed, otherwise they become part of words. The task of translation pre-processing involves two steps. First of all, the translations are sanitized from unwanted information. Second, the sanitized strings are tokenized so that they can be used to train a SMT system.
 
 \subsection{Sanitizing}
 
@@ -562,18 +587,20 @@ The following steps are used to remove unwanted information:
 
 \subsection{Tokenization and Truecasing}
 
-\rp{write why do we need tokenization and truecasing, it is important to always tell why do this and that.}
-Tokenization is required to separate words from punctuation. Each token then is separated by a space character, e.g, ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}''
+%\rp{write why do we need tokenization and truecasing, it is important to always tell why do this and that.}
 
-After tokenization, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized in the corpus. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase.
+Tokenization is required to separate words from punctuation. Each token then is separated by a space character, e.g, ``\texttt{Hi, my name is John.}'' becomes ``\texttt{Hi , my name is John .}'' 
+\\
+In machine translation, tokenization prevents a system to learn different translations for the same words. For the example above, without tokenization, ``Hi'' and ``Hi,'' would be considered as two different words.   
 
+After tokenization, \emph{truecasing}\footnote{\url{https://en.wikipedia.org/wiki/Truecasing} (accessed 13 May 2016)} was applied to the text corpus. In contrast to lowercasing, truecasing determines the proper capitalization of words. This is done by first analyzing how words are mostly capitalized in the corpus. The proper case is then applied to each word. It is especially useful for words starting a sentence, that are written uppercase in many languages. For example the word ``This'' starting a sentence will become ``this'', because it is usually written lowercase. Again, in the context of machine translation, normalizing the words to have a common capitalization prevents a system to learn different representations of the same word.
 
 \section{Data storage}
 
 
 \subsection{Parallel and Monolingual Corpus}
 
-After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. A parallel corpus (often also called bitext) \rp{represents?} sentence aligned text-files of one language pair. All sentences must be aligned so that line \(x\) of the first language corresponds to line \(x\) of the second language. In order to get a random mix of translations from different apps, the sentences are shuffled before they are written to the files. The parallel corpus can be used by any SMT system to train the models. If the model requires a separate development set of parallel sentences, we can split the existing corpus at any percentage, e.g. use 80\% as training data and the remaining 20\% as development set.
+After pre-processing the translations, they are written to text files, one sentence per line. The corpus is split into parallel and monolingual data. A parallel corpus (often also called bitext) represents sentence aligned text-files of one language pair. All sentences must be aligned so that line \(x\) of the first language corresponds to line \(x\) of the second language. In order to get a random mix of translations from different apps, the sentences are shuffled before they are written to the files. The parallel corpus can be used by any SMT system to train the models. If the model requires a separate development set of parallel sentences, the existing corpus can be split at any percentage, e.g. use 80\% as training data and the remaining 20\% as development set.
 In addition, data of each language is also stored in a monolingual corpus. All sentences of one language are written into a single text file. This data is then used to build language models, which are an important part of a phrase-based translation model (see Chapter~\ref{sec:phrase_based_mt}).
 
 The data analysis (Chapter~\ref{cha:data_analysis}) showed that the monolingual corpus holds more sentences than the parallel corpus for all three languages. The reason is that the XML files are not synchronized perfectly: English sentences that are  missing in French or German cannot be part of the parallel corpus.
@@ -581,11 +608,14 @@ The data analysis (Chapter~\ref{cha:data_analysis}) showed that the monolingual 
 \subsection{Apache Solr}
 \label{sec:apache_solr}
 
-\rp{describe first what we are trying to achieve here, like, we need to store data in a scalable way, with a possibility to perform this and that, and access this and that. We chose Apache Solr for such purposes.}
-\emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed 13 May 2016)} is an open source text search platform. In the context of this thesis, Solr was used to store all extracted sentences with additional meta data such as the corresponding translation key or a unique app ID. %Due to its way of indexing text data, Solr is very fast when querying for translation strings. 
-Built in tools allow to perform data analysis, for example to get the top sentences grouped by language.
+The previous section described how to store the pre-processed translation data in text files which can be processed by an SMT system. In order to perform data analysis, this format is not practical, because the sentences in the corpora are no longer linked to the app they are coming from. Ideally, all extracted translations are additionally stored in a database, offering tools to analyse indexed data. \emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed 13 May 2016)} was chosen for this purpose. Solr is an open source text search platform. Built in tools allow to perform data analysis, for example to get the top sentences grouped by language.
 
-Solr is also used as \emph{Baseline Translation System}, where we translate strings with a simple algorithm directly from the collected data in Solr (Chapter~\ref{cha:translation_process_baseline}).
+
+%\rp{describe first what we are trying to achieve here, like, we need to store data in a scalable way, with a possibility to perform this and that, and access this and that. We chose Apache Solr for such purposes.}
+%\emph{Apache Solr}\footnote{\url{http://lucene.apache.org/solr/} (accessed 13 May 2016)} is an open source text search platform. In the context of this thesis, Solr was used to store all extracted sentences with additional meta data such as the corresponding translation key or a unique app ID. %Due to its way of indexing text data, Solr is very fast when querying for translation strings. 
+%Built in tools allow to perform data analysis, for example to get the top sentences grouped by language.
+
+Solr is also used as \emph{Baseline Translation System}, where strings can be translated with a simple algorithm directly from the collected data in Solr (Chapter~\ref{cha:translation_process_baseline}).
 
 \subsubsection{Setup and Schema}
 
