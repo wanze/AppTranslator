@@ -841,7 +841,7 @@ Each line contains the phrase pairs together with the computed phrase translatio
 
 %Note that \(\bar{f}\) means ``foreign'' and \(\bar{e}\) stands for ``English''.
 
-The \emph{lexical weighting} is an additional score to check the reliability of the phrase translation probability. Rare phrase pairs may cause problems if they are collected from noisy data. If both of the phrases \(\bar{f}\), \(\bar{e}\) only occur once in the training data, then \(\phi(\bar{f}|\bar{e}) = \phi(\bar{e}|\bar{f}) = 1\). This often overestimates how reliable rare phrase pairs are. Lexical weighting decomposes phrase pairs into its word translations, so that we can check how well they match up \citep{smt_book_koehn}.
+The \emph{lexical weighting} is an additional score to check the reliability of the phrase translation probability. Rare phrase pairs may cause problems if they are collected from noisy data. If both phrases \(\bar{f}\) and \(\bar{e}\) occur only once in the training data, then \(\phi(\bar{f}|\bar{e}) = \phi(\bar{e}|\bar{f}) = 1\). This often overestimates how reliable rare phrase pairs are. Lexical weighting decomposes phrase pairs into its word translations, so that we can check how well they match~\citep{smt_book_koehn}.
 
 \end{enumerate}
 The output of the training process is the phrase translation table and a configuration file \texttt{moses.ini} containing all necessary configuration for the decoder to translate sentences.
