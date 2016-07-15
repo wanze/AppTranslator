@@ -838,6 +838,7 @@ The training process requires sentence aligned parallel data to build the transl
 \item Aligning words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
 \item Extract phrases: All phrases are put into a single file. The following listing shows some sample content of this file. Each line of this file contains: an English phrase, a French phrase and the alignment points of matching words (English-French).
 
+\rp{The listings are not particularly readable, maybe make an actual table?}
 \begin{lstlisting}[label=list:moses_phrase_extraction]
 ! as you can see from ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
 ! as you can see ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
@@ -848,7 +849,7 @@ The training process requires sentence aligned parallel data to build the transl
 \end{lstlisting}
 
 
-\item Scoring phrases by computing the phrase translation probability \(\phi(\bar{f}|\bar{e})\) and building a phrase table. Here is an example how the content of the phrase table is organized in Moses for the English-French language pair:
+\item Scoring phrases by computing the phrase translation probability \(\phi(\bar{f}|\bar{e})\) and building a phrase table. Below is an example how the content of the phrase table is organized in Moses for the English-French language pair:
 
 \begin{lstlisting}[label=list:moses_phrase_table]
 ! your version of Google Play ||| ! votre version de Google Play ||| 1 0.04 1 0.22 
@@ -875,8 +876,8 @@ The \emph{lexical weighting} is an additional score to check the reliability of 
 
 \end{enumerate}
 The output of the training process is the phrase translation table and a configuration file \texttt{moses.ini} containing all necessary configuration for the decoder to translate sentences.
-
-Training one model, e.g. English-French with all parallel data only took about one hour. A more time consuming task is \emph{Tuning}, which is explained in the next section.
+In the next section, we describe the model tuning process for finding optimal weights.
+% Training one model, e.g. English-French with all parallel data only took about one hour. A more time consuming task is \emph{Tuning}, which is explained in the next section.
 
 %Moses includes tools to binarise the pharse and reordering tables. The data is compiled into a format that can be quickly loaded.
 
@@ -893,13 +894,13 @@ The probability cost that is assigned to a translation is a product of probabili
 \item \(D(e,f)\) The \textbf{distortion model} allows for reordering of the input sentence, but at a cost. The more reordering, the more expensive is the translation.
 \item \(W(e)\) The \textbf{word penalty} ensures that the translations do not get too long or too short.
 \end{itemize}
-There is a weight assigned to each of these components that influences their importance. These weights can be passed to the decoder when translating sentences. The optimal weights depend on the languages and training corpus. However, Moses offers to optimize the weights automatically by maximizing the BLEU score \cite{bleu_score} on a small, separate set of parallel sentences (tuning set).
+There is a weight assigned to each of these components that influences their importance. These weights can be passed to the decoder when translating sentences. The optimal weights depend on the languages and training corpus. However, Moses offers a possibility to optimize the weights automatically by maximizing the BLEU score \cite{bleu_score} on a small, separate set of parallel sentences (tuning set).
 
-We used 80\% of the available parallel data for training and the remaining 20\% for tuning. Tuning takes much more time than training. Moses executes different tuning runs and measures the BLEU score achieved on the tuning set. The optimal weights were usually determined after 6-11 runs, which took about 3-6 hours.
+We used 80\% of the available parallel data for training and the remaining 20\% for tuning. Tuning process takes significantly more time than the training. Moses executes different tuning runs and measures the BLEU score achieved on the tuning set. The optimal weights were usually determined after 6-11 runs. %, which took about 3-6 hours.
 
 \subsection{Decoding}
 
-The decoder of Moses is controlled by the \texttt{moses.ini} file. This file stores the path to the phrase translation table and the language model. Additionally it also holds the tuned weights for the translation model. Many more configuration options\footnote{\url{http://www.statmt.org/moses/?n=Moses.DecoderParameters} (accessed 13. May 2016)} can be set in this file or passed as parameters when executing the decoder. Here is a summary from \cite{pdf_moses_manual} how the decoder of Moses works:
+The decoder of Moses is controlled by the \texttt{moses.ini} file. This file stores the path to the phrase translation table and the language model. Additionally it also holds the tuned weights for the translation model. Many more configuration options\footnote{\url{http://www.statmt.org/moses/?n=Moses.DecoderParameters} (accessed 13. May 2016)} can be set in this file or passed as parameters when executing the decoder. Here is a summary from \cite{pdf_moses_manual} how the decoder works:
 
 \begin{enumerate}
 \item The decoder collects all phrase translations from the phrase table that could be applied on the input strings of words (translation options). The translation options are stored with the following information:
@@ -909,25 +910,26 @@ The decoder of Moses is controlled by the \texttt{moses.ini} file. This file sto
 \item Phrase translation in the target language
 \item Phrase translation probability
 \end{itemize}
-\item The output sentence is generated left to right in form of hypotheses. Each hypothesis is represented by:
+\item The output sentence is generated left to right in a form of several hypotheses. Each hypothesis is represented by:
 \begin{itemize}
-\item A link to the best previous state, so that the decoder later can back track through the graph to find the best translation.
+\item A link to the best previous state, so that the decoder later can backtrack through the graph to find the best translation.
 \item The cost (probability) and covered source words so far. A low cost means high probability.
 \item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
 \end{itemize}
 
-The decoder uses \emph{Recombination} and a \emph{Beam Search} (see Section \ref{sec:phrase_based_decoding}) to reduce the size of the search space. 
+The decoder uses \emph{Recombination} and \emph{Beam Search} algorithms (Section~\ref{sec:phrase_based_decoding}) to reduce the size of the search space. 
 
 %The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
 \end{enumerate}
-\textbf{Example} We translate the same example string as used in the previous chapter ``Open the settings to change your username'' to French. Here is the command to invoke the decoder:
+\textbf{Example} We translate the same example phrase as in the previous chapter ``Open the settings to change your username'' to French. The command to invoke the decoder is the following:
 
 \begin{lstlisting}[breaklines=true ]
 echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin/moses -f /home/stefan/AppTranslator/data/moses/en-fr/mert-work/moses.ini -verbose 3 &> moses_decoding.out 
 \end{lstlisting}
 We used histogram pruning with a stack size of 100 and the optimal model weights determined after tuning.
 
-The decoder produces the following output string: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''. Here are some statistics on how the decoder derived the target sentence:
+The decoder produces the following output phrase: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''.
+Here are some statistics on how the decoder derived the target sentence \rp{what do they tell us? some observations?}:
 
 \begin{itemize}
 \item Total translation options collected: 197
