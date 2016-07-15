@@ -943,19 +943,19 @@ Here are some statistics on how the decoder derived the target sentence \rp{what
 
 \emph{Tensorflow}\footnote{\url{https://www.tensorflow.org/} (accessed 13 May 2016)} is a software library for machine intelligence, open sourced by Google in November 2015. The source code is available on GitHub\footnote{\url{https://github.com/tensorflow/tensorflow} (accessed 13 May 2016)} and the project is still under development.
 
-Tensorflow includes a library to learn sequence to sequence models with neural networks. The implementation follows the encoder-decoder RNN model described in Section \ref{sec:related_work_deep_learning}.
+Tensorflow includes a package to learn sequence to sequence models with neural networks. The implementation follows the encoder-decoder RNN model described in Section~\ref{sec:related_work_deep_learning}.
 
 \subsection{Training}
 \label{subsec:tensorflow_training}
 
 The training process closely follows the tutorial by Tensorflow on sequence-to-sequence models \citep{website_tensorflow_tutorial}. 
-The training script was modified to fit our needs:
+However, the training script was modified in a number of ways to suit the needs of this work:
 \begin{itemize}
-\item Skip the part where Tensorflow downloads and prepares the sample data since the models are trained on our corpus prepared in Chapter \ref{cha:data_extraction_prep_storage}.
-\item Replace the included tokenizer by registering a function that just splits a string at spaces, because our corpus is already tokenized.
-\item Add additional parameters for the training process to make the training script more generic. New parameters include the source and target language and the path to the parallel corpus.
+\item We skip the part where Tensorflow downloads and prepares the sample data since we train models on our corpus (Chapter~\ref{cha:data_extraction_prep_storage});
+\item We replace the included tokenizer by registering a function that just splits a string at spaces, because our corpus is already tokenized;
+\item We added additional parameters for the training process to make the training script more generic. New parameters include the source and target language and the path to the parallel corpus.
 \end{itemize}
-Training requires the following model parameters. The values in square brackets represent the chosen default values. 
+Training requires the following model parameters (values in square brackets represent the chosen default values):. 
 %In the evaluation (see Chapter \ref{cha:evaluation}), different parameters were used  we trained models with different values.
 
 \begin{itemize}
@@ -968,7 +968,9 @@ Training requires the following model parameters. The values in square brackets 
 \item \textbf{Learning Rate} The initial learning rate used when evaluating the model after each training step. [0.5]
 \item \textbf{Learning Rate Decay Factor} The learning rate decays by this factor. [0.99]
 \end{itemize}
-Training one model (e.g. from English to French) was during about two days with the parameters indicated above. At each checkpoint, when Tensorflow saves the current model to disk, some statistics are printed:
+
+\rp{Time depends on the performance of a particular machine, so you either need to specify the characteristics of a machine, or remove this.}
+Training one model (e.g. from English to French) took about two days with the parameters indicated above. At each checkpoint, when Tensorflow saves the current model to disk, some statistics are printed:
 
 \begin{lstlisting}
 global step 71000 learning rate 0.2708 step-time 1.88 perplexity 1.08
@@ -982,9 +984,11 @@ global step 71600 learning rate 0.2576 step-time 1.79 perplexity 1.07
   eval: bucket 2 perplexity 1.07
   eval: bucket 3 perplexity 1.55
 \end{lstlisting}
-The statistics show the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair is put in a bucket according to the lengths of the source and target sentence. The sentences are then padded to fit the length of the bucket. The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language. Shorter sentences are padded with a special \texttt{PAD} symbol. For example, the English sentence ``I go.'' and corresponding French sentence ``Je vais.'' are put into the bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD PAD "." "go" "I"]} and \texttt{[GO "Je" "vais" "." EOS PAD PAD PAD PAD PAD]} \citep{website_tensorflow_tutorial}. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. We used the default buckets from the tutorial: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}.
+The statistics show the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair is put in a bucket according to the lengths of the source and target sentence. The sentences are then padded to fit the length of the bucket. The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language. Shorter sentences are padded with a special \texttt{PAD} symbol. For example, the English sentence ``I go.'' and corresponding French sentence ``Je vais.'' are put into the bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD PAD . go I]} and \texttt{[GO Je vais . EOS PAD PAD PAD PAD PAD]} \citep{website_tensorflow_tutorial}. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. We used the default buckets from the tutorial: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}.
+\rp{You need to tell what (5,10) is, what is 5 and what is 10, why the target length is bigger than the source, the phrases are of the same length, it's not straightforward. And why there is GO in a french sentence?}
 
-The perplexity indicates how well the model of each bucket predicts the samples of the development set. A low perplexity means that the model is good in predicting the development sentences. Again, as with Moses, we used 80\% as training data and 20\% as development data. The (infinite) training loop was stopped after the perplexities did not improve any more.
+
+The perplexity indicates how well the model of each bucket predicts the samples of the development set. A low perplexity means that the model is good at predicting the development sentences. Again, as with Moses, we used 80\% as training data and 20\% as development data. The (infinite) training loop was stopped after the perplexities did not improve anymore.
 
 %The vocabulary for the source and target language is written to a file, one word per line where the line indicates the numeric index of the word:
 
@@ -1001,7 +1005,7 @@ The perplexity indicates how well the model of each bucket predicts the samples 
 
 \subsection{Decoding}
 
-In contrast to Moses, the decoding process in Tensorflow does not offer any options to influence the translation result. One problem is that unknown words not being part of the target language vocabulary are output with an \texttt{UNK} token. Our Baseline System and Moses both replace unknown words with the original word in the source language. Not having this behaviour \emph{can} impact the BLEU score: If the unknown word is the same as in the source language, we get a penalty when comparing unigrams, because the word is not present in the output sentence (see Section \ref{sec:bleu}). To overcome this problem, the decoding process was extended by the following steps:
+In contrast to Moses, the decoding process in Tensorflow does not offer any options to influence the translation result. One problem is that unknown words not being part of the target language vocabulary are output with an \texttt{UNK} token. Our Baseline System and Moses both replace unknown words with the original word in the source language. This difference in behavior \emph{can} impact the BLEU score: If an unknown word is the same as in the source language, we get a penalty when comparing unigrams, because the word is not present in the output sentence (see Section \ref{sec:bleu}). To overcome this problem, the decoding process was extended by the following steps:
 \begin{enumerate}
 \item After reading the input sentence, store the words that were converted to \texttt{UNK} in a list.
 \item Let the decoder produce the output sentence and check if it contains \texttt{UNK} tokens. If so, replace each \texttt{UNK} token with a stored unknown word from input sentence.
@@ -1018,8 +1022,10 @@ The correct position of the unknown word in the output sentence is not guarantee
 \]
 where ID \(2\) represents the \texttt{UNK} token. The unknown word ``change'' is stored. If the decoder derives the sentence ``ouvrir les param\`{e}tres pour \texttt{UNK} votre nom d' utilisateur'', the \texttt{UNK} token is then replaced by ``change''.
 
-To be consistent with the examples of the Baseline System and Moses, here is the translation produced by Tensorflow: ``modifiez affichage Param\`{e}tres Param\`{e}tres votre utilisateur de votre nom''. This translation is obviously worse than the results of the other two systems.
 
+As in the previous chapters, we translate the example phrase ``Open the settings to change your usernam'' to French.
+The resulting translation produced by Tensorflow is the following: ``modifiez affichage Param\`{e}tres Param\`{e}tres votre utilisateur de votre nom''.
+It should be noted that this translation is worse than the results of the previous two systems.
 
 \chapter{Web Application}
 
