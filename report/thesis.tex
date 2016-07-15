@@ -1406,20 +1406,19 @@ This app won't run unless you update the Android Wear app. & diese App won't ers
 % https://de.wikipedia.org/wiki/Subjekt-Verb-Objekt
 % http://esl.fis.edu/grammar/langdiff/french.htm
 
-\chapter{Conclusion}
+\chapter{Conclusions}
 
 The question if it is possible to provide high-quality translations for apps with machine learning can be answered with ``Yes''. Still, one might argue that this answer depends on the definition of \emph{high-quality}. On the one hand, good BLEU scores were achieved with a phrase-based system, as shown in Chapter \ref{cha:evaluation}. The BLEU scores for Moses are higher than the scores achieved in \cite{smt_phrase_based, smt_deep_learning} on the \emph{European Parliament parallel corpus} \cite{website_parallel_corpus}, though the context is different, so a direct comparison is not possible. However, it still proofs our initial claim: Based on existing data and the similarity of sentences among different apps, we achieved a reasonable quality for machine translated sentences.  %that the concept of using existing data to translate new apps works. 
-On the other hand, machine translated text is almost never perfect. Bad app translations can do more harm than good, users might get confused if they cannot understand the content. Because of that, machine translated text should be reviewed and corrected or completed by human translators.
+On the other hand, machine translated text is almost never perfect. Low quality app translations can do more harm than good, and users might get confused if they cannot understand the content. Because of that, machine translated text should be reviewed and corrected or completed by human translators.
 
-Is there a market for a system proposed in this thesis? Maybe, but there is also the question of whether it is legal from a laws point of view. The \emph{terms of service} from the Google Playstore include the following paragraph: ``You may not sell, rent, lease, redistribute, broadcast, transmit, communicate, modify, sublicense or transfer or assign any Content or your rights to Content to any third party without authorization, including with regard to any downloads of Content that you may obtain through Google Play. Use of any tool or feature provided as an authorized part of Google Play (for example, ``Social Recommendations'') shall not violate this provision so long as you use the tool as specifically permitted and only in the exact manner specified and enabled by Google.'' \footnote{\url{https://play.google.com/intl/en_ch/about/play-terms.html} (Accessed 16 May 2016)} According to this quotation, authorization would be necessary to use existing content, which might also include the translation data.
-
+\rp{Maybe add something about the performance of neural networks/tensorflow}
 
 \section{Future Work}
 
 
-The current state of the project could be improved in many ways. Currently, all available translations are used to train the SMT models, which also includes wrong or poor translations. Existing translations could be rated based on metadata of the app they are coming from, e.g. number of downloads, average rating, number of ratings ect. In general, the more existing high-quality translations that are collected to train the SMT models, the better the quality of our produced translations.
+The current state of the project could be improved in many ways. Currently, all available translations are used to train the SMT models, which also includes wrong or poor translations. Existing translations could be rated based on metadata of the app they are coming from, e.g. number of downloads, average rating, number of reviews, etc. In general, the more existing high-quality translations that are collected to train the SMT models, the better the quality of the produced translations.
 
-Another improvement would be to analyse what kind of sentences are translated well on which system. With this in mind, we could choose the optimal system based on the input sentence.
+Another improvement would be to analyze what kind of sentences are translated well on which system. With this in mind, we could choose the optimal system based on the input data.
 
 Lastly, the prototype web application could be improved as well. After translating an XML file, the download of the results as XML file or other formats could be offered. An interesting option could be to connect the web application with a crowdsourcing service, where the produced translations can be corrected and extended by human translators.
 
