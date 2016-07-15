@@ -1031,9 +1031,11 @@ It should be noted that this translation is worse than the results of the previo
 
 A simple web application was built to test and compare the different translation systems. It offers a common interface to translate strings with the Baseline System, Moses and Tensorflow. Furthermore, there is the possibility to translate Android XML files containing sentences, so the web application could be used to translate apps.
 
-Additionally, the web application offers a functionality in terms of data analysing, called \emph{Term Variations}. Given a string, source and target language, it returns all different translations from Solr that were used among all apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param\`{e}teres'', ``r\'{e}glages'', ``configuration'', ``settings''. %The last one indicates that at least one app did not translate ``settings'' correctly to French.
+Additionally, the web application offers a functionality in terms of data analysis, called \emph{Term Variations}. Given a string, source and target language, it returns all different translations from Solr that were used among all apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param\`{e}teres'', ``r\'{e}glages'', ``configuration'', ``settings''. %The last one indicates that at least one app did not translate ``settings'' correctly to French.
 
-Visit the following URL to access the web application: \url{http://diufpc114.unifr.ch}\footnote{You must be connected to the LAN of the university of fribourg in order to access the web application.}
+\rp{You cannot put links to internal networks, plus we might clean the machines at some point, it's better to just point to the source code on github if you didn't do it before.}
+\rp{The source code of the application is available online at ...}
+%Visit the following URL to access the web application: \url{http://diufpc114.unifr.ch}\footnote{You must be connected to the LAN of the university of fribourg in order to access the web application.}
 
 
 %The main purpose of the web application is to offer a simple way of testing the different implemented translation systems (Baseline with Solr, Moses and Tensorflow). However, the application could already be used by app developers to translate their XML translation files.
@@ -1042,7 +1044,7 @@ Visit the following URL to access the web application: \url{http://diufpc114.uni
 
 \section{User Interface}
 
-The user interface to perform a translation is divided into three steps. First of all, one needs to specify the source and target language, translation input and the system that produces the translations. The input can either be plain strings or an Android XML translation file (see Figure \ref{fig:web_app_index}). Secondly, there is the possibility to set decoding options depending on the chosen translation system. The available options are described in the following section. Lastly, the results are displayed together with some debug information.
+The user interface to perform a translation consists of three steps. First of all, one needs to specify the source and target language, translation input and the system that produces the translations. The input can either be plain strings or an Android XML translation file (see Figure \ref{fig:web_app_index}). Second, there is the possibility to set the decoding options depending on the chosen translation system. The available options are described in the following section. Finally, the results are displayed together with some debug information. \rp{you often use the word ``some'', which does not really tell anything to the reader, it's better to say something like ``the results are displayed together with additional debug informations, such as ...''}
 
 \begin{figure}[H]
     \centering
@@ -1095,7 +1097,7 @@ The backend offers a REST based interface for the different functionalities. The
     \label{fig:web_app_uml}
 \end{figure}
 
-The business logic is implemented in \emph{Python}, the REST interface is powered by a microframework called \emph{Flask}\footnote{\url{http://flask.pocoo.org/} (accessed 16 May 2016)}. Flask has a built-in server and offers \emph{RESTful request dispatching}, among many other features. Table \ref{table_rest_endpoints} shows the possible endpoints of the REST interface together with the expected request data. The frontend uses \emph{AngularJS}\footnote{\url{https://angularjs.org/} (accessed 16 May 2016)} together with the \emph{Semantic UI}\footnote{\url{http://semantic-ui.com/} (accessed 16 May 2016)} CSS framework.
+The business logic is implemented in \emph{Python}, the REST interface is powered by a microframework called \emph{Flask}\footnote{\url{http://flask.pocoo.org/} (accessed 16 May 2016)}. Flask provides a built-in web server and offers \emph{RESTful request dispatching}, among many other features. Table \ref{table_rest_endpoints} shows the possible endpoints of the REST interface together with the expected request data. The frontend uses \emph{AngularJS}\footnote{\url{https://angularjs.org/} (accessed 16 May 2016)} together with the \emph{Semantic UI}\footnote{\url{http://semantic-ui.com/} (accessed 16 May 2016)} CSS framework.
 
 \begin{table}[H]
 \centering
