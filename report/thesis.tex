@@ -262,14 +262,14 @@ This process creates an exponential number of hypothesis. To reduce the search s
 
 \begin{itemize}
 %\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped \rp{I'm not sure I understand the method here, could you expand?}.
-\item \textbf{Recombination} Matching hypothesis both having the same English words in the output can be reached by different paths. In the heuristic search they can be recombined and the worse hypothesis is dropped (see Figure~\ref{fig:related_work_hypothesis_recombination}).
+\item \textbf{Recombination} Hypothesis both having the same English words in the output can be reached by different paths. In the heuristic search they can be recombined and the worse hypothesis is dropped (see Figure~\ref{fig:related_work_hypothesis_recombination}).
 \item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/related_work_recombination.png}
-    \caption[Decoding process: Apply Recombination of hypotheses \cite{smt_book_koehn}]{Example of possible Recombination: The output ``it is'' can be reached with two different paths. The score of the translation option using a single phrase is worse, so this hypothesis is dropped  \cite{smt_book_koehn}.}
+    \caption[Decoding process: Apply Recombination of hypotheses \cite{smt_book_koehn}]{Example of Recombination: The output ``it is'' can be reached with two different paths, one path using a single phrase and the other path using two separate phrases. The score of the translation option using a single phrase is worse, so the hypothesis is dropped  \cite{smt_book_koehn}.}
     \label{fig:related_work_hypothesis_recombination}
 \end{figure}
 
@@ -277,7 +277,7 @@ This process creates an exponential number of hypothesis. To reduce the search s
 \section{Deep Learning Neural Networks}
 \label{sec:related_work_deep_learning}
 Translating with neural networks is based on an encoder-decoder architecture \cite{smt_deep_learning1, smt_deep_learning}. Two \emph{recurrent neural networks} (RNN)\footnote{\url{https://en.wikipedia.org/wiki/Recurrent_neural_network} (accessed 13 May 2016)} are involved: The first RNN encodes a variable-length input sentence into a fixed-length vector representation. The second RNN decodes a given fixed-length vector back into a variable-length sentence in the target language.
-The following section briefly describes how RNNs work in general while the following sections explain the encoder-decoder architecture in more detail.
+The next section briefly describes how RNNs work in general while the following sections explain the encoder-decoder architecture in more detail.
 
 %Beside the papers, we also want to mention a blog post\footnote{\url{https://devblogs.nvidia.com/parallelforall/introduction-neural-machine-translation-with-gpus/}} by NVIDIA which offers a very detailed explanation of the model.%
 
@@ -742,7 +742,7 @@ Now, we search for translations for all substrings in both variations \(V_1\) an
 
 The process of reducing the substring length is repeated until we can translate a substring of at least one variation \(V_j\).
 
-\item Let us consider what happens if there are translations found for \rp{variation X?, please finish.}. For each variation \(V_j\), we count the number of available translations for their substrings \(\bar{S}_i\). We continue with the variation \(\tilde{V}\) having the highest total count of translations among their substrings:
+\item Let us consider what happens if there are translations found for at least one Variation \(V_j\). For each variation \(V_j\), we count the number of available translations for their substrings \(\bar{S}_i\). We continue with the variation \(\tilde{V}\) having the highest total count of translations among their substrings:
 
 \[ \tilde{V} = argmax\sum_i count\_translations(\bar{S}_i) \]
 
@@ -834,7 +834,7 @@ At the last step, there are translations available for both substrings of the va
 The training process requires sentence aligned parallel data to build the translation models, and monolingual data for the language models. We can make use of the sanitized and tokenized data as described in Section~\ref{sec:preprocess_translations}. The training process involves the following steps:
 
 \begin{enumerate}
-\item Building a language model from the monolingual data of the target language. Moses includes the \emph{KenLM toolkit}\footnote{\url{https://kheafield.com/code/kenlm/} (accessed 13 May 2016)} for this task.
+\item Building a language model from the monolingual data of the target language. Moses includes the \emph{KenLM toolkit}\footnote{\url{https://kheafield.com/code/kenlm/} (accessed 13 May 2016)} for this task. We built 3-gram language models as used in~\citep{smt_phrase_based}.
 \item Aligning words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
 \item Extract phrases: All phrases are put into a single file. The following listing shows some sample content of this file. Each line of this file contains: an English phrase, a French phrase and the alignment points of matching words (English-French).
 
@@ -889,10 +889,10 @@ Tuning refers to the process of finding the optimal weights for the linear trans
 The probability cost that is assigned to a translation is a product of probability costs of four models:
 
 \begin{itemize}
-\item \(\phi(f|e)\) The \textbf{phrase translation table} ensures that the source and target phrases are good translations of each other.
-\item \(LM(e)\) The \textbf{language model} ensures that the output of the target language is fluently.
-\item \(D(e,f)\) The \textbf{distortion model} allows for reordering of the input sentence, but at a cost. The more reordering, the more expensive is the translation.
-\item \(W(e)\) The \textbf{word penalty} ensures that the translations do not get too long or too short.
+\item \(\phi(f|e)\) The \textbf{phrase translation table} is responsible that the input and output phrases are good translations of each other by looking at the probability scores~\citep{pdf_moses_manual}.
+\item \(LM(e)\) The \textbf{language model} makes sure that the produced output sentence of the target language is fluently~\citep{pdf_moses_manual}.
+\item \(D(e,f)\) The \textbf{distortion model} allows for reordering of the input sentence, but at a cost. The more reordering, the more expensive is the translation~\citep{pdf_moses_manual}.
+\item \(W(e)\) The \textbf{word penalty} ensures that the translations do not get too long or too short. Negative values favor longer output while positive values favor shorter output~\citep{pdf_moses_manual}.
 \end{itemize}
 There is a weight assigned to each of these components that influences their importance. These weights can be passed to the decoder when translating sentences. The optimal weights depend on the languages and training corpus. However, Moses offers a possibility to optimize the weights automatically by maximizing the BLEU score \cite{bleu_score} on a small, separate set of parallel sentences (tuning set).
 
@@ -917,7 +917,7 @@ The decoder of Moses is controlled by the \texttt{moses.ini} file. This file sto
 \item An estimate of the future cost, how expensive it is to translate the remaining words of the source sentence.
 \end{itemize}
 
-The decoder uses \emph{Recombination} and \emph{Beam Search} algorithms (Section~\ref{sec:phrase_based_decoding}) to reduce the size of the search space. 
+The decoder uses \emph{Recombination} and \emph{Stack Pruning} algorithms (Section~\ref{sec:phrase_based_decoding}) to reduce the size of the search space. 
 
 %The beam search compares hypothesis covering the same number of source words in stacks. Given the cost so far and the future cost estimation, hypotheses that fall outside of the beam are pruned. The beam size can be defined by threshold and histogram pruning. A relative threshold cuts out a hypothesis with a probability less than a factor \(\alpha\) of the best hypotheses. Histogram pruning keeps a certain number \(n\) of hypotheses in each stack. 
 \end{enumerate}
@@ -926,7 +926,7 @@ The decoder uses \emph{Recombination} and \emph{Beam Search} algorithms (Section
 \begin{lstlisting}[breaklines=true ]
 echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin/moses -f /home/stefan/AppTranslator/data/moses/en-fr/mert-work/moses.ini -verbose 3 &> moses_decoding.out 
 \end{lstlisting}
-We used histogram pruning with a stack size of 100 and the optimal model weights determined after tuning.
+We used stack pruning with a stack size of 100 and the optimal model weights determined after tuning.
 
 The decoder produces the following output phrase: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''.
 Here are some statistics on how the decoder derived the target sentence \rp{what do they tell us? some observations?}:
@@ -969,8 +969,7 @@ Training requires the following model parameters (values in square brackets repr
 \item \textbf{Learning Rate Decay Factor} The learning rate decays by this factor. [0.99]
 \end{itemize}
 
-\rp{Time depends on the performance of a particular machine, so you either need to specify the characteristics of a machine, or remove this.}
-Training one model (e.g. from English to French) took about two days with the parameters indicated above. At each checkpoint, when Tensorflow saves the current model to disk, some statistics are printed:
+At each checkpoint, when Tensorflow saves the current model to disk, some statistics are printed:
 
 \begin{lstlisting}
 global step 71000 learning rate 0.2708 step-time 1.88 perplexity 1.08
@@ -1033,8 +1032,10 @@ A simple web application was built to test and compare the different translation
 
 Additionally, the web application offers a functionality in terms of data analysis, called \emph{Term Variations}. Given a string, source and target language, it returns all different translations from Solr that were used among all apps to translate the string, together with a count. For example, for the English term ``settings'' the following translations are available in French: ``param\`{e}teres'', ``r\'{e}glages'', ``configuration'', ``settings''. %The last one indicates that at least one app did not translate ``settings'' correctly to French.
 
-\rp{You cannot put links to internal networks, plus we might clean the machines at some point, it's better to just point to the source code on github if you didn't do it before.}
-\rp{The source code of the application is available online at ...}
+The source code of the web application is available on GitHub\footnote{Source code of web application: \url{https://github.com/wanze/AppTranslator}}.
+
+%\rp{You cannot put links to internal networks, plus we might clean the machines at some point, it's better to just point to the source code on github if you didn't do it before.}
+%\rp{The source code of the application is available online at ...}
 %Visit the following URL to access the web application: \url{http://diufpc114.unifr.ch}\footnote{You must be connected to the LAN of the university of fribourg in order to access the web application.}
 
 
@@ -1044,7 +1045,9 @@ Additionally, the web application offers a functionality in terms of data analys
 
 \section{User Interface}
 
-The user interface to perform a translation consists of three steps. First of all, one needs to specify the source and target language, translation input and the system that produces the translations. The input can either be plain strings or an Android XML translation file (see Figure \ref{fig:web_app_index}). Second, there is the possibility to set the decoding options depending on the chosen translation system. The available options are described in the following section. Finally, the results are displayed together with some debug information. \rp{you often use the word ``some'', which does not really tell anything to the reader, it's better to say something like ``the results are displayed together with additional debug informations, such as ...''}
+The user interface to perform a translation consists of three steps. First of all, one needs to specify the source and target language, translation input and the system that produces the translations. The input can either be plain strings or an Android XML translation file (see Figure \ref{fig:web_app_index}). Second, there is the possibility to set the decoding options depending on the chosen translation system. The available options are described in the following section. Finally, the translation results are displayed in a table. If the decoder of the chosen translation system returns some statistics or debug information on how the translation results were generated, then this information is presented as well.
+
+%\rp{you often use the word ``some'', which does not really tell anything to the reader, it's better to say something like ``the results are displayed together with additional debug informations, such as ...''}
 
 \begin{figure}[H]
     \centering
@@ -1163,7 +1166,7 @@ The baseline in \citep{bleu_score} used \(N = 4 \) and uniform weights  \( w_n =
 
 \section{Setup}
 
-The BLEU scores were computed in different evaluation runs for the results of translating English to French and German. \emph{K-fold cross-validation} was used to predict how the different models would perform if they were applied to independent data. The parallel corpus was split into 6 equal sized samples. One sample was always reserved as development set for Moses (Tuning) and Tensorflow, the remaining 5 samples were used to evaluate BLEU. For each evaluation run, four samples were merged into training data and a single sample was used as test set (see Figure~\ref{fig:evaluation_k_fold}). One sample contains 19'158 parallel sentences for English-French and 19'129 sentences for English-German.
+The BLEU scores were computed in different evaluation runs for the results of translating English to French and German. \emph{K-fold cross-validation} was used to predict how the different models would perform if they were applied to independent data. The parallel corpus was split into 6 equal sized samples. One sample was always reserved as development set for Moses (Tuning) and Tensorflow (Evaluation), the remaining 5 samples were used to evaluate BLEU. For each evaluation run, four samples were merged into training data and a single sample was used as test set (see Figure~\ref{fig:evaluation_k_fold}). One sample contains 19'158 parallel sentences for English-French and 19'129 sentences for English-German.
 
 \begin{figure}[H]
     \centering
@@ -1172,7 +1175,7 @@ The BLEU scores were computed in different evaluation runs for the results of tr
     \label{fig:evaluation_k_fold}
 \end{figure}
 
-The Baseline System needed a special setup. First, the development set is ignored since there is no tuning involved in this model. \rp{And? what do you do about this?} Second, the training data was indexed separately inside Solr for each evaluation run. This was achieved by creating new cores in Solr according to the following schema:
+The Baseline System needed a special setup. First, the development set is ignored since there is no tuning or evaluation involved in this model. Second, the training data was indexed separately inside Solr for each evaluation run. This was achieved by creating new cores in Solr according to the following schema:
 
 \[ source-target-run-k-(source|target) \]
 where \(source\) and \(target\) are the source and target language and \(k\) is the index of the evaluation run (1-5). For example, in the first evaluation run for translating English to French, the French data is put into the core \texttt{en-fr-run-1-fr}.
@@ -1301,7 +1304,7 @@ run-5 & 8.98          \\
 
 \subsection{Observations}
 
-As we can observer, according to BLEU, Moses produces the best translations. As expected, if the language model component of Moses has less data available, the scores drop about 5 units. Still, the achieved BLEU scores are twice as much compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that the corpus used in this work is too small. In machine translation literature, the translation models are usually trained on much larger amounts of data. The English-French parallel corpus from the \emph{European Parliament Proceedings}~\cite{website_parallel_corpus}, for instance, contains over 2 million sentences, which is \texttildelow 105 times more sentences than the one we used. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks a tuning process, where the optimal model parameters are determined.
+As we can observe, according to BLEU, Moses produces the best translations. As expected, if the language model component of Moses has less data available, the scores drop about 5 units. Still, the achieved BLEU scores are twice as much compared to Tensorflow and the Baseline System. While deep learning neural networks achieve a slightly higher BLEU score than phrase based systems in \cite{smt_deep_learning}, this does not apply to our context. One reason probably is that the corpus used in this work is too small. In machine translation literature, the translation models are usually trained on much larger amounts of data. The English-French parallel corpus from the \emph{European Parliament Proceedings}~\cite{website_parallel_corpus}, for instance, contains over 2 million sentences, which is \texttildelow 105 times more sentences than the one we used. Other than that, Moses has the advantage that its phrase table contains all possible words, while in Tensorflow, there is a fixed limit of the vocabulary size. Compared to Moses, Tensorflow also lacks a tuning process, where the optimal model parameters are determined.
 
 Surprisingly, increasing the model parameters in Tensorflow (add more layers and units to the network) did not improve translation quality. The best results were achieved with 2 layers and 256 units. Using 3 layers and 1204 units reduces the standard deviation though. Increasing the vocabulary size to 50'000 words for the source and target language did improve the BLEU score only for translating English to German.
 
