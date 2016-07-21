@@ -55,7 +55,7 @@ SMT is the dominant approach in automating translations and used by services suc
 \chapter{Problem Analysis}
 \label{cha:problem_analysis}
 
-This chapter first describes the importance of app localization. Next, translation services that are already available for this task are analysed. Finally, SMT is introduced together with a brief explanation of how it can be used for the purpose of app translation.
+This chapter first describes the importance of app localization. Next, translation services that are already available for this task are analysed. Finally, SMT is introduced.
 
 %This chapter answers the question why it is an absolute must to localize mobile apps nowadays. We analyze what kind of services exist to translate apps. %Lastly, we identify the challenges we most likely will face during this project.%
 
@@ -80,7 +80,7 @@ Since 2013, Google offers an app translation service~\citep{website_google_trans
 \item The developer of card game \emph{G4A Indian Rummy}\footnote{\url{https://play.google.com/store/apps/details?id=org.games4all.android.games.indianrummy.prod} (accessed 12 May 2016)} found that the app translation service was easier to use than their previous translation methods, and saw a 300\% increase with user engagement in localized apps~\citep{website_google_translation_service}.
 \end{itemize}
 
-In 2012, company \emph{App Annie}\footnote{\url{https://www.appannie.com} (accessed 12 May 2016)} (former called \emph{Distimo}), published a study where they analyzed the impact of translations to iPhone apps~\citep{website_impact_of_translations_to_mobile_apps}. They found out that the use of native language is still limited in several countries, including Italy, Russia and Brazil. In such countries, offering an app that supports the native language certainly is an advantage over competitors. Native-only apps are mostly used in Asian countries (see Figure~\ref{fig:problem_analysis_impact_languages}). Hence, supporting the native language is a condition to be successful in the Asian market.
+In 2012, company \emph{App Annie}\footnote{\url{https://www.appannie.com} (accessed 12 May 2016)} (former called \emph{Distimo}), published a study where they analyzed the impact of translations to iPhone apps~\citep{website_impact_of_translations_to_mobile_apps}. They found out that the use of native language is still limited in several countries, including Italy, Russia and Brazil. In such countries, offering an app that supports the native language certainly is an advantage over competitors. Apps supporting the native language are widely used in Asian countries (see Figure~\ref{fig:problem_analysis_impact_languages}). Hence, supporting the native language is a condition to be successful in the Asian market.
 The study followed 200 iPhone apps that introduced native language support in a market and observed their growth. One week after the local language support was introduced with an app update, download rate increased by 128\% and revenue by 26\%.
 
 %Another case-study by David Janner from make app magazine\footnote{\url{http://makeappmag.com/iphone-app-localization-keywords}} observed the impact of translating one single app.
@@ -155,7 +155,7 @@ To find the best English translation \(e_{best}\), the following equation based 
 
 \[e_{best} = argmax_eP(e|f)\]
 \[= argmax_e\frac{P(f|e)P(e)}{P(f)}\]
-\[= argmax_e P(e|f)P(e)\]
+\[= argmax_e P(f|e)P(e)\]
 where \(P(e)\) is called the \emph{language model}\footnote{\url{https://en.wikipedia.org/wiki/Language_model} (accessed 17 May 2016)} and \(P(f|e)\) is the \emph{translation model}.
 \\
 \\
@@ -262,8 +262,8 @@ This process creates an exponential number of hypothesis. To reduce the search s
 
 \begin{itemize}
 %\item \textbf{Recombination} Two hypothesis paths lead to two matching hypotheses, so that both hypotheses have the same English words in the output. The worse hypothesis is dropped \rp{I'm not sure I understand the method here, could you expand?}.
-\item \textbf{Recombination} Hypothesis both having the same English words in the output can be reached by different paths. In the heuristic search they can be recombined and the worse hypothesis is dropped (see Figure~\ref{fig:related_work_hypothesis_recombination}).
-\item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence.
+\item \textbf{Recombination} Hypothesis both having the same English words in the output can be reached by different paths. In the heuristic search they can be recombined and the worse hypothesis is dropped \cite{smt_book_koehn} (see Figure~\ref{fig:related_work_hypothesis_recombination}).
+\item \textbf{Stack Pruning} Bad hypotheses are removed early. Hypothesis that have translated the same number of input words are put into a stack, so that they are comparable. The number of hypotheses in a stack is limited, for example by keeping only \emph{k} hypotheses according to a score. This score is typically a combination of the partial probability score and a future cost estimation for translating the remaining sentence \cite{smt_book_koehn}.
 \end{itemize}
 
 \begin{figure}[H]
@@ -329,7 +329,7 @@ for given activation functions \(f\) and \(g\). The latter must produce valid pr
 
 \subsection{Training}
 
-The proposed encoder-decoder system is trained by maximizing the \emph{log-likelihood}\footnote{\url{https://en.wikipedia.org/wiki/Likelihood_function} (accessed 13 May 2016)} of the training corpus. Training requires a parallel corpus \(C\) of source and target sentences \((X^n, Y^n)\). The sentences are represented as sequence of one-hot vectors. We can compute the conditional log-probability of \(Y^n\) given \(X^n\) by \( log P(Y^n|X^n, \theta) \). The log-likelihood of the training corpus is written as:
+The proposed encoder-decoder system is trained by maximizing the \emph{log-likelihood}\footnote{\url{https://en.wikipedia.org/wiki/Likelihood_function} (accessed 13 May 2016)} of the training corpus. Training requires a parallel corpus \(C\) of source and target sentences \((X^n, Y^n)\). The sentences are represented as sequence of one-hot vectors. The conditional log-probability of \(Y^n\) given \(X^n\) can be computed by \( log P(Y^n|X^n, \theta) \). The log-likelihood of the training corpus is written as:
 
 \[ L(C,\theta) = \frac{1}{N} \sum_{n=1}^N log P(Y^n|X^n, \theta) \]
 where \(N\) is the number of training samples and \(\theta\) is the set of model parameters. Maximizing the log-likelihood function can be done by using \emph{stochastic gradient descent}\footnote{\url{https://en.wikipedia.org/wiki/Stochastic_gradient_descent} (accessed 13 May 2016)}.
@@ -694,11 +694,11 @@ The \emph{Baseline System} makes direct use of the data stored in Solr and produ
 
 \begin{enumerate}
 \item Look up the string to translate in the core of the source language.
-\item Parse the resulting documents and extract the \texttt{app\_id} and \texttt{key} fields.
+\item Parse the resulting documents and extract the \texttt{app\_id} and \texttt{key} fields. The number of documents returned from Solr can be set by a parameter ``number of rows'', the default chosen for the Baseline System is 100 documents.
 \item Find translations in the target language by querying the target core with the collected \texttt{app\_id}s and \texttt{key}s.
 \item Count the number of unique translations found. The best translation is the value that was used most often.
 \end{enumerate}
-Figure \ref{baseline_system_table_available_translations} shows some translations for the English word ``Settings''. The best translation according to the highest count among all apps is ``param\`{e}tres''.
+Figure \ref{baseline_system_table_available_translations} shows some translations for the English word ``Settings''. The best translation according to the highest count among all apps is ``param\`{e}tres''. Note that the parameter ``number of rows'' influences performance and the translation result: Setting low values increases performance because less queries are needed when searching for available translations in the target language. However, the best translation might not be the correct one, as there are not enough translations available when counting unique values.
 
 \begin{table}[H]
 \centering
@@ -712,7 +712,9 @@ configuration                                & 1     \\ \bottomrule
 \end{tabular}
 \caption{Available translations for ``Settings'' in French.}
 \label{baseline_system_table_available_translations}
-\end{table} 
+\end{table}
+
+
 
 \subsection{Algorithm}
 
@@ -756,11 +758,11 @@ Otherwise, the output string \(T\) is built incrementally: If no translation is 
 
 \end{enumerate}
 This simple algorithm works well for translating short words or sentences where a direct translation exists in the target language.
-However, if substring translation \rp{The simple algorithm is also able to translate substrings, please specify} is necessary, the following problems can occur:
+However, if substring translation is necessary (step 2 of algorithm), the following problems can occur:
 
 \begin{itemize}
 \item Sentences or words for translated substrings are inserted at the same position in \(T\) where they occurred in the source string. This will not produce good results since words often need to be reordered depending on the target language.
-\item Poor app translation quality directly impacts the translation results. For example, due to an error in the XML files, the English word ``the'' could be mapped to a sentence with many words. If the algorithm looks up ``the'', it considers the mapped sentence as valid translation.
+\item Poor app translation quality directly impacts the translation results. For example, due to an error in the XML translation files, the English word ``the'' could be mapped to a sentence with many words. If the algorithm looks up ``the'', it considers the mapped sentence as valid translation.
 \end{itemize} 
 
 
@@ -838,7 +840,6 @@ The training process requires sentence aligned parallel data to build the transl
 \item Aligning words of the parallel sentences. We used an external library \emph{MGIZA}\footnote{\url{https://github.com/moses-smt/mgiza.git} (accessed 13 May 2016)}, an extension of the popular \emph{GIZA++} word alignment toolkit \cite{giza_pp}. MGIZA is multi-threaded and therefore runs faster on a multi-core machine.
 \item Extract phrases: All phrases are put into a single file. The following listing shows some sample content of this file. Each line of this file contains: an English phrase, a French phrase and the alignment points of matching words (English-French).
 
-\rp{The listings are not particularly readable, maybe make an actual table?}
 \begin{lstlisting}[label=list:moses_phrase_extraction]
 ! as you can see from ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
 ! as you can see ||| ! comme vous pouvez le voir ||| 0-0 1-1 2-2 3-3 4-5
@@ -929,7 +930,7 @@ echo 'Open the settings to change your username' | /home/stefan/mosesdecoder/bin
 We used stack pruning with a stack size of 100 and the optimal model weights determined after tuning.
 
 The decoder produces the following output phrase: ``ouvrir les param\`{e}tres pour modifier votre nom d' utilisateur''.
-Here are some statistics on how the decoder derived the target sentence \rp{what do they tell us? some observations?}:
+Here are some statistics on how the decoder derived the target sentence.
 
 \begin{itemize}
 \item Total translation options collected: 197
@@ -938,6 +939,8 @@ Here are some statistics on how the decoder derived the target sentence \rp{what
 \item Total hypotheses recombined: 8292
 \item Total hypotheses pruned: 2401
 \end{itemize}
+
+As we can see, 197 phrase translation table entries (translation options) are collected by Moses. During decoding, a large amount of hypotheses are created. Many are discarded early because they were considered bad, some others were pruned or recombined at a later stage.
 
 \section{Tensorflow}
 
@@ -983,9 +986,13 @@ global step 71600 learning rate 0.2576 step-time 1.79 perplexity 1.07
   eval: bucket 2 perplexity 1.07
   eval: bucket 3 perplexity 1.55
 \end{lstlisting}
-The statistics show the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair is put in a bucket according to the lengths of the source and target sentence. The sentences are then padded to fit the length of the bucket. The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language. Shorter sentences are padded with a special \texttt{PAD} symbol. For example, the English sentence ``I go.'' and corresponding French sentence ``Je vais.'' are put into the bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD PAD . go I]} and \texttt{[GO Je vais . EOS PAD PAD PAD PAD PAD]} \citep{website_tensorflow_tutorial}. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. We used the default buckets from the tutorial: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}.
-\rp{You need to tell what (5,10) is, what is 5 and what is 10, why the target length is bigger than the source, the phrases are of the same length, it's not straightforward. And why there is GO in a french sentence?}
+%The statistics show the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair is put in a bucket according to the lengths of the source and target sentence. The sentences are then padded to fit the length of the bucket. The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language. Shorter sentences are padded with a special \texttt{PAD} symbol. For example, the English sentence ``I go.'' and corresponding French sentence ``Je vais.'' are put into the bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD PAD . go I]} and \texttt{[GO Je vais . EOS PAD PAD PAD PAD PAD]} \citep{website_tensorflow_tutorial}. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. We used the default buckets from the tutorial: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}.
+%\rp{You need to tell what (5,10) is, what is 5 and what is 10, why the target length is bigger than the source, the phrases are of the same length, it's not straightforward. And why there is GO in a french sentence?}
 
+The statistics show the current \emph{perplexity} of different \emph{buckets} at timestep \(t\). Tensorflow uses bucketing in combination with padding to efficiently handle sentences of different lengths. Each sentence pair from the training data is put into a bucket according to the length of the source and target sentence. The sentences are then padded to fit the dimension of the bucket. %The bucket \((x, y)\) contains sentences of length \(x\) in the source language and sentences of length \(y\) in the target language.
+We used the default buckets from the tutorial \citep{website_tensorflow_tutorial}: \texttt{[(5, 10), (10, 15), (20, 25), (40, 50)]}
+\\
+This means that if a source sentence has 4 tokens and the corresponding target sentence has 7 tokens, they are put in the first bucket and padded to length 5 for the encoder and length 10 for the decoder. A training sample having a source sentence with 21 tokens and a target sentence with 28 tokens does not fit into the bucket \((20, 25)\), so it is put into bucket \((40, 50)\) and padded accordingly. The English sentence ``Update Google Play Services'' and corresponding French sentence ``Mettre \`{a} jour les services Google Play'' are put into bucket \((5, 10)\) with vectors padded to the correct size: \texttt{[PAD Services Play Google Update]} and \texttt{[GO Mettre \`{a} jour les services Google Play EOS PAD]}. Reversing the source sentence was shown to improve results in \citep{smt_deep_learning}. The \texttt{GO} symbol always prefixes vectors passed into the decoder, the \texttt{EOS} symbol denotes the end of a sentence and the \texttt{PAD} symbol is used for padding. Behind the scenes, Tensorflow uses \(k\) different models for the \(k\) defined buckets. Without bucketing and padding, a model for every pair of lengths of source and target sentences would be created~\citep{website_tensorflow_tutorial}. 
 
 The perplexity indicates how well the model of each bucket predicts the samples of the development set. A low perplexity means that the model is good at predicting the development sentences. Again, as with Moses, we used 80\% as training data and 20\% as development data. The (infinite) training loop was stopped after the perplexities did not improve anymore.
 
@@ -1299,7 +1306,7 @@ run-5 & 8.98          \\
 \end{minipage}
 \end{table}
 
-\rp{Missing text and captions}
+The parameter ``number of rows'' for the Baseline System (see Section \ref{cha:translation_process_baseline}) was set to 100 documents.
 
 
 \subsection{Observations}
